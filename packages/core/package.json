@@ -2,14 +2,19 @@
   "name": "@vt/core",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {
-    "eslint-plugin-prettier": "^5.2.1",
-    "prettier": "^3.3.3"
-  },
   "scripts": {
+    "build": "rimraf ./dist && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "@react-navigation/native": "^6.1.18",
+    "@react-navigation/native-stack": "^6.11.0"
+  }
 }
