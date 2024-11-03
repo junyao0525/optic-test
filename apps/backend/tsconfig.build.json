@@ -11,11 +11,20 @@
       "rootDir": "./src"
     },
     "include": [
-      "./types/**/*",
-      "./src/**/*.ts",
-      "./src/**/*.js",
-      "./src/**/*.json"
-    ],
+        "./types/**/*",
+        "./src/**/*.ts",
+        "./src/**/*.js",
+        "./src/**/*.json"
+      ],
+      "paths": {
+        "@src/*": [
+          "./src/*"
+        ],
+        "@vt/core/*": [
+          "../../packages/core/*",
+          "../../packages/core/dist/*"
+        ],
+      },
     "exclude": ["node_modules", "**/*.spec.ts"],
     "references": [
       {
