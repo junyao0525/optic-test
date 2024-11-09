@@ -9,6 +9,7 @@ import React from 'react';
 import {StatusBar} from 'react-native';
 // import SplashScreen from 'src/screens/SplashScreen';
 import Routes from './src/Routes';
+import SplashScreen from './src/screens/SplashScreen';
 
 function App(): React.JSX.Element {
   return (
@@ -18,7 +19,9 @@ function App(): React.JSX.Element {
         translucent
         backgroundColor="transparent"
       />
-      <Routes />
+      <SplashScreen>
+        <Routes />
+      </SplashScreen>
     </>
   );
 }
