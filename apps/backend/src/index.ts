@@ -3,6 +3,7 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
+import initailRouter from "./modules/router";
 
 //App Varaibles
 dotenv.config();
@@ -14,6 +15,7 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+initailRouter(app);
 
 //exporting app
 export default app;

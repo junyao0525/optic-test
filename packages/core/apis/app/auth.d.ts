@@ -1,7 +1,7 @@
 import { ERRORS } from "../../constants/error";
 
 export type GetUserApi = {
-  Endpoint: "/api/user";
+  Endpoint: "/app/user";
   Method: "GET";
   Response: {
     id: bigint | string;
