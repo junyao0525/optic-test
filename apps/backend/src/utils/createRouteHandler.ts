@@ -1,5 +1,5 @@
 import { BaseApi } from "@vt/core/apis/base";
-import { RequestHandler, Router } from "express";
+import { Router } from "express";
 
 export const createRouteHandler = <Api extends BaseApi = BaseApi>(
   router: Router,

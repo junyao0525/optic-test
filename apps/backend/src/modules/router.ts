@@ -1,5 +1,5 @@
+import UserRouter from "@src/modules/user/router";
 import { Router } from "express";
-import UserRouter from "../modules/user/router";
 
 const initailRouter = (router: Router) => {
   router.use(UserRouter);
