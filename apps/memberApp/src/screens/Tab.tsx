@@ -2,9 +2,11 @@ import {
   BottomTabBarProps,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
-import React, {useMemo, useRef} from 'react';
+import React, {useRef} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import IonIcon from 'react-native-vector-icons/Ionicons';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {Colors, TextStyle} from '../themes';
 import HomeScreen from './Home';
 import MeScreen from './Me';
@@ -12,6 +14,33 @@ import UnKnownScreen from './Unknown';
 
 export const tabHeight = 64;
 const Tab = createBottomTabNavigator();
+
+const iconMapping: Record<
+  string,
+  {name: string; iconSet: 'FontAwesome' | 'MaterialIcons' | 'Ionicons'}
+> = {
+  Home: {name: 'home', iconSet: 'FontAwesome'},
+  Unknown: {name: 'person', iconSet: 'Ionicons'},
+  Me: {name: 'account-circle', iconSet: 'MaterialIcons'},
+};
+
+const renderIcon = (
+  iconName: string,
+  iconSet: string,
+  color: string,
+  size: number,
+) => {
+  switch (iconSet) {
+    case 'FontAwesome':
+      return <Icon name={iconName} size={size} color={color} />;
+    case 'MaterialIcons':
+      return <MaterialIcon name={iconName} size={size} color={color} />;
+    case 'Ionicons':
+      return <IonIcon name={iconName} size={size} color={color} />;
+    default:
+      return <Icon name="question-circle" size={size} color={color} />; // Default icon if none match
+  }
+};
 
 const TabItem = ({
   title,
@@ -25,27 +54,22 @@ const TabItem = ({
   selected?: boolean;
   showBadge?: boolean;
   badgeNumber?: number;
-  routerName: ReactNavigation.TabParamListKey;
+  routerName: string;
   onPress: () => void;
 }) => {
-  const iconName = useMemo(() => {
-    if (routerName === 'Home') {
-      return 'home';
-    } else if (routerName === 'UnKnown') {
-      return 'user';
-    } else if (routerName === 'Me') {
-      return 'user';
-    }
-    return 'home';
-  }, [routerName]);
+  const {name: iconName, iconSet} = iconMapping[routerName] || {
+    name: 'question-circle',
+    iconSet: 'FontAwesome',
+  };
 
   return (
     <Pressable style={styles.tabItem} onPress={onPress}>
-      <Icon
-        name={iconName}
-        size={30}
-        color={selected ? Colors.lightBlue : Colors.black}
-      />
+      {renderIcon(
+        iconName,
+        iconSet,
+        selected ? Colors.lightBlue : Colors.black,
+        30,
+      )}
       {showBadge && (
         <View style={styles.badgeContainer}>
           <Text style={[TextStyle.P3, styles.badgeText]}>{badgeNumber}</Text>
@@ -108,7 +132,7 @@ const TabScreen = () => {
           headerShown: false,
         }}>
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="UnKnown" component={UnKnownScreen} />
+        <Tab.Screen name="Unknown" component={UnKnownScreen} />
         <Tab.Screen name="Me" component={MeScreen} />
       </Tab.Navigator>
     </>
