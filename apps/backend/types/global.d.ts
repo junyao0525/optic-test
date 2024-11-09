@@ -22,6 +22,10 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       APP_NAME: string;
+      NODE_ENV: "development" | "production";
+
+      SUPABASE_URL: string;
+      SUPABASE_API_KEY: string;
     }
   }
 
