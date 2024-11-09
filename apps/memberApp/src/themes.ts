@@ -29,6 +29,7 @@ export const Colors = {
   lightBlue: '#B0C4DE',
   black: '#000000',
   white: '#FFFFFF',
+  borderGrey: '#E6E6E6',
 };
 
 export const TextStyle = StyleSheet.create({
