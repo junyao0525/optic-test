@@ -3,6 +3,7 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
+import "src/overrides/bigint";
 import initailRouter from "./modules/router";
 
 //App Varaibles
