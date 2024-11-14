@@ -20,9 +20,9 @@ export const FontFamilies = {
 } as const;
 
 export const Colors = {
-  BackgroundColors: 'Transparent',
+  backgroundColor: 'Transparent',
   primary: '#0099ff',
-  Orange: '#FF4000',
+  orange: '#FF4000',
   lightGrey: '#2F4F4F',
   lightGreen: '#8FBC8F',
   lightCyan: '#E0FFFF',
@@ -35,15 +35,15 @@ export const Colors = {
 export const TextStyle = StyleSheet.create({
   H1: {
     fontSize: 32,
-    fontFamily: FontFamilies.black,
+    fontFamily: FontFamilies.regular,
   },
   H2: {
     fontSize: 28,
-    fontFamily: FontFamilies.black,
+    fontFamily: FontFamilies.regular,
   },
   H3: {
     fontSize: 24,
-    fontFamily: FontFamilies.black,
+    fontFamily: FontFamilies.regular,
   },
   H1B: {
     fontSize: 32,
@@ -71,14 +71,14 @@ export const TextStyle = StyleSheet.create({
   },
   P1B: {
     fontSize: 18,
-    fontFamily: FontFamilies.semiBold,
+    fontFamily: FontFamilies.bold,
   },
   P2B: {
     fontSize: 16,
-    fontFamily: FontFamilies.semiBold,
+    fontFamily: FontFamilies.bold,
   },
   P3B: {
     fontSize: 14,
-    fontFamily: FontFamilies.semiBold,
+    fontFamily: FontFamilies.bold,
   },
 });

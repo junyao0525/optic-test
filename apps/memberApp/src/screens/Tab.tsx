@@ -126,7 +126,7 @@ const TabScreen = () => {
         initialRouteName="Home"
         tabBar={tabBar}
         sceneContainerStyle={{
-          backgroundColor: Colors.BackgroundColors,
+          backgroundColor: Colors.backgroundColor,
         }}
         screenOptions={{
           headerShown: false,
