@@ -10,7 +10,7 @@ const HomeScreen = () => {
   return (
     <View style={[styles.container]}>
       <Text>HomeScreen</Text>
-      <Button onPress={handleOnPress} title="buwwwtton" color={Colors.Orange} />
+      <Button onPress={handleOnPress} title="buwwwtton" color={Colors.orange} />
     </View>
   );
 };
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.BackgroundColors,
+    backgroundColor: Colors.BackgroundColor,
   },
 });
 

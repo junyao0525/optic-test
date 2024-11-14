@@ -21,7 +21,7 @@ const Routes = () => {
           screenOptions={{
             headerShown: false,
             contentStyle: {
-              backgroundColor: Colors.BackgroundColors,
+              backgroundColor: Colors.backgroundColor,
             },
           }}>
           <Stack.Screen name="Tab" component={TabScreen} />

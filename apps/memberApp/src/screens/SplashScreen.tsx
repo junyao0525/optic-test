@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.BackgroundColors,
+    backgroundColor: Colors.backgroundColor,
   },
   text: {
     fontWeight: 'bold', // 700 , normal 400
