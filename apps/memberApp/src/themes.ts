@@ -20,10 +20,10 @@ export const FontFamilies = {
 } as const;
 
 export const Colors = {
-  backgroundColor: 'Transparent',
+  backgroundColor: '#E0FFFF',
   primary: '#0099ff',
   orange: '#FF4000',
-  lightGrey: '#2F4F4F',
+  darkGreen: '#2F4F4F',
   lightGreen: '#8FBC8F',
   lightCyan: '#E0FFFF',
   lightBlue: '#B0C4DE',
