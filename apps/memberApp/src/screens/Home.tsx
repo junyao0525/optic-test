@@ -37,7 +37,7 @@ const HomeScreen = () => {
   return (
     <>
       <Header backButton={false} title={'Home'} />
-      <ScrollView style={styles.container} scrollEnabled={false}>
+      <ScrollView style={styles.container}>
         <Card title="Overview">
           {/**Hard code for Image */}
           <Image
@@ -58,6 +58,7 @@ const HomeScreen = () => {
                 image={item.image}
               />
             )}
+            scrollEnabled={false}
           />
         </View>
       </ScrollView>
