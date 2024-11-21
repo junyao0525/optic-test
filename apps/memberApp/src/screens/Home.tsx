@@ -36,7 +36,7 @@ const HomeScreen = () => {
 
   return (
     <>
-      <Header backButton={false} title={'Home'} />
+      <Header title={'Home'} menuButton />
       <ScrollView style={styles.container}>
         <Card title="Overview">
           {/**Hard code for Image */}

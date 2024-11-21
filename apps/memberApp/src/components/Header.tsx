@@ -6,9 +6,11 @@ import {Colors, TextStyle} from '../themes';
 
 const Header = ({
   backButton = false,
+  menuButton = false,
   title,
 }: {
-  backButton: boolean;
+  backButton?: boolean;
+  menuButton?: boolean;
   title: string;
 }) => {
   const onBack = useCallback(() => {}, []);
@@ -22,9 +24,11 @@ const Header = ({
         </Pressable>
       )}
 
-      <Pressable onPress={onClick}>
-        <MaterialIcon size={30} name="menu" color={Colors.darkGreen} />
-      </Pressable>
+      {menuButton && (
+        <Pressable onPress={onClick}>
+          <MaterialIcon size={30} name="menu" color={Colors.darkGreen} />
+        </Pressable>
+      )}
       <Text style={[TextStyle.H3B, styles.text]}>{title}</Text>
     </View>
   );
