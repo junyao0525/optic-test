@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Dimensions,
   FlatList,
   Image,
   ImageSourcePropType,
@@ -12,6 +13,7 @@ import Card from '../components/Card';
 import Header from '../components/Header';
 import TypeButton from '../components/TypeButton';
 import {Colors, TextStyle} from '../themes';
+import {LineChart} from 'react-native-chart-kit';
 
 type ButtonDetail = {
   title: string;
@@ -28,7 +30,14 @@ const buttonDetails: ButtonDetail[] = [
   {title: 'Eye Tiredness', image: EyeTirednessImage},
   {title: 'Color Vision', image: ColorVisionImage},
 ];
-
+const historyData = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+  datasets: [
+    {
+      data: [Math.random(), Math.random(), Math.random(), Math.random()],
+    },
+  ],
+};
 const HomeScreen = () => {
   const handleButtonPress = (title: string) => {
     console.log(`${title} button pressed`);
@@ -40,10 +49,33 @@ const HomeScreen = () => {
       <ScrollView style={styles.container}>
         <Card title="Overview">
           {/**Hard code for Image */}
-          <Image
-            style={styles.image}
-            resizeMode="contain"
-            source={GraphImage}
+          <LineChart
+            data={historyData}
+            width={Dimensions.get('window').width - 90}
+            height={180}
+            yAxisLabel=""
+            yAxisSuffix=""
+            yAxisInterval={1} // optional, defaults to 1
+            chartConfig={{
+              backgroundColor: '#FFFFFF',
+              backgroundGradientFrom: '#FFFFFF',
+              backgroundGradientTo: '#FFFFFF',
+              decimalPlaces: 2, // optional, defaults to 2dp
+              color: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+              propsForDots: {
+                r: '6',
+                strokeWidth: '2',
+                stroke: '#FFFFFF ',
+              },
+            }}
+            bezier
+            style={{
+              borderRadius: 16,
+            }}
           />
         </Card>
         <Text style={[TextStyle.H1B, styles.textTypes]}>Test Types</Text>
