@@ -27,6 +27,7 @@ export const Colors = {
   lightGreen: '#8FBC8F',
   lightCyan: '#E0FFFF',
   lightBlue: '#B0C4DE',
+  blue: '#4682B4',
   black: '#000000',
   white: '#FFFFFF',
   borderGrey: '#E6E6E6',
