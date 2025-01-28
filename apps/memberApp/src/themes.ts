@@ -31,6 +31,8 @@ export const Colors = {
   black: '#000000',
   white: '#FFFFFF',
   borderGrey: '#E6E6E6',
+  red: '#FF0000',
+  green: '#00D627',
 };
 
 export const TextStyle = StyleSheet.create({

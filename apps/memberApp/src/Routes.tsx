@@ -5,6 +5,10 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import HomeScreen from './screens/Home';
 import TabScreen from './screens/Tab';
 import {Colors} from './themes';
+import LandoltC from './screens/LandoltC/LandoltC';
+import DistanceMeasure from './screens/LandoltC/DistanceMeasure';
+import EyeTiredness from './screens/EyeTiredness/EyeTiredness';
+import ColorVision from './screens/ColorVision/ColorVision';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +30,10 @@ const Routes = () => {
           }}>
           <Stack.Screen name="Tab" component={TabScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="LandoltC" component={LandoltC} />
+          <Stack.Screen name="DistanceMeasure" component={DistanceMeasure} />
+          <Stack.Screen name="EyeTiredness" component={EyeTiredness} />
+          <Stack.Screen name="ColorVision" component={ColorVision} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

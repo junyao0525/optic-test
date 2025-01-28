@@ -14,7 +14,7 @@
     "packages/*",
     "!apps/memberApp"
   ],
- "devDependencies": {
+  "devDependencies": {
     "@types/lodash": "^4.17.7",
     "babel-plugin-module-resolver": "^5.0.2"
   },

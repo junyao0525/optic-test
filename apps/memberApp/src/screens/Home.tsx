@@ -14,10 +14,12 @@ import Header from '../components/Header';
 import TypeButton from '../components/TypeButton';
 import {Colors, TextStyle} from '../themes';
 import {LineChart} from 'react-native-chart-kit';
+import {useNavigation} from '@react-navigation/core';
 
 type ButtonDetail = {
   title: string;
   image: ImageSourcePropType;
+  route: string;
 };
 
 const LandoltImage = require('../../assets/images/home/landolt.png');
@@ -26,9 +28,9 @@ const ColorVisionImage = require('../../assets/images/home/color-vision.png');
 const GraphImage = require('../../assets/images/home/graph-exp.png');
 
 const buttonDetails: ButtonDetail[] = [
-  {title: 'Landolt’s C Test', image: LandoltImage},
-  {title: 'Eye Tiredness', image: EyeTirednessImage},
-  {title: 'Color Vision', image: ColorVisionImage},
+  {title: 'Landolt’s C Test', image: LandoltImage, route: 'LandoltC'},
+  {title: 'Eye Tiredness', image: EyeTirednessImage, route: 'EyeTiredness'},
+  {title: 'Color Vision', image: ColorVisionImage, route: 'ColorVision'},
 ];
 const historyData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr'],
@@ -39,8 +41,10 @@ const historyData = {
   ],
 };
 const HomeScreen = () => {
-  const handleButtonPress = (title: string) => {
-    console.log(`${title} button pressed`);
+  const {navigate} = useNavigation();
+  const handleButtonPress = (route: string) => {
+    navigate(route as never);
+    console.log(`${route} button pressed`);
   };
 
   return (
@@ -57,9 +61,9 @@ const HomeScreen = () => {
             yAxisSuffix=""
             yAxisInterval={1} // optional, defaults to 1
             chartConfig={{
-              backgroundColor: '#FFFFFF',
-              backgroundGradientFrom: '#FFFFFF',
-              backgroundGradientTo: '#FFFFFF',
+              backgroundColor: 'rgb(255, 255, 255)',
+              backgroundGradientFrom: 'rgb(255, 255, 255)',
+              backgroundGradientTo: 'rgb(255, 255, 255)',
               decimalPlaces: 2, // optional, defaults to 2dp
               color: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
@@ -69,7 +73,7 @@ const HomeScreen = () => {
               propsForDots: {
                 r: '6',
                 strokeWidth: '2',
-                stroke: '#FFFFFF ',
+                stroke: 'rgb(255, 255, 255) ',
               },
             }}
             bezier
@@ -86,7 +90,7 @@ const HomeScreen = () => {
             renderItem={({item}) => (
               <TypeButton
                 title={item.title}
-                onPress={() => handleButtonPress(item.title)}
+                onPress={() => handleButtonPress(item.route)}
                 image={item.image}
               />
             )}

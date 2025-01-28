@@ -11,7 +11,7 @@ type Props = {
 const Button = (props: Props) => {
   return (
     <Pressable style={styles.fbContainer} onPress={props.onPress}>
-      <Text style={[TextStyle.H3B, styles.title]}>{props.title}</Text>
+      <Text style={[TextStyle.P2, styles.title]}>{props.title}</Text>
     </Pressable>
   );
 };
@@ -19,12 +19,14 @@ const Button = (props: Props) => {
 const styles = StyleSheet.create({
   fbContainer: {
     backgroundColor: Colors.blue,
-    height: 24,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 40,
+    borderRadius: 10,
   },
   title: {
     textAlign: 'center',
+    color: Colors.white,
   },
 });
+
 export default Button;
