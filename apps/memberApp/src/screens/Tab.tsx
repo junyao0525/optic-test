@@ -8,9 +8,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {Colors, TextStyle} from '../themes';
+import HistoryScreen from './Historys';
 import HomeScreen from './Home';
-import MeScreen from './Me';
-import UnKnownScreen from './Unknown';
+import SettingScreen from './Settings';
 
 export const tabHeight = 64;
 const Tab = createBottomTabNavigator();
@@ -19,9 +19,10 @@ const iconMapping: Record<
   string,
   {name: string; iconSet: 'FontAwesome' | 'MaterialIcons' | 'Ionicons'}
 > = {
-  Home: {name: 'home', iconSet: 'FontAwesome'},
-  Unknown: {name: 'person', iconSet: 'Ionicons'},
-  Me: {name: 'account-circle', iconSet: 'MaterialIcons'},
+  Home: {name: 'home-outline', iconSet: 'Ionicons'},
+  Test: {name: 'eye-outline', iconSet: 'Ionicons'},
+  History: {name: 'stats-chart-outline', iconSet: 'Ionicons'},
+  Setting: {name: 'settings-outline', iconSet: 'Ionicons'},
 };
 
 const renderIcon = (
@@ -132,8 +133,9 @@ const TabScreen = () => {
           headerShown: false,
         }}>
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Unknown" component={UnKnownScreen} />
-        <Tab.Screen name="Me" component={MeScreen} />
+        {/* <Tab.Screen name="Test" component={TestScreen} /> */}
+        <Tab.Screen name="History" component={HistoryScreen} />
+        <Tab.Screen name="Setting" component={SettingScreen} />
       </Tab.Navigator>
     </>
   );
