@@ -44,6 +44,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
   },
-  text: {},
+  text: {
+    color: Colors.black,
+  },
 });
 export default Header;

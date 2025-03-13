@@ -1,20 +1,19 @@
+import {useNavigation} from '@react-navigation/core';
 import React from 'react';
 import {
   Dimensions,
   FlatList,
-  Image,
   ImageSourcePropType,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import {LineChart} from 'react-native-chart-kit';
 import Card from '../components/Card';
 import Header from '../components/Header';
 import TypeButton from '../components/TypeButton';
 import {Colors, TextStyle} from '../themes';
-import {LineChart} from 'react-native-chart-kit';
-import {useNavigation} from '@react-navigation/core';
 
 type ButtonDetail = {
   title: string;
@@ -61,9 +60,9 @@ const HomeScreen = () => {
             yAxisSuffix=""
             yAxisInterval={1} // optional, defaults to 1
             chartConfig={{
-              backgroundColor: 'rgb(255, 255, 255)',
-              backgroundGradientFrom: 'rgb(255, 255, 255)',
-              backgroundGradientTo: 'rgb(255, 255, 255)',
+              backgroundColor: Colors.white,
+              backgroundGradientFrom: Colors.white,
+              backgroundGradientTo: Colors.white,
               decimalPlaces: 2, // optional, defaults to 2dp
               color: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
@@ -73,7 +72,7 @@ const HomeScreen = () => {
               propsForDots: {
                 r: '6',
                 strokeWidth: '2',
-                stroke: 'rgb(255, 255, 255) ',
+                stroke: Colors.white,
               },
             }}
             bezier
