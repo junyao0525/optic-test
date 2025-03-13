@@ -133,7 +133,6 @@ const TabScreen = () => {
           headerShown: false,
         }}>
         <Tab.Screen name="Home" component={HomeScreen} />
-        {/* <Tab.Screen name="Test" component={TestScreen} /> */}
         <Tab.Screen name="History" component={HistoryScreen} />
         <Tab.Screen name="Setting" component={SettingScreen} />
       </Tab.Navigator>
