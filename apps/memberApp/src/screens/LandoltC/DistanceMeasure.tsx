@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {View, StyleSheet, Text, Alert, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, Text, Alert, ActivityIndicator} from 'react-native';
 import {
   Camera,
   useCameraDevice,
@@ -61,9 +61,10 @@ export default function DistanceMeasure() {
 
       {/* Button Section */}
       <View style={{flex: 1, alignItems: 'center'}}>
-        <Text style={styles.measuringText}>
-          <Icon name="loading" size={30} color={Colors.black} /> Measuring...
-        </Text>
+        <View style={styles.measureTextContainer}>
+          <ActivityIndicator />
+          <Text style={styles.measuringText}>Measuring...</Text>
+        </View>
 
         {/* Conditional Distance Message */}
         {headDistance === 'tooClose' ? (
@@ -108,6 +109,12 @@ const styles = StyleSheet.create({
   camera: {
     width: '100%',
     height: '100%',
+  },
+  measureTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
   },
   measuringText: {
     marginVertical: 10,
