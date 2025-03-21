@@ -1,12 +1,13 @@
 import React from 'react';
-import {View} from 'react-native';
+import {Text, View} from 'react-native';
 import Header from '../../components/Header';
 
 const HistoryScreen = () => {
   return (
     <>
       <View>
-        <Header title={'Me Screen'} />
+        <Header title={'History'} />
+        <Text>History Screen</Text>
       </View>
     </>
   );

@@ -1,12 +1,8 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {View, StyleSheet, Text, Alert, TouchableOpacity} from 'react-native';
-import {
-  Camera,
-  useCameraDevice,
-  useCameraPermission,
-} from 'react-native-vision-camera';
-import {Colors, TextStyle} from '../../themes';
+import React, {useEffect, useRef, useState} from 'react';
+import {Alert, StyleSheet, Text, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icon package
+import {Camera, useCameraDevice} from 'react-native-vision-camera';
+import {Colors, TextStyle} from '../../themes';
 
 export default function DistanceMeasure() {
   const cameraRef = useRef(null);
