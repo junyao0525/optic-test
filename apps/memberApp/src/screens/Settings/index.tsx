@@ -6,7 +6,7 @@ const SettingScreen = () => {
   return (
     <>
       <View>
-        <Header title={'Setting '} menuButton />
+        <Header title={'Setting Screen'} />
       </View>
     </>
   );
