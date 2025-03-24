@@ -1,6 +1,6 @@
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import React from 'react';
-import {Pressable, Text, View} from 'react-native';
+import {Pressable, StyleSheet, Text, View, ViewProps} from 'react-native';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import {Colors} from '../themes'; // Ensure you have a Colors file for theming
 
@@ -12,7 +12,6 @@ const tabItems = [
 
 const CustomTabContent = (
   {state, navigation}: BottomTabBarProps,
-  props: any,
 ) => {
   return (
     <View style={styles.tabBarContainer}>
@@ -39,7 +38,7 @@ const CustomTabContent = (
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
