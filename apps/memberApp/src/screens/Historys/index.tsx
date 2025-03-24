@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, useWindowDimensions} from 'react-native';
-import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
+import {StyleSheet, Text, useWindowDimensions, View} from 'react-native';
+import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
 import Header from '../../components/Header';
 import {Colors} from '../../themes';
 
-const PlaceholderScreen = ({title}) => (
+const PlaceholderScreen: React.FC<{title: string}> = ({title}) => (
   <View style={styles.scene}>
     <Text style={styles.text}>{title} Content Goes Here</Text>
   </View>
@@ -31,7 +31,7 @@ const HistoryScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Header title="History" />
+      <Header title={'History'} menuButton />
       <TabView
         navigationState={{index, routes}}
         renderScene={renderScene}

@@ -1,5 +1,6 @@
+import {useNavigation} from '@react-navigation/native';
 import React, {useCallback} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {Colors, TextStyle} from '../themes';
@@ -8,26 +9,35 @@ const Header = ({
   backButton = false,
   menuButton = false,
   title,
-}: {
+}: // onClick,
+// onBack,
+{
   backButton?: boolean;
   menuButton?: boolean;
   title: string;
+  // onClick?: () => void;
+  // onBack?: () => void;
 }) => {
-  const onBack = useCallback(() => {}, []);
-  const onClick = useCallback(() => {}, []);
+  const navigation = useNavigation();
+  const onBack = useCallback(() => {
+    navigation.goBack();
+  }, []);
+  const onClick = useCallback(() => {
+    navigation.openDrawer();
+  }, []);
 
   return (
     <View style={styles.container}>
       {backButton && (
-        <Pressable onPress={onBack}>
+        <TouchableOpacity onPress={onBack}>
           <Icon size={30} name="chevron-left" color={Colors.darkGreen} />
-        </Pressable>
+        </TouchableOpacity>
       )}
 
       {menuButton && (
-        <Pressable onPress={onClick}>
+        <TouchableOpacity onPress={onClick}>
           <MaterialIcon size={30} name="menu" color={Colors.darkGreen} />
-        </Pressable>
+        </TouchableOpacity>
       )}
       <Text style={[TextStyle.H3B, styles.text]}>{title}</Text>
     </View>

@@ -6,7 +6,6 @@ import React, {useRef} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IonIcon from 'react-native-vector-icons/Ionicons';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {Colors, TextStyle} from '../themes';
 import HistoryScreen from './Historys';
 import HomeScreen from './Home';
@@ -15,10 +14,7 @@ import SettingScreen from './Settings';
 export const tabHeight = 64;
 const Tab = createBottomTabNavigator();
 
-const iconMapping: Record<
-  string,
-  {name: string; iconSet: 'FontAwesome' | 'MaterialIcons' | 'Ionicons'}
-> = {
+const iconMapping: Record<string, {name: string; iconSet: 'Ionicons'}> = {
   Home: {name: 'home-outline', iconSet: 'Ionicons'},
   Test: {name: 'eye-outline', iconSet: 'Ionicons'},
   History: {name: 'stats-chart-outline', iconSet: 'Ionicons'},
@@ -32,10 +28,6 @@ const renderIcon = (
   size: number,
 ) => {
   switch (iconSet) {
-    case 'FontAwesome':
-      return <Icon name={iconName} size={size} color={color} />;
-    case 'MaterialIcons':
-      return <MaterialIcon name={iconName} size={size} color={color} />;
     case 'Ionicons':
       return <IonIcon name={iconName} size={size} color={color} />;
     default:

@@ -8,6 +8,7 @@
 import React from 'react';
 import {StatusBar} from 'react-native';
 // import SplashScreen from 'src/screens/SplashScreen';
+import './gesture-handler';
 import Routes from './src/Routes';
 import SplashScreen from './src/screens/SplashScreen';
 
