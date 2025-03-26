@@ -4,7 +4,6 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import CustomDrawerContent from './components/CustomDrawerContent'; // Custom drawer (optional)
 import ColorVision from './screens/ColorVision/ColorVision';
 import EyeTiredness from './screens/EyeTiredness/EyeTiredness';
 import HistoryScreen from './screens/Historys';
@@ -14,6 +13,7 @@ import LandoltC from './screens/LandoltC/LandoltC';
 import SettingScreen from './screens/Settings';
 // import TabScreen from './screens/Tab';
 import CustomTabContent from './components/CustomTabContent';
+import DrawerNavigator from './navigations/DrawerNavigator';
 import {Colors} from './themes';
 
 // Create Stack & Drawer Navigators
@@ -57,19 +57,7 @@ const Routes = () => {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Drawer.Navigator
-          id="MainDrawer"
-          drawerContent={props => <CustomDrawerContent {...props} />}
-          screenOptions={{
-            drawerPosition: 'left',
-            headerShown: false,
-            drawerStyle: {
-              backgroundColor: '#fff',
-              width: 250,
-            },
-          }}>
-          <Drawer.Screen name="MainStack" component={TabScreen} />
-        </Drawer.Navigator>
+        <DrawerNavigator />
       </NavigationContainer>
     </SafeAreaProvider>
   );

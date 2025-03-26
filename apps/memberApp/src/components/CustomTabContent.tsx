@@ -1,6 +1,6 @@
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import React from 'react';
-import {Pressable, StyleSheet, Text, View, ViewProps} from 'react-native';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import {Colors} from '../themes'; // Ensure you have a Colors file for theming
 
@@ -10,9 +10,7 @@ const tabItems = [
   {label: 'Settings', iconName: 'settings-outline', route: 'Setting'},
 ];
 
-const CustomTabContent = (
-  {state, navigation}: BottomTabBarProps,
-) => {
+const CustomTabContent = ({state, navigation}: BottomTabBarProps) => {
   return (
     <View style={styles.tabBarContainer}>
       {tabItems.map((item, index) => {
@@ -61,6 +59,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.black,
   },
-};
+});
 
 export default CustomTabContent;
