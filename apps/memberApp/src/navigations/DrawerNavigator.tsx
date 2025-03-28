@@ -5,10 +5,18 @@ import {
 } from '@react-navigation/drawer';
 import {useNavigation} from '@react-navigation/native';
 import React from 'react';
-import {Text, View} from 'react-native';
+import {Image, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import Divider from '../components/Divider';
+import {Colors} from '../themes';
 import StackNavigator from './StackNavigator';
+
+type User = {
+  UserName: string;
+  userEmail: string;
+  userImage: string;
+};
 
 const Drawer = createDrawerNavigator();
 
@@ -45,10 +53,33 @@ const CustomDrawerContent = (props: any) => {
   return (
     <SafeAreaView style={{flex: 1}}>
       {/* Header Section */}
-      <View style={{padding: 20, backgroundColor: '#f4f4f4'}}>
-        <Text style={{fontSize: 18, fontWeight: 'bold'}}>App Menu</Text>
+      <View style={{paddingVertical: 20, paddingHorizontal: 10}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+          }}>
+          <Image
+            source={require('../../assets/images/person.png')}
+            style={{
+              width: 75,
+              height: 75,
+              borderRadius: 37.5,
+              borderColor: Colors.borderGrey,
+              borderWidth: 2,
+              backgroundColor: Colors.borderGrey,
+            }}
+          />
+          <View style={{flex: 1}}>
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>John Doe</Text>
+            <Text style={{fontSize: 14, fontWeight: 'bold'}}>
+              JohnDoe@gmail.com
+            </Text>
+          </View>
+        </View>
       </View>
-
+      <Divider />
       {/* Drawer Items List */}
       <DrawerContentScrollView {...props}>
         {[
