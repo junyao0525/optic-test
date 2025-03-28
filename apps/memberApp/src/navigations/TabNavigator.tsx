@@ -6,16 +6,17 @@ import React, {useRef} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import HistoryScreen from '../screens/Historys';
+import HomeScreen from '../screens/Home';
+import SettingScreen from '../screens/Settings';
 import {Colors, TextStyle} from '../themes';
-import HistoryScreen from './Historys';
-import HomeScreen from './Home';
-import SettingScreen from './Settings';
 
 export const tabHeight = 64;
 const Tab = createBottomTabNavigator();
 
 const iconMapping: Record<string, {name: string; iconSet: 'Ionicons'}> = {
   Home: {name: 'home-outline', iconSet: 'Ionicons'},
+  Test: {name: 'eye-outline', iconSet: 'Ionicons'},
   History: {name: 'stats-chart-outline', iconSet: 'Ionicons'},
   Setting: {name: 'settings-outline', iconSet: 'Ionicons'},
 };
@@ -108,7 +109,7 @@ const TabBar = (props: BottomTabBarProps) => {
   );
 };
 
-const TabScreen = () => {
+const TabNavigator = () => {
   const tabBar = useRef((props: BottomTabBarProps) => (
     <TabBar {...props} />
   )).current;
@@ -169,4 +170,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TabScreen;
+export default TabNavigator;
