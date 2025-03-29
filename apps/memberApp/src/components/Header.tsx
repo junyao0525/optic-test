@@ -1,6 +1,12 @@
 import {useNavigation} from '@react-navigation/native';
 import React, {useCallback} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {Colors, TextStyle} from '../themes';
@@ -22,25 +28,33 @@ const Header = ({
   const onBack = useCallback(() => {
     navigation.goBack();
   }, []);
+
+  //not correct
   const onClick = useCallback(() => {
-    navigation.openDrawer();
+    if ('openDrawer' in navigation) {
+      (navigation as any).openDrawer();
+    } else {
+      console.warn('openDrawer is not available on the navigation object');
+    }
   }, []);
 
   return (
-    <View style={styles.container}>
-      {backButton && (
-        <TouchableOpacity onPress={onBack}>
-          <Icon size={30} name="chevron-left" color={Colors.darkGreen} />
-        </TouchableOpacity>
-      )}
+    <SafeAreaView>
+      <View style={styles.container}>
+        {backButton && (
+          <TouchableOpacity onPress={onBack}>
+            <Icon size={30} name="chevron-left" color={Colors.darkGreen} />
+          </TouchableOpacity>
+        )}
 
-      {menuButton && (
-        <TouchableOpacity onPress={onClick}>
-          <MaterialIcon size={30} name="menu" color={Colors.darkGreen} />
-        </TouchableOpacity>
-      )}
-      <Text style={[TextStyle.H3B, styles.text]}>{title}</Text>
-    </View>
+        {menuButton && (
+          <TouchableOpacity onPress={onClick}>
+            <MaterialIcon size={30} name="menu" color={Colors.darkGreen} />
+          </TouchableOpacity>
+        )}
+        <Text style={[TextStyle.H3B, styles.text]}>{title}</Text>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -51,6 +65,7 @@ const styles = StyleSheet.create({
     height: 80,
     alignContent: 'center',
     paddingHorizontal: 20,
+    paddingTop: 15,
     alignItems: 'center',
     gap: 20,
   },
