@@ -43,7 +43,7 @@ const Header = ({
       <View style={styles.container}>
         {backButton && (
           <TouchableOpacity onPress={onBack}>
-            <Icon size={30} name="chevron-left" color={Colors.darkGreen} />
+            <Icon size={24} name="chevron-left" color={Colors.darkGreen} />
           </TouchableOpacity>
         )}
 

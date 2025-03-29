@@ -8,7 +8,7 @@ export type SettingListProps = {
   items?: {
     title: string;
     icon?: string;
-    onPress: () => void;
+    onPress?: () => void;
   }[];
   iconSize?: number;
   iconColor?: string;
