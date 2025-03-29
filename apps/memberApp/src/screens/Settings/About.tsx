@@ -5,7 +5,7 @@ import Header from '../../components/Header';
 const About = () => {
   return (
     <View>
-      <Header title={'Language'} backButton />
+      <Header title={'About'} backButton />
     </View>
   );
 };
