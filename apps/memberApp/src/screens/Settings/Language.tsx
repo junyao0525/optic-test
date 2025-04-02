@@ -33,12 +33,13 @@ const Language = () => {
     items: [
       {
         title: language,
-        icon: 'globe',
+        // icon: 'globe',
         onPress: () => {
           // Alert.alert('English');
         },
       },
     ],
+    forwardIcon: false,
   };
 
   return (

@@ -10,6 +10,7 @@ export type SettingListProps = {
     icon?: string;
     onPress?: () => void;
   }[];
+  forwardIcon?: boolean;
   iconSize?: number;
   iconColor?: string;
 };
@@ -19,6 +20,7 @@ const SettingList = ({
   items = [],
   iconSize = 24,
   iconColor = 'black',
+  forwardIcon = true,
 }: SettingListProps) => {
   return (
     <View style={styles.container}>
@@ -47,11 +49,13 @@ const SettingList = ({
             <TouchableOpacity
               style={styles.itemContainer}
               onPress={item.onPress}>
-              <Icon
-                name={item.icon || 'help-circle-outline'}
-                size={iconSize}
-                color={iconColor}
-              />
+              {item.icon && (
+                <Icon
+                  name={item.icon || 'help-circle-outline'}
+                  size={iconSize}
+                  color={iconColor}
+                />
+              )}
 
               <View style={styles.leftContent}>
                 <View style={styles.textIconContainer}>
@@ -63,7 +67,9 @@ const SettingList = ({
                     {item.title}
                   </Text>
                 </View>
-                <Icon name="chevron-forward" size={25} color={Colors.black} />
+                {forwardIcon && (
+                  <Icon name="chevron-forward" size={25} color={Colors.black} />
+                )}
               </View>
             </TouchableOpacity>
           </View>
