@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native';
 import React from 'react';
-import {Alert, Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View} from 'react-native';
 import Header from '../../components/Header';
 import SettingList from '../../components/SettingList';
 import {Colors, TextStyle} from '../../themes';
@@ -21,9 +21,7 @@ const SettingScreen = () => {
       {
         title: 'My Profile',
         icon: 'person-circle',
-        onPress: () => {
-          Alert.alert('Profile Clicked');
-        },
+        onPress: () => navigation.navigate('Profile'),
       },
       {
         title: 'My History',

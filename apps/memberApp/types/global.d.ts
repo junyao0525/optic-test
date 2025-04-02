@@ -17,6 +17,7 @@ declare global {
       About: undefined;
       Help: undefined;
       Language: undefined;
+      Profile: undefined;
     }
   }
 }

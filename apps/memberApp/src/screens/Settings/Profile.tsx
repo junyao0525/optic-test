@@ -3,10 +3,10 @@ import {StyleSheet, View} from 'react-native';
 import Header from '../../components/Header';
 import {Colors} from '../../themes';
 
-const Help = () => {
+const Profile = () => {
   return (
     <View style={styles.container}>
-      <Header title={'Help'} backButton />
+      <Header title={'My Profile'} backButton />
     </View>
   );
 };
@@ -18,5 +18,4 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
-
-export default Help;
+export default Profile;

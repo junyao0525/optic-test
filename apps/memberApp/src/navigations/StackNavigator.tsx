@@ -7,6 +7,7 @@ import LandoltC from '../screens/LandoltC/LandoltC';
 import About from '../screens/Settings/About';
 import Help from '../screens/Settings/Help';
 import Language from '../screens/Settings/Language';
+import Profile from '../screens/Settings/Profile';
 import TabNavigator from './TabNavigator';
 
 const Stack = createNativeStackNavigator();
@@ -24,6 +25,7 @@ const StackNavigator = () => {
       <Stack.Screen name="About" component={About} />
       <Stack.Screen name="Help" component={Help} />
       <Stack.Screen name="Language" component={Language} />
+      <Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };

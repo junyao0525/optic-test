@@ -94,7 +94,7 @@ const TabBar = (props: BottomTabBarProps) => {
       {props.state.routes.map((route, idx) => (
         <TabItem
           key={route.key}
-          title={route.name as ReactNavigation.TabParamListKey}
+          title={route.name as TabParamListKey}
           selected={idx === props.state.index}
           onPress={() => {
             props.navigation.navigate(route.name);

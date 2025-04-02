@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Alert, StyleSheet, View} from 'react-native';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Header from '../../components/Header';
 import SettingList, {SettingListProps} from '../../components/SettingList';
+import {Colors} from '../../themes';
 
 const Language = () => {
   const [language, setLanguage] = useState('English');
@@ -53,7 +53,7 @@ const Language = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.lightBlue,
+    backgroundColor: Colors.backgroundColor,
     flex: 1,
     width: '100%',
   },
