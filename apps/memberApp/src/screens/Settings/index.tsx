@@ -1,20 +1,40 @@
 import {useNavigation} from '@react-navigation/native';
-import React from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import React, {useState} from 'react';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Header from '../../components/Header';
 import SettingList from '../../components/SettingList';
 import {Colors, TextStyle} from '../../themes';
 
 const personImage = require('../../../assets/images/person.png');
 
-const UserForm = {
-  userName: 'John Doe',
-  userEmail: 'JohnDoe@gmail.com',
+export type User = {
+  userName: string;
+  firstName: string;
+  lastName: string;
+  userEmail: string;
+  userImage: string;
+  userDOB: string;
+};
+
+const UserForm: User = {
+  // userName: 'John Doe',
+  // firstName: 'John',
+  // lastName: 'Doe',
+  // userEmail: 'JohnDoe@gmail.com',
+  // userImage: personImage,
+  // userDOB: '3/12/1995',
+  userName: '',
+  firstName: '',
+  lastName: '',
+  userEmail: '',
   userImage: personImage,
+  userDOB: '',
 };
 
 const SettingScreen = () => {
   const navigation = useNavigation();
+  const [userForm, setUserForm] = useState(UserForm);
+
   const settingsData = {
     title: 'Personal Data',
     items: [
@@ -62,16 +82,38 @@ const SettingScreen = () => {
         <View style={styles.userInfoContainer}>
           <View style={styles.userInfoStyle}>
             <Image
-              source={UserForm.userImage}
+              source={userForm.userImage}
               style={styles.userImageContainer}
             />
             <View>
-              <Text style={{...TextStyle.H3B, color: Colors.black}}>
-                {UserForm.userName}
-              </Text>
-              <Text style={{...TextStyle.P1B, color: Colors.darkGreen}}>
-                {UserForm.userEmail}
-              </Text>
+              {userForm.userName ? (
+                <>
+                  <Text style={{...TextStyle.H3B, color: Colors.black}}>
+                    {userForm.userName}
+                  </Text>
+                  <Text style={{...TextStyle.P1B, color: Colors.darkGreen}}>
+                    {userForm.userEmail}
+                  </Text>
+                </>
+              ) : (
+                <View>
+                  <Text style={{...TextStyle.H3B, color: Colors.black}}>
+                    Guess
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Login')}
+                    style={{
+                      width: 100,
+                      height: 30,
+                      backgroundColor: Colors.red,
+                      borderRadius: 10,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Text style={(TextStyle.P1B, styles.login)}>Sign In</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
         </View>
@@ -104,6 +146,10 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderGrey,
     borderWidth: 2,
     backgroundColor: Colors.borderGrey,
+  },
+  login: {
+    color: Colors.white,
+    fontWeight: 'bold',
   },
 });
 

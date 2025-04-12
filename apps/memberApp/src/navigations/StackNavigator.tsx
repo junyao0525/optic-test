@@ -1,5 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
+import Login from '../screens/Auth/Login';
+import Register from '../screens/Auth/Register';
 import ColorVision from '../screens/ColorVision/ColorVision';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
 import DistanceMeasure from '../screens/LandoltC/DistanceMeasure';
@@ -26,6 +28,8 @@ const StackNavigator = () => {
       <Stack.Screen name="Help" component={Help} />
       <Stack.Screen name="Language" component={Language} />
       <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Register" component={Register} />
     </Stack.Navigator>
   );
 };
