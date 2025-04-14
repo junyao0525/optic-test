@@ -34,7 +34,7 @@ model Users {
   name       String?   @db.VarChar
   email      String?   @db.VarChar
   dob        DateTime? @db.Timestamp(6)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
   password   String?   @db.VarChar
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt  DateTime? @db.Timestamptz(6)
 }
