@@ -1,60 +1,140 @@
-import React from 'react';
-import {StyleSheet, Text, TextInput, TextInputProps, View} from 'react-native';
+// InputText.tsx
 
-export type inputFieldProps = TextInputProps & {
-  label?: string;
+import React, {ComponentProps} from 'react';
+import {Controller} from 'react-hook-form';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+  ViewStyle,
+} from 'react-native';
+import {Colors, FontFamilies, TextStyle} from '../themes'; // Adjust this import based on your project structure
+
+interface InputTextProps extends TextInputProps {
+  control: any;
+  name: string;
+  label: string;
+  containerStyle?: StyleProp<ViewStyle>;
+  rules?: ComponentProps<typeof Controller>['rules'];
+  multiline?: boolean;
   error?: string;
-  containerStyle?: object;
-};
+  placeholder?: string;
+  editable?: boolean;
+  numberOfLines?: number;
+  topErrorText?: boolean;
+  imageSource?: any;
+  required?: boolean;
+}
 
-const InputField: React.FC<inputFieldProps> = ({
-  value = '',
-  onChangeText,
+const InputField: React.FC<InputTextProps> = ({
+  control,
+  name,
   label,
+  rules,
+  multiline = false,
   error,
+  placeholder = '',
+  editable = true,
+  topErrorText = false,
+  required = false,
   containerStyle,
-  style,
-  ...props
+  ...rest
 }) => {
   return (
-    <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <TextInput
-        style={[styles.input, error ? styles.errorInput : {}, style]}
-        onChangeText={onChangeText}
-        value={value}
-        {...props}
-      />
-      {error && <Text style={styles.errorText}>{error}</Text>}
-    </View>
+    <Controller
+      control={control}
+      name={name}
+      rules={rules}
+      render={({field: {onChange, value}}) => (
+        <View style={[styles.container, containerStyle]}>
+          <View style={styles.labelContainer}>
+            <Text style={[TextStyle.P1B, styles.label]}>
+              {label}{' '}
+              <Text style={[TextStyle.P1B, styles.requiredSpan]}>
+                {required ? '*' : ''}
+              </Text>
+            </Text>
+            {topErrorText && error && (
+              <Text style={[styles.topError]}>{error}</Text>
+            )}
+          </View>
+          <View>
+            <TextInput
+              value={value}
+              onChangeText={onChange}
+              placeholder={placeholder}
+              editable={editable}
+              multiline={multiline}
+              numberOfLines={rest.numberOfLines}
+              {...rest}
+              style={[
+                TextStyle.P2,
+                styles.input,
+                multiline && styles.textArea,
+                !editable && {backgroundColor: Colors.green},
+                error ? {borderColor: Colors.borderGrey} : undefined,
+                rest?.style,
+              ]}
+            />
+          </View>
+          {!topErrorText && error && (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
+        </View>
+      )}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
+  container: {},
+  labelContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   label: {
     marginBottom: 4,
+    color: Colors.black,
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: 700,
+  },
+  topError: {
+    color: Colors.red,
+    fontSize: 13,
+    fontWeight: 400,
   },
   input: {
-    height: 50,
+    flexDirection: 'row',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#fff',
+    borderColor: Colors.borderGrey,
+    borderRadius: 5,
+    color: Colors.black,
+    backgroundColor: Colors.white,
+    fontFamily: FontFamilies.regular,
+    fontWeight: '400',
+    textAlignVertical: 'center',
+    justifyContent: 'space-between',
+    minHeight: 50,
+    fontSize: 14,
+    lineHeight: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  errorInput: {
-    borderColor: 'red',
+  textArea: {
+    textAlignVertical: 'top',
+    minHeight: 80,
   },
   errorText: {
-    marginTop: 4,
-    color: 'red',
+    color: Colors.red,
     fontSize: 12,
+    marginTop: 5,
+  },
+  requiredSpan: {
+    color: Colors.red,
   },
 });
 
