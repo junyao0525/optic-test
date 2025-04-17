@@ -5,6 +5,7 @@ import { omit } from "lodash";
 import getPrismaInstance from "src/utils/prisma";
 
 //login user
+//TODO : get access token and refresh token and expire time
 export const controllerLoginUser: RequestHandler = async (req, res) => {
   try {
     const client = getPrismaInstance();
