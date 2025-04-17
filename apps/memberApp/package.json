@@ -1,5 +1,5 @@
 {
-  "name": "memberApp",
+  "name": "vt",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -15,6 +15,7 @@
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
+    "@tanstack/react-query": "^5.74.4",
     "react": "18.2.0",
     "react-hook-form": "^7.55.0",
     "react-native": "0.74.5",

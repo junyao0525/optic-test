@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {useUserLoginApi} from '../../api/auth';
 import Divider from '../../components/Divider';
 import Header from '../../components/Header';
 import InputField from '../../components/InputField';
@@ -26,13 +27,25 @@ const initialData: formData = {
 
 const Login = () => {
   const navigation = useNavigation();
+
+  const {mutateAsync, isPending} = useUserLoginApi();
   const {control, handleSubmit} = useForm({
     defaultValues: initialData,
   });
 
-  const onSubmit = (data: any) => {
-    console.log('Form Data:', data);
-    Alert.alert('Login Success', `Email: ${data.email}`);
+  const onSubmit = async (data: formData) => {
+    try {
+      console.log('Login data:', data);
+      const response = await mutateAsync(data);
+      console.log(response);
+      Alert.alert('Login Success', `Email: ${data.email}`);
+    } catch (error) {
+      console.log('Login error:', error);
+      Alert.alert(
+        'Login Failed',
+        'There was an issue logging you in. Please try again.',
+      );
+    }
   };
 
   const onSignUp = useCallback(() => {
