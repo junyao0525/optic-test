@@ -1,14 +1,12 @@
-import numpy as np
-import pandas as pd
+# main.py
+from fastapi import FastAPI
+from routers import mtcnn as ml
 
-np.random.seed(1)
+app = FastAPI(
+    title="Modular FastAPI Service",
+    version="1.0.0"
+)
 
-def add(a, b):
-    return a + b
+# Register routers
+app.include_router(ml.router)
 
-number = add(1, 2)
-
-print(number)
-
-df = pd.array([1, 2, 3])
-print(df)
