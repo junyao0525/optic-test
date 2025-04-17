@@ -14,13 +14,20 @@ import Header from '../../components/Header';
 import InputField from '../../components/InputField';
 import {Colors, TextStyle} from '../../themes';
 
+type formData = {
+  email: string;
+  password: string;
+};
+
+const initialData: formData = {
+  email: '',
+  password: '',
+};
+
 const Login = () => {
   const navigation = useNavigation();
   const {control, handleSubmit} = useForm({
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: initialData,
   });
 
   const onSubmit = (data: any) => {
