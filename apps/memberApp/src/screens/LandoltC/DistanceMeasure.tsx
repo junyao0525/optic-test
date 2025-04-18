@@ -1,40 +1,71 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {View, StyleSheet, Text, Alert, ActivityIndicator} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-  Camera,
-  useCameraDevice,
-  useCameraPermission,
-} from 'react-native-vision-camera';
+  ActivityIndicator,
+  Alert,
+  Linking,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import {Camera} from 'react-native-vision-camera';
+import CameraProvider, {useCameraContext} from '../../../hocs/CameraProvider';
+import {useDetectFaceAPI} from '../../api/python';
 import {Colors, TextStyle} from '../../themes';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Import icon package
 
-export default function DistanceMeasure() {
-  const cameraRef = useRef(null);
-  const [permission, setPermission] = useState('');
-  const [headDistance, setHeadDistance] = useState(null); // Manage head distance
-  const device = useCameraDevice('front');
+const DistanceMeasure = () => {
+  const camera = useRef<Camera>(null);
+  const {loaded, cameraPermission, activeDevice} = useCameraContext();
+  const isActiveRef = useRef(true);
+  const capturingRef = useRef(false); // Added missing ref
+  const [headDistance, setHeadDistance] = useState<
+    'tooClose' | 'perfect' | 'tooFar' | null
+  >(null);
+  const navigation = useNavigation();
+  const {mutateAsync} = useDetectFaceAPI();
 
   useEffect(() => {
-    (async () => {
-      const status = await Camera.requestCameraPermission();
-      setPermission(status);
-      console.log('Camera permission status:', status);
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission Required',
-          'Camera access is needed to use this feature. Please grant camera permissions in your device settings.',
-        );
-      }
-    })();
-  }, []);
+    if (cameraPermission === 'granted') {
+      isActiveRef.current = true;
+    } else if (cameraPermission === 'denied') {
+      Alert.alert(
+        'Permission Denied',
+        'Camera access is denied. Please enable it in settings.',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => {
+              navigation.goBack();
+            },
+          },
+          {
+            text: 'Open Settings',
+            onPress: () => Linking.openSettings(),
+          },
+        ],
+      );
+    }
+  }, [cameraPermission, navigation]);
 
-  const updateHeadDistance = () => {
-    // setHeadDistance(distance); // Update the head distance
-  };
+  if (!activeDevice) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.errorText}>Front camera not available</Text>
+      </SafeAreaView>
+    );
+  }
 
-  if (!device) return <Text>Loading front camera...</Text>;
+  if (cameraPermission !== 'granted') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.errorText}>Camera permission is required.</Text>
+      </SafeAreaView>
+    );
+  }
 
-  return permission === 'granted' ? (
+  return (
     <View style={styles.container}>
       {/* Text Section */}
       <View style={styles.textContainer}>
@@ -51,43 +82,54 @@ export default function DistanceMeasure() {
       {/* Camera Section */}
       <View style={styles.cameraContainer}>
         <Camera
-          ref={cameraRef}
-          style={styles.camera}
-          device={device}
-          isActive={true}
+          ref={camera}
+          style={StyleSheet.absoluteFill}
+          device={activeDevice}
+          isActive={isActiveRef.current}
           photo={true}
         />
       </View>
 
-      {/* Button Section */}
-      <View style={{flex: 1, alignItems: 'center'}}>
+      {/* Status Section */}
+      <View style={styles.statusContainer}>
         <View style={styles.measureTextContainer}>
-          <ActivityIndicator />
+          <ActivityIndicator color={Colors.primary} />
           <Text style={styles.measuringText}>Measuring...</Text>
         </View>
 
         {/* Conditional Distance Message */}
         {headDistance === 'tooClose' ? (
           <Text style={[styles.distanceText, {color: Colors.red}]}>
-            Please move your head further.
+            Please move your head further (40-70cm recommended)
           </Text>
         ) : headDistance === 'perfect' ? (
           <Text style={[styles.distanceText, {color: Colors.green}]}>
-            Perfect Distance
+            Perfect Distance (40-70cm)
+          </Text>
+        ) : headDistance === 'tooFar' ? (
+          <Text style={[styles.distanceText, {color: Colors.orange}]}>
+            Please move your head closer (40-70cm recommended)
           </Text>
         ) : (
           <Text style={styles.distanceText}>Adjust your head position</Text>
         )}
       </View>
     </View>
-  ) : (
-    <Text>Camera permission is required.</Text>
+  );
+};
+
+export default function DistanceMeasureWithProvider() {
+  return (
+    <CameraProvider>
+      <DistanceMeasure />
+    </CameraProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.white,
   },
   textContainer: {
     flex: 1,
@@ -101,28 +143,36 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   cameraContainer: {
-    flex: 2, // Ensures the camera takes available space
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 2,
     backgroundColor: 'black',
+    position: 'relative',
   },
-  camera: {
-    width: '100%',
-    height: '100%',
+  statusContainer: {
+    flex: 1,
+    alignItems: 'center',
+    paddingBottom: 20,
   },
   measureTextContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+    marginBottom: 10,
   },
   measuringText: {
-    marginVertical: 10,
     fontSize: 18,
     color: Colors.black,
   },
   distanceText: {
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  errorText: {
+    fontSize: 18,
+    color: Colors.black,
+    textAlign: 'center',
+    padding: 20,
   },
 });

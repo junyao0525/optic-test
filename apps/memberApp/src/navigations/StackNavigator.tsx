@@ -4,7 +4,7 @@ import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import ColorVision from '../screens/ColorVision/ColorVision';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
-import DistanceMeasure from '../screens/LandoltC/DistanceMeasure';
+import DistanceMeasureWithProvider from '../screens/LandoltC/DistanceMeasure';
 import LandoltC from '../screens/LandoltC/LandoltC';
 import About from '../screens/Settings/About';
 import Help from '../screens/Settings/Help';
@@ -21,7 +21,10 @@ const StackNavigator = () => {
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="Tab" component={TabNavigator} />
       <Stack.Screen name="LandoltC" component={LandoltC} />
-      <Stack.Screen name="DistanceMeasure" component={DistanceMeasure} />
+      <Stack.Screen
+        name="DistanceMeasure"
+        component={DistanceMeasureWithProvider}
+      />
       <Stack.Screen name="EyeTiredness" component={EyeTiredness} />
       <Stack.Screen name="ColorVision" component={ColorVision} />
       <Stack.Screen name="About" component={About} />
