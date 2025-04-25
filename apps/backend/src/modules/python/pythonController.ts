@@ -1,26 +1,34 @@
+import { DetectFaceApi } from "@vt/core/apis/app/python";
 import axios from "axios";
 import { RequestHandler } from "express";
-import FormData from "form-data";
+import FormData from "form-data"; // This must be imported (Node's version)
 
-export const controllerDetectFace: RequestHandler = async (req, res) => {
+export const controllerDetectFace: RequestHandler<DetectFaceApi> = async (
+  req,
+  res
+) => {
   try {
-    const file = req.file;
+    const file = req.file; // This is populated by multer middleware
+    const data = req.body;
+    console.log(data);
+
+    console.log(file);
 
     if (!file) {
       return res.status(400).json({
         success: false,
-        message: "File not found in request",
+        message: "No file uploaded",
       });
     }
 
-    const formData = new FormData();
-    formData.append("file", file.buffer, file.originalname);
+    const form = new FormData();
+    form.append("file", file.buffer, file.originalname); // buffer, filename
 
     const response = await axios.post(
       "http://localhost:8000/mtcnn/detect-face/",
-      formData,
+      form,
       {
-        headers: formData.getHeaders(),
+        headers: form.getHeaders(),
       }
     );
 
@@ -30,9 +38,10 @@ export const controllerDetectFace: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(400).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to connect with FastAPI backend",
+      message: "Error forwarding file to FastAPI",
+      error,
     });
   }
 };
