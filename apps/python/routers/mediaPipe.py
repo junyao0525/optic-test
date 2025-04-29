@@ -6,6 +6,7 @@ from fastapi import APIRouter, UploadFile, File
 import numpy as np
 import cv2
 import mediapipe as mp
+import json
 
 router = APIRouter(prefix="/mediapipe", tags=["face-recognition-mediapipe"])
 
@@ -67,7 +68,7 @@ async def detect_faces_mediapipe(file: UploadFile = File(...)):
 
         # Constants
         KNOWN_FACE_WIDTH_CM = 16  # Average adult face width
-        FOCAL_LENGTH_PX = 600     # Approximate focal length, needs calibration for your camera
+        FOCAL_LENGTH_PX = 1470     # Approximate focal length, needs calibration for your camera
 
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
@@ -138,13 +139,24 @@ async def detect_faces_mediapipe(file: UploadFile = File(...)):
         annotated_filename = f"annotated_{timestamp}_{file.filename}"
         annotated_path = os.path.join(OUTPUT_FOLDER, annotated_filename)
         cv2.imwrite(annotated_path, img)
+        import json
 
-        return {
+        # Build JSON data
+        record = {
+            "timestamp": timestamp,
+            "original_image": file_path,
+            "annotated_image": annotated_path,
             "face_count": len(face_data),
             "faces": face_data,
-            # "landmarks": landmark_data,
-            "annotated_image_path": annotated_path
         }
+
+        # Optional: Save to .json file
+        json_output_path = os.path.join(OUTPUT_FOLDER, f"record_{timestamp}.json")
+        with open(json_output_path, "w") as f:
+            json.dump(record, f, indent=2)
+
+
+        return record
 
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the image."}

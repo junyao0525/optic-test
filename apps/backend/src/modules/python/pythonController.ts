@@ -8,11 +8,10 @@ export const controllerDetectFace: RequestHandler<DetectFaceApi> = async (
   res
 ) => {
   try {
-    const file = req.file; // This is populated by multer middleware
+    const file = req.files?.file;
     const data = req.body;
-    console.log(data);
-
-    console.log(file);
+    console.log("data", data);
+    console.log("file", file);
 
     if (!file) {
       return res.status(400).json({
@@ -22,7 +21,7 @@ export const controllerDetectFace: RequestHandler<DetectFaceApi> = async (
     }
 
     const form = new FormData();
-    form.append("file", file.buffer, file.originalname); // buffer, filename
+    form.append("file", file.data, file.name); // Append file data and file name to FormData
 
     const response = await axios.post(
       "http://localhost:8000/mtcnn/detect-face/",
