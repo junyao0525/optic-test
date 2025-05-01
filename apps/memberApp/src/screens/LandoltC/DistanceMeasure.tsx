@@ -17,7 +17,6 @@ import {Colors, TextStyle} from '../../themes';
 
 const MIN_DISTANCE = 21;
 const MAX_DISTANCE = 45;
-const SECOND_REMINDER = 30; // seconds
 
 const DistanceMeasure: React.FC = () => {
   const cameraRef = useRef<Camera | null>(null);
