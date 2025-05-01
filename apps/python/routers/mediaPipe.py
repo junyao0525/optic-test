@@ -26,6 +26,15 @@ face_mesh = mp_face_mesh.FaceMesh(
     min_detection_confidence=0.5
 )
 
+# Constants
+KNOWN_FACE_WIDTH_CM = 14  # Average adult face width
+FOCAL_LENGTH_PX = 1100     # Approximate focal length, needs calibration for your camera
+
+
+def measure_distance(pupil_distance_px):
+    return (KNOWN_FACE_WIDTH_CM * FOCAL_LENGTH_PX) / pupil_distance_px
+
+
 @router.post("/detect-face/")
 async def detect_faces_mediapipe(file: UploadFile = File(...)):
     try:
@@ -66,24 +75,22 @@ async def detect_faces_mediapipe(file: UploadFile = File(...)):
         face_data = [] 
         landmark_data = []
 
-        # Constants
-        KNOWN_FACE_WIDTH_CM = 16  # Average adult face width
-        FOCAL_LENGTH_PX = 1470     # Approximate focal length, needs calibration for your camera
-
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                # Get left cheek (234) and right cheek (454)
-                left_cheek = face_landmarks.landmark[234]
-                right_cheek = face_landmarks.landmark[454]
                 
-                x1, y1 = int(left_cheek.x * w), int(left_cheek.y * h)
-                x2, y2 = int(right_cheek.x * w), int(right_cheek.y * h)
-                
-                # Calculate pixel distance between the two points
+                # Use pupil landmarks (left: 468, right: 473 in MediaPipe's 478 landmarks)
+                left_pupil = face_landmarks.landmark[468]  # Left pupil center
+                right_pupil = face_landmarks.landmark[473] # Right pupil center
+
+                # Convert to pixel coordinates
+                x1, y1 = int(left_pupil.x * w), int(left_pupil.y * h)
+                x2, y2 = int(right_pupil.x * w), int(right_pupil.y * h)
+
+                # Euclidean distance
                 pixel_distance = math.hypot(x2 - x1, y2 - y1)
                 
                 # Calculate distance to screen
-                distance_cm = (KNOWN_FACE_WIDTH_CM * FOCAL_LENGTH_PX) / pixel_distance
+                distance_cm = measure_distance(pixel_distance)
                 
                 # Draw distance info on the image
                 mid_x, mid_y = (x1 + x2) // 2, (y1 + y2) // 2
@@ -97,32 +104,19 @@ async def detect_faces_mediapipe(file: UploadFile = File(...)):
                 )
 
                 # Determine if face is too small (means too far)
-                min_face_pixel_distance = w // 10  # 10% of image width
+                # when small then 400
+                min_face_pixel_distance = w // 6 
                 is_too_far = pixel_distance < min_face_pixel_distance
 
-                # Draw face detection area (rectangular box around face)
-                # Estimate face width and height based on distance between cheeks
-                face_width = int(pixel_distance * 1.5)  # Approximate face width
-                face_height = int(face_width * 1.3)     # Approximate face height based on width
-                
-                # Calculate top-left and bottom-right corners of face rectangle
-                face_x1 = max(0, mid_x - face_width // 2)
-                face_y1 = max(0, mid_y - face_height // 2)
-                face_x2 = min(w, mid_x + face_width // 2)
-                face_y2 = min(h, mid_y + face_height // 2)
-                
-                # Draw face rectangle in green with 2px thickness
-                cv2.rectangle(img, (face_x1, face_y1), (face_x2, face_y2), (0, 255, 0), 2)
+                is_too_near = pixel_distance > min_face_pixel_distance * 2
 
                 # Add to results
                 face_info = {
-                    "distance_cm": round(distance_cm, 2),
-                    "mid_point": {"x": mid_x, "y": mid_y},
-                    "pixel_distance": round(pixel_distance, 2),
+                    "distance_cm": round(distance_cm),
+                    "pixel_distance": round(pixel_distance),
+                    "is_too_near": is_too_near,
                     "is_centered": is_centered,
                     "is_too_far": is_too_far,
-                    "face_bounds": {"x1": face_x1, "y1": face_y1, "x2": face_x2, "y2": face_y2},
-                    "img_shape": img.shape,
                 }
                 face_data.append(face_info)
 
@@ -154,9 +148,16 @@ async def detect_faces_mediapipe(file: UploadFile = File(...)):
         json_output_path = os.path.join(OUTPUT_FOLDER, f"record_{timestamp}.json")
         with open(json_output_path, "w") as f:
             json.dump(record, f, indent=2)
+        
+        result ={
+            "timestamp": timestamp,
+            "face_count": len(face_data),
+            "faces": face_data,
+        }
 
 
-        return record
+        return result.json()
+    
 
     except Exception as e:
         return {"error": str(e), "message": "An error occurred while processing the image."}

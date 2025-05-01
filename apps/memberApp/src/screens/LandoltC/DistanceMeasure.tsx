@@ -12,12 +12,11 @@ import {
 } from 'react-native';
 import {Camera, PhotoFile} from 'react-native-vision-camera';
 import CameraProvider, {useCameraContext} from '../../../hocs/CameraProvider';
-import {useUploadFile} from '../../api/file';
 import {useDetectFaceAPI} from '../../api/python';
 import {Colors, TextStyle} from '../../themes';
 
-const MIN_DISTANCE = 40;
-const MAX_DISTANCE = 70;
+const MIN_DISTANCE = 21;
+const MAX_DISTANCE = 45;
 
 interface FaceDetectionResponse {
   face_count: number;
@@ -28,76 +27,89 @@ interface FaceDetectionResponse {
 }
 
 const DistanceMeasure: React.FC = () => {
-  const camera = useRef<Camera | null>(null);
+  const cameraRef = useRef<Camera | null>(null);
   const {loaded, cameraPermission, activeDevice} = useCameraContext();
   const isActiveRef = useRef<boolean>(true);
   const capturingRef = useRef<boolean>(false);
+  const captureIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMeasuring, setIsMeasuring] = useState(false);
+
   const [headDistance, setHeadDistance] = useState<number | null>(null);
-  const [isMeasuring, setIsMeasuring] = useState<boolean>(true);
   const [faceCount, setFaceCount] = useState<number>(0);
+  const [cameraReady, setCameraReady] = useState(false);
+
   const navigation = useNavigation();
   const {mutateAsync: detectFaceMutateAsync} = useDetectFaceAPI();
-  const {mutateAsync: uploadFileMutateAsync} = useUploadFile();
-  const [cameraReady, setCameraReady] = useState(false);
-  const [faces, setFaces] = useState<
-    Array<{x: number; y: number; width: number; height: number}>
-  >([]);
 
   const capturePhoto = async (): Promise<void> => {
     if (
-      !camera.current ||
+      !cameraRef.current ||
       capturingRef.current ||
       !activeDevice ||
       !cameraReady
-    )
+    ) {
       return;
+    }
 
     capturingRef.current = true;
 
     try {
       console.log('Taking photo...');
 
-      const photo: PhotoFile = await camera.current.takePhoto({
+      const photo: PhotoFile = await cameraRef.current.takePhoto({
         flash: 'off',
         enableShutterSound: false,
       });
 
       console.log('Photo captured:', photo.path);
 
-      // 2. Create FormData object for API request
       const formData = new FormData();
       formData.append('file', {
         uri: Platform.OS === 'ios' ? photo.path : `file://${photo.path}`,
         type: 'image/jpeg',
         name: 'photo.jpg',
-      } as any);
+      } as Partial<PhotoFile>);
 
-      // 3. Send photo to backend for face detection
-      console.log('Sending photo to API...');
-      const response = (await detectFaceMutateAsync(
-        formData,
-      )) as FaceDetectionResponse & {
-        faces?: {x: number; y: number; width: number; height: number}[];
-      };
-      console.log('Face detection response:', response);
+      const response = await detectFaceMutateAsync(formData);
 
-      // 4. Process face detection results
-      if (response?.face_count !== undefined) {
+      if (!response.faces && !response.face_count) {
+        console.error('No faces detected in the response:', response);
+        Alert.alert('Error', 'No faces detected. Please try again.');
+        return;
+      }
+
+      if (response.face_count >= 2) {
+        Alert.alert('Error', 'Multiple faces detected. Please try again.');
+        return;
+      }
+
+      if (response.face_count !== undefined) {
         setFaceCount(response.face_count);
-        setFaces(response.faces || []);
 
-        if (response.face_count > 0 && response.distances_cm?.length) {
-          const distance = response.distances_cm[0];
+        if (response.face_count === 1) {
+          const distance = response.faces[0].distance_cm;
+
+          if (distance == null) {
+            console.error('Distance not found in the response:', response);
+            return;
+          }
+
+          console.log('Distance:', distance);
           setHeadDistance(distance);
-          setIsMeasuring(false);
 
-          // Check if distance is within acceptable range
           if (distance < MIN_DISTANCE) {
             Alert.alert('Too Close', 'Please move farther from the camera');
           } else if (distance > MAX_DISTANCE) {
             Alert.alert('Too Far', 'Please move closer to the camera');
           } else {
             Alert.alert('Perfect Distance', 'Your distance is ideal!');
+
+            // ✅ Stop capturing when distance is within ideal range
+            if (captureIntervalRef.current) {
+              clearInterval(captureIntervalRef.current);
+              captureIntervalRef.current = null;
+              console.log('Capture interval cleared - valid distance reached');
+            }
           }
         }
       }
@@ -112,30 +124,33 @@ const DistanceMeasure: React.FC = () => {
     }
   };
 
-  // Set up interval for continuous measurements
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | undefined;
+    const setupCapture = async () => {
+      if (cameraPermission === 'denied') {
+        Alert.alert('Permission Denied', 'Camera access is required.');
+        return;
+      }
 
-    if (cameraPermission === 'denied') {
-      handlePermissionDenied();
-    } else if (
-      cameraPermission === 'granted' &&
-      camera.current &&
-      loaded &&
-      activeDevice
-    ) {
-      // Initial capture
-      capturePhoto();
+      if (
+        cameraPermission === 'granted' &&
+        cameraRef.current &&
+        loaded &&
+        activeDevice
+      ) {
+        await capturePhoto();
 
-      // Set up interval for continuous measurement
-      intervalId = setInterval(capturePhoto, 1000);
-      console.log('Photo capture interval set up');
-    }
+        captureIntervalRef.current = setInterval(capturePhoto, 1000);
+        console.log('Photo capture interval set up');
+      }
+    };
+
+    setupCapture();
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-        console.log('Cleared photo capture interval');
+      if (captureIntervalRef.current) {
+        clearInterval(captureIntervalRef.current);
+        captureIntervalRef.current = null;
+        console.log('Cleared photo capture interval on unmount');
       }
     };
   }, [cameraPermission, loaded, activeDevice, cameraReady]);
@@ -216,8 +231,8 @@ const DistanceMeasure: React.FC = () => {
 
       <View style={styles.cameraContainer}>
         <Camera
-          ref={camera}
-          style={StyleSheet.absoluteFill}
+          ref={cameraRef}
+          style={styles.camera}
           device={activeDevice}
           isActive={isActiveRef.current}
           photo={true}
@@ -229,7 +244,6 @@ const DistanceMeasure: React.FC = () => {
             console.error('Camera initialization error', error);
           }}
         />
-
         <View style={styles.faceGuide} />
       </View>
 
@@ -280,9 +294,14 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   cameraContainer: {
-    flex: 2,
+    flex: 2, // Ensures the camera takes available space
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'black',
-    position: 'relative',
+  },
+  camera: {
+    width: '100%',
+    height: '100%',
   },
   statusContainer: {
     flex: 1,
@@ -330,13 +349,24 @@ const styles = StyleSheet.create({
   },
   faceGuide: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+    width: 250, // Width of the circle
+    height: 300, // Height of the circle (same as width to make it circular)
+    borderRadius: 125, // Half of width/height to make it circular
+    borderColor: 'white',
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-    transform: [{translateX: -110}, {translateY: -110}],
+    borderStyle: 'dashed', // Dotted border
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  // faceGuide: {
+  //   position: 'absolute',
+  //   top: '50%',
+  //   left: '50%',
+  //   width: 220,
+  //   height: 220,
+  //   borderRadius: 110,
+  //   borderWidth: 2,
+  //   borderColor: 'rgba(255, 255, 255, 0.5)',
+  //   transform: [{translateX: -110}, {translateY: -110}],
+  // },
 });
