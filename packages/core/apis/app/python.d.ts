@@ -1,7 +1,7 @@
 export type DetectFaceApi = {
   Endpoint: "/mediapipe/detect-face/";
   Method: "POST";
-  BODY: {
+  Body: {
     file: FormData;
   };
   Response: {

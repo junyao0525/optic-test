@@ -41,14 +41,14 @@ const DistanceMeasure: React.FC = () => {
   const navigation = useNavigation();
   const {mutateAsync: detectFaceMutateAsync} = useDetectFaceAPI();
 
-  const capturePhoto = async (): Promise<void> => {
+  const capturePhoto = async (): Promise<boolean> => {
     if (
       !cameraRef.current ||
       capturingRef.current ||
       !activeDevice ||
       !cameraReady
     ) {
-      return;
+      return false;
     }
 
     capturingRef.current = true;
@@ -75,12 +75,17 @@ const DistanceMeasure: React.FC = () => {
       if (!response.faces && !response.face_count) {
         console.error('No faces detected in the response:', response);
         Alert.alert('Error', 'No faces detected. Please try again.');
-        return;
+        return false;
       }
 
       if (response.face_count >= 2) {
         Alert.alert('Error', 'Multiple faces detected. Please try again.');
-        return;
+        return false;
+      }
+
+      if (!response.faces[0].is_centered) {
+        Alert.alert('Error', 'Face is not Center. Please try again.');
+        return false;
       }
 
       if (response.face_count !== undefined) {
@@ -91,7 +96,7 @@ const DistanceMeasure: React.FC = () => {
 
           if (distance == null) {
             console.error('Distance not found in the response:', response);
-            return;
+            return false;
           }
 
           console.log('Distance:', distance);
@@ -99,17 +104,19 @@ const DistanceMeasure: React.FC = () => {
 
           if (distance < MIN_DISTANCE) {
             Alert.alert('Too Close', 'Please move farther from the camera');
+            return false;
           } else if (distance > MAX_DISTANCE) {
             Alert.alert('Too Far', 'Please move closer to the camera');
+            return false;
           } else {
             Alert.alert('Perfect Distance', 'Your distance is ideal!');
 
-            // ✅ Stop capturing when distance is within ideal range
             if (captureIntervalRef.current) {
               clearInterval(captureIntervalRef.current);
               captureIntervalRef.current = null;
               console.log('Capture interval cleared - valid distance reached');
             }
+            return true;
           }
         }
       }
@@ -119,15 +126,17 @@ const DistanceMeasure: React.FC = () => {
         'Error',
         'Failed to capture or process photo. Please try again.',
       );
+      return false;
     } finally {
       capturingRef.current = false;
     }
+    return false;
   };
 
   useEffect(() => {
     const setupCapture = async () => {
       if (cameraPermission === 'denied') {
-        Alert.alert('Permission Denied', 'Camera access is required.');
+        handlePermissionDenied();
         return;
       }
 
@@ -137,13 +146,19 @@ const DistanceMeasure: React.FC = () => {
         loaded &&
         activeDevice
       ) {
-        await capturePhoto();
+        const response = await capturePhoto();
+        console.log('response', response);
 
-        captureIntervalRef.current = setInterval(capturePhoto, 1000);
-        console.log('Photo capture interval set up');
+        if (!response) {
+          captureIntervalRef.current = setInterval(capturePhoto, 1000);
+          console.log('Photo capture interval set up');
+        }
+
+        setIsMeasuring(false);
       }
     };
 
+    setIsMeasuring(true);
     setupCapture();
 
     return () => {
@@ -358,15 +373,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // faceGuide: {
-  //   position: 'absolute',
-  //   top: '50%',
-  //   left: '50%',
-  //   width: 220,
-  //   height: 220,
-  //   borderRadius: 110,
-  //   borderWidth: 2,
-  //   borderColor: 'rgba(255, 255, 255, 0.5)',
-  //   transform: [{translateX: -110}, {translateY: -110}],
-  // },
 });
