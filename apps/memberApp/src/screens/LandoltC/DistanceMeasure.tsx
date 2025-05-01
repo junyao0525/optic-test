@@ -17,14 +17,7 @@ import {Colors, TextStyle} from '../../themes';
 
 const MIN_DISTANCE = 21;
 const MAX_DISTANCE = 45;
-
-interface FaceDetectionResponse {
-  face_count: number;
-  distances_cm?: number[];
-  raw_output?: any;
-  error?: string;
-  message?: string;
-}
+const SECOND_REMINDER = 30; // seconds
 
 const DistanceMeasure: React.FC = () => {
   const cameraRef = useRef<Camera | null>(null);
@@ -72,8 +65,7 @@ const DistanceMeasure: React.FC = () => {
 
       const response = await detectFaceMutateAsync(formData);
 
-      if (!response.faces && !response.face_count) {
-        console.error('No faces detected in the response:', response);
+      if (response.faces.length === 0 && response.face_count === 0) {
         Alert.alert('Error', 'No faces detected. Please try again.');
         return false;
       }
@@ -83,12 +75,12 @@ const DistanceMeasure: React.FC = () => {
         return false;
       }
 
-      if (!response.faces[0].is_centered) {
-        Alert.alert('Error', 'Face is not Center. Please try again.');
-        return false;
-      }
+      if (response.face_count !== 0 && response.faces.length > 0) {
+        if (!response.faces[0].is_centered) {
+          Alert.alert('Error', 'Face is not Center. Please try again.');
+          return false;
+        }
 
-      if (response.face_count !== undefined) {
         setFaceCount(response.face_count);
 
         if (response.face_count === 1) {
@@ -134,39 +126,87 @@ const DistanceMeasure: React.FC = () => {
   };
 
   useEffect(() => {
-    const setupCapture = async () => {
-      if (cameraPermission === 'denied') {
-        handlePermissionDenied();
-        return;
-      }
+    setIsMeasuring(true);
+    let countdownInterval: NodeJS.Timeout | null = null;
+    let secondsRemaining = 10;
 
-      if (
-        cameraPermission === 'granted' &&
-        cameraRef.current &&
-        loaded &&
-        activeDevice
-      ) {
-        const response = await capturePhoto();
-        console.log('response', response);
+    const startMeasurement = () => {
+      secondsRemaining = 10;
+      setIsMeasuring(true);
 
-        if (!response) {
-          captureIntervalRef.current = setInterval(capturePhoto, 1000);
-          console.log('Photo capture interval set up');
+      const setupCapture = async () => {
+        if (cameraPermission === 'denied') {
+          handlePermissionDenied();
+          return;
         }
 
-        setIsMeasuring(false);
+        if (
+          cameraPermission === 'granted' &&
+          cameraRef.current &&
+          loaded &&
+          activeDevice
+        ) {
+          const response = await capturePhoto();
+          console.log('Initial response', response);
+
+          if (!response) {
+            captureIntervalRef.current = setInterval(capturePhoto, 1000);
+            console.log('Photo capture interval set up');
+          }
+        }
+      };
+
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
       }
+
+      countdownInterval = setInterval(() => {
+        secondsRemaining -= 1;
+        console.log(`⏱️ Time remaining: ${secondsRemaining}s`);
+
+        if (secondsRemaining <= 0) {
+          console.log('⛔ Timeout reached, stopping capture');
+          clearInterval(countdownInterval!);
+          if (captureIntervalRef.current) {
+            clearInterval(captureIntervalRef.current);
+            captureIntervalRef.current = null;
+          }
+          setIsMeasuring(false);
+
+          Alert.alert(
+            'Timeout',
+            'Measurement session expired. Please try again.',
+            [
+              {
+                text: 'Back',
+                onPress: () => navigation.goBack(),
+                style: 'destructive',
+              },
+              {
+                text: 'Cancel',
+                onPress: () => {
+                  // Restart the process
+                  console.log('Restarting measurement...');
+                  startMeasurement();
+                },
+              },
+            ],
+          );
+        }
+      }, 1000);
+
+      setupCapture();
     };
 
-    setIsMeasuring(true);
-    setupCapture();
+    startMeasurement();
 
     return () => {
+      if (countdownInterval) clearInterval(countdownInterval);
       if (captureIntervalRef.current) {
         clearInterval(captureIntervalRef.current);
         captureIntervalRef.current = null;
-        console.log('Cleared photo capture interval on unmount');
       }
+      console.log('Cleanup: All intervals cleared');
     };
   }, [cameraPermission, loaded, activeDevice, cameraReady]);
 
