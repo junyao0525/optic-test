@@ -1,10 +1,17 @@
-import { GetUserApi } from "@vt/core/apis/app/auth";
+import { GetUserApi, RegisterUserApi } from "@vt/core/apis/app/users";
 import { Router } from "express";
 import { createRouteHandler } from "../../utils/createRouteHandler";
-import { controllerGetUser } from "./userController";
+import { controllerGetUser, controllerRegisterUser } from "./userController";
 
 const router = Router();
 
 createRouteHandler<GetUserApi>(router, "/app/user", "GET", controllerGetUser);
+
+createRouteHandler<RegisterUserApi>(
+  router,
+  "/app/registerUser",
+  "POST",
+  controllerRegisterUser
+);
 
 export default router;

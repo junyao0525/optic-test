@@ -15,14 +15,12 @@ const Header = ({
   backButton = false,
   menuButton = false,
   title,
-}: // onClick,
-// onBack,
-{
+  headerColor,
+}: {
   backButton?: boolean;
   menuButton?: boolean;
   title: string;
-  // onClick?: () => void;
-  // onBack?: () => void;
+  headerColor?: string;
 }) => {
   const navigation = useNavigation();
   const onBack = useCallback(() => {
@@ -40,7 +38,11 @@ const Header = ({
 
   return (
     <SafeAreaView>
-      <View style={styles.container}>
+      <View
+        style={[
+          {backgroundColor: headerColor || Colors.backgroundColor},
+          styles.container,
+        ]}>
         {backButton && (
           <TouchableOpacity onPress={onBack}>
             <Icon size={24} name="chevron-left" color={Colors.darkGreen} />
@@ -60,7 +62,6 @@ const Header = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.backgroundColor,
     flexDirection: 'row',
     height: 80,
     alignContent: 'center',

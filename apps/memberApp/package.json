@@ -1,5 +1,5 @@
 {
-  "name": "memberApp",
+  "name": "vt",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -15,9 +15,12 @@
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
+    "@tanstack/react-query": "^5.74.4",
     "react": "18.2.0",
+    "react-hook-form": "^7.55.0",
     "react-native": "0.74.5",
     "react-native-chart-kit": "^6.12.0",
+    "react-native-date-picker": "^5.0.12",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-pager-view": "^6.7.0",
     "react-native-permissions": "^5.2.4",
@@ -38,7 +41,7 @@
     "@react-native/eslint-config": "0.74.87",
     "@react-native/metro-config": "0.74.87",
     "@react-native/typescript-config": "0.74.87",
-    "@types/react": "^18.2.6",
+    "@types/react": "^18.3.20",
     "@types/react-native-vector-icons": "^6.4.18",
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.6.3",

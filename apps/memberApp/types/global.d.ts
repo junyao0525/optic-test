@@ -18,6 +18,8 @@ declare global {
       Help: undefined;
       Language: undefined;
       Profile: undefined;
+      Login: undefined;
+      Register: undefined;
     }
   }
 }

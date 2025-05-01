@@ -33,6 +33,7 @@ export const Colors = {
   borderGrey: '#E6E6E6',
   red: '#FF0000',
   green: '#00D627',
+  forgetPassword: '#5b2c92',
 };
 
 export const TextStyle = StyleSheet.create({

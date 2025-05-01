@@ -17,6 +17,10 @@ export const Errors = {
     code: "404",
     message: "Data not found",
   },
+  emailExists: {
+    code: "400",
+    message: "Email exists",
+  },
 } as const satisfies {
   [key: string]: BaseApi["Error"];
 };

@@ -1,15 +1,19 @@
 import { ERRORS } from "../../constants/error";
 
-export type GetUserApi = {
-  Endpoint: "/app/user";
-  Method: "GET";
-  Response: {
-    id: bigint | string;
-    name: string;
+//TODO : LOGIN
+export type LoginUserApi = {
+  Endpoint: "/app/loginUser";
+  Method: "POST";
+  BODY: {
     email: string;
-    dob: string;
-    createdAt: string;
-    updatedAt: string;
+    password: string;
+  };
+  Response: {
+    success: boolean;
   };
   Error: ERRORS["notFound"];
 };
+
+// no important for now
+//TODO : FORGOT PASSWORD
+//TODO : CHANGE PASSWORD
