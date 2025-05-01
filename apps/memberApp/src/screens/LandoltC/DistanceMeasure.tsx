@@ -20,26 +20,21 @@ const MAX_DISTANCE = 45;
 
 const DistanceMeasure: React.FC = () => {
   const cameraRef = useRef<Camera | null>(null);
-  const {loaded, cameraPermission, activeDevice} = useCameraContext();
   const isActiveRef = useRef<boolean>(true);
   const capturingRef = useRef<boolean>(false);
   const captureIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [isMeasuring, setIsMeasuring] = useState(false);
 
+  const {loaded, cameraPermission, activeDevice} = useCameraContext();
+
+  const [isMeasuring, setIsMeasuring] = useState(false);
   const [headDistance, setHeadDistance] = useState<number | null>(null);
   const [faceCount, setFaceCount] = useState<number>(0);
-  const [cameraReady, setCameraReady] = useState(false);
 
   const navigation = useNavigation();
   const {mutateAsync: detectFaceMutateAsync} = useDetectFaceAPI();
 
   const capturePhoto = async (): Promise<boolean> => {
-    if (
-      !cameraRef.current ||
-      capturingRef.current ||
-      !activeDevice ||
-      !cameraReady
-    ) {
+    if (!cameraRef.current || capturingRef.current || !activeDevice) {
       return false;
     }
 
@@ -177,12 +172,12 @@ const DistanceMeasure: React.FC = () => {
             'Measurement session expired. Please try again.',
             [
               {
-                text: 'Back',
+                text: 'Cancel',
                 onPress: () => navigation.goBack(),
                 style: 'destructive',
               },
               {
-                text: 'Cancel',
+                text: 'Continue',
                 onPress: () => {
                   // Restart the process
                   console.log('Restarting measurement...');
@@ -207,7 +202,7 @@ const DistanceMeasure: React.FC = () => {
       }
       console.log('Cleanup: All intervals cleared');
     };
-  }, [cameraPermission, loaded, activeDevice, cameraReady]);
+  }, [cameraPermission, loaded, activeDevice]);
 
   const handlePermissionDenied = (): void => {
     Alert.alert(
@@ -290,12 +285,8 @@ const DistanceMeasure: React.FC = () => {
           device={activeDevice}
           isActive={isActiveRef.current}
           photo={true}
-          onInitialized={() => {
-            console.log('Camera initialized');
-            setCameraReady(true);
-          }}
           onError={error => {
-            console.error('Camera initialization error', error);
+            console.log('Camera initialization error', error);
           }}
         />
         <View style={styles.faceGuide} />
