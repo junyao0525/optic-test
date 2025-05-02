@@ -123,83 +123,75 @@ const DistanceMeasure: React.FC = () => {
     return false;
   };
 
+  const [secondsRemaining, setSecondsRemaining] = useState(10);
+
   useEffect(() => {
     setIsMeasuring(true);
-    let countdownInterval: NodeJS.Timeout | null = null;
-    let secondsRemaining = 10;
 
-    const startMeasurement = () => {
-      secondsRemaining = 10;
-      setIsMeasuring(true);
-
-      const setupCapture = async () => {
-        if (cameraPermission === 'denied') {
-          handlePermissionDenied();
-          return;
-        }
-
-        if (
-          cameraPermission === 'granted' &&
-          cameraRef.current &&
-          loaded &&
-          activeDevice
-        ) {
-          const response = await capturePhoto();
-          console.log('Initial response', response);
-
-          if (!response) {
-            captureIntervalRef.current = setInterval(capturePhoto, 1000);
-            console.log('Photo capture interval set up');
-          }
-        }
-      };
-
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
+    const setupCapture = () => {
+      if (cameraPermission === 'denied') {
+        handlePermissionDenied();
+        return;
       }
 
-      countdownInterval = setInterval(() => {
-        secondsRemaining -= 1;
-        console.log(`⏱️ Time remaining: ${secondsRemaining}s`);
+      if (
+        cameraPermission === 'granted' &&
+        cameraRef.current &&
+        loaded &&
+        activeDevice
+      ) {
+        const interval = setInterval(async () => {
+          // Run capture
+          const response = await capturePhoto();
 
-        if (secondsRemaining <= 0) {
-          console.log('⛔ Timeout reached, stopping capture');
-          clearInterval(countdownInterval!);
-          if (captureIntervalRef.current) {
-            clearInterval(captureIntervalRef.current);
-            captureIntervalRef.current = null;
-          }
-          setIsMeasuring(false);
+          // Decrease timer
+          setSecondsRemaining(prev => {
+            const updated = prev - 1;
+            console.log(`⏱️ Time remaining: ${updated}s`);
 
-          Alert.alert(
-            'Timeout',
-            'Measurement session expired. Please try again.',
-            [
-              {
-                text: 'Cancel',
-                onPress: () => navigation.goBack(),
-                style: 'destructive',
-              },
-              {
-                text: 'Continue',
-                onPress: () => {
-                  // Restart the process
-                  console.log('Restarting measurement...');
-                  startMeasurement();
-                },
-              },
-            ],
-          );
-        }
-      }, 1000);
+            // Stop condition: success or timeout
+            const timeout = updated <= 0;
+            const success = response;
 
-      setupCapture();
+            if (success || timeout) {
+              clearInterval(interval);
+              setIsMeasuring(false);
+
+              if (timeout && !success) {
+                console.log('⛔ Timeout reached, stopping capture');
+
+                Alert.alert(
+                  'Timeout',
+                  'Measurement session expired. Please try again.',
+                  [
+                    {
+                      text: 'Cancel',
+                      onPress: () => navigation.goBack(),
+                      style: 'destructive',
+                    },
+                    {
+                      text: 'Continue',
+                      onPress: () => {
+                        console.log('Restarting measurement...');
+                        setIsMeasuring(true);
+                        setSecondsRemaining(10);
+                        setupCapture();
+                      },
+                    },
+                  ],
+                );
+              }
+            }
+
+            return updated;
+          });
+        }, 1000);
+      }
     };
 
-    startMeasurement();
+    setupCapture();
 
     return () => {
-      if (countdownInterval) clearInterval(countdownInterval);
       if (captureIntervalRef.current) {
         clearInterval(captureIntervalRef.current);
         captureIntervalRef.current = null;
@@ -289,6 +281,11 @@ const DistanceMeasure: React.FC = () => {
           device={activeDevice}
           isActive={isActiveRef.current}
           photo={true}
+          // onInitialized={() => {
+          //   if (!activeDevice) {
+          //     console.log('Camera initialized unsuccessfully');
+          //   }
+          // }}
           onError={error => {
             console.log('Camera initialization error', error);
           }}
