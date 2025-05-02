@@ -1,6 +1,6 @@
 {
   "name": "memberApp",
-  "displayName": "memberApp",
+  "displayName": "OptiTest",
   "plugins": [
     [
       "react-native-vision-camera",
