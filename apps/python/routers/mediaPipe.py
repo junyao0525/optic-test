@@ -155,8 +155,7 @@ async def detect_faces_mediapipe(file: UploadFile = File(...)):
             "faces": face_data,
         }
 
-
-        return result.json()
+        return result
     
 
     except Exception as e:

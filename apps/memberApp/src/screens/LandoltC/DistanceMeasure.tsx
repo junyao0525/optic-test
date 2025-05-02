@@ -15,6 +15,9 @@ import CameraProvider, {useCameraContext} from '../../../hocs/CameraProvider';
 import {useDetectFaceAPI} from '../../api/python';
 import {Colors, TextStyle} from '../../themes';
 
+//TODO : oninitialise camera problem
+//TODO : same time the type of newtork request is not working on the very first time
+
 const MIN_DISTANCE = 21;
 const MAX_DISTANCE = 45;
 
@@ -58,6 +61,7 @@ const DistanceMeasure: React.FC = () => {
       } as Partial<PhotoFile>);
 
       const response = await detectFaceMutateAsync(formData);
+      console.log('Face detection response:', response);
 
       if (response.faces.length === 0 && response.face_count === 0) {
         Alert.alert('Error', 'No faces detected. Please try again.');
