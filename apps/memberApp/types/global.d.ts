@@ -12,6 +12,7 @@ declare global {
       Tab: undefined;
       ColorVision: undefined;
       LandoltC: undefined;
+      LandoltCTest: undefined;
       EyeTiredness: undefined;
       History: undefined;
       About: undefined;

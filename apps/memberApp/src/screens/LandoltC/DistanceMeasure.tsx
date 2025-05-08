@@ -1,5 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -8,12 +8,13 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  View,
+  View
 } from 'react-native';
-import {Camera, PhotoFile} from 'react-native-vision-camera';
-import CameraProvider, {useCameraContext} from '../../../hocs/CameraProvider';
-import {useDetectFaceAPI} from '../../api/python';
-import {Colors, TextStyle} from '../../themes';
+import { Camera, PhotoFile } from 'react-native-vision-camera';
+import CameraProvider, { useCameraContext } from '../../../hocs/CameraProvider';
+import { useDetectFaceAPI } from '../../api/python';
+import BottomButton from '../../components/BottomButton';
+import { Colors, TextStyle } from '../../themes';
 
 //TODO : oninitialise camera problem
 //TODO : same time the type of newtork request is not working on the very first time
@@ -31,10 +32,16 @@ const DistanceMeasure: React.FC = () => {
 
   const [isMeasuring, setIsMeasuring] = useState(false);
   const [headDistance, setHeadDistance] = useState<number | null>(null);
+  const [isTooNear, setTooNear] = useState(false);
+  const [isTooFar, setTooFar] = useState(false);
+  const [isPerfectDistance, setIsPerfectDistance] = useState(false);
   const [faceCount, setFaceCount] = useState<number>(0);
+ 
 
   const navigation = useNavigation();
   const {mutateAsync: detectFaceMutateAsync} = useDetectFaceAPI();
+
+ 
 
   const capturePhoto = async (): Promise<boolean> => {
     if (!cameraRef.current || capturingRef.current || !activeDevice) {
@@ -92,13 +99,16 @@ const DistanceMeasure: React.FC = () => {
           console.log('Distance:', distance);
           setHeadDistance(distance);
 
-          if (distance < MIN_DISTANCE) {
+          if (response.faces[0].is_too_near) {
+            setTooNear(true);
             Alert.alert('Too Close', 'Please move farther from the camera');
             return false;
-          } else if (distance > MAX_DISTANCE) {
+          } else if (response.faces[0].is_too_far) {
+            setTooFar(true);
             Alert.alert('Too Far', 'Please move closer to the camera');
             return false;
           } else {
+            setIsPerfectDistance(true);
             Alert.alert('Perfect Distance', 'Your distance is ideal!');
 
             if (captureIntervalRef.current) {
@@ -219,18 +229,17 @@ const DistanceMeasure: React.FC = () => {
   };
 
   const renderDistanceMessage = (): React.ReactNode => {
-    if (headDistance === null) return null;
 
     let message = '';
     let color = Colors.black;
 
-    if (headDistance < MIN_DISTANCE) {
+    if (isTooNear) {
       message = 'Too close! Please move back.';
       color = Colors.red;
-    } else if (headDistance > MAX_DISTANCE) {
+    } else if (isTooFar) {
       message = 'Too far! Please move closer.';
       color = Colors.orange;
-    } else {
+    } else if(isPerfectDistance){
       message = 'Perfect distance!';
       color = Colors.green;
     }
@@ -238,9 +247,7 @@ const DistanceMeasure: React.FC = () => {
     return (
       <View style={styles.distanceMessageContainer}>
         <Text style={[styles.distanceText, {color}]}>{message}</Text>
-        <Text style={styles.distanceValue}>
-          Distance: {headDistance.toFixed(1)} cm
-        </Text>
+  
         {faceCount > 0 && (
           <Text style={styles.faceCountText}>Faces detected: {faceCount}</Text>
         )}
@@ -281,11 +288,6 @@ const DistanceMeasure: React.FC = () => {
           device={activeDevice}
           isActive={isActiveRef.current}
           photo={true}
-          // onInitialized={() => {
-          //   if (!activeDevice) {
-          //     console.log('Camera initialized unsuccessfully');
-          //   }
-          // }}
           onError={error => {
             console.log('Camera initialization error', error);
           }}
@@ -302,6 +304,12 @@ const DistanceMeasure: React.FC = () => {
         )}
         {renderDistanceMessage()}
       </View>
+      {!isMeasuring && (
+        <BottomButton
+          title="Continue"
+          onPress={() => navigation.navigate('LandoltCTest')}
+        />
+      )}
     </View>
   );
 };
@@ -395,8 +403,8 @@ const styles = StyleSheet.create({
   },
   faceGuide: {
     position: 'absolute',
-    width: 250, // Width of the circle
-    height: 300, // Height of the circle (same as width to make it circular)
+    width: 200, // Width of the circle
+    height: 250, // Height of the circle (same as width to make it circular)
     borderRadius: 125, // Half of width/height to make it circular
     borderColor: 'white',
     borderWidth: 2,
