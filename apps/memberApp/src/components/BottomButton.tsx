@@ -1,5 +1,6 @@
 import {ReactNode} from 'react';
 import {
+  Dimensions,
   StyleProp,
   StyleSheet,
   Text,
@@ -8,6 +9,8 @@ import {
   ViewStyle,
 } from 'react-native';
 import {Colors} from '../themes';
+
+const {height} = Dimensions.get('window');
 
 const BottomButton = ({
   title,
@@ -39,7 +42,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 45,
+    height: height * 0.06,
   },
   buttonText: {
     color: Colors.white,
@@ -48,14 +51,14 @@ const styles = StyleSheet.create({
   buttonContainer: {
     borderRadius: 5,
     position: 'absolute',
-    bottom: 30,
+    bottom: 20,
     left: 20,
     right: 20,
     backgroundColor: 'transparent',
   },
   bottomContainer: {
     width: '100%',
-    height: 70,
+    height: height * 0.11,
     backgroundColor: Colors.white, // Replace with Colors.White
   },
 });

@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useRef, useState } from 'react';
+import {useNavigation} from '@react-navigation/native';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -10,11 +10,11 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Camera, PhotoFile } from 'react-native-vision-camera';
-import CameraProvider, { useCameraContext } from '../../../hocs/CameraProvider';
-import { useDetectFaceAPI } from '../../api/python';
+import {Camera, PhotoFile} from 'react-native-vision-camera';
+import CameraProvider, {useCameraContext} from '../../../hocs/CameraProvider';
+import {useDetectFaceAPI} from '../../api/python';
 import BottomButton from '../../components/BottomButton';
-import { Colors, TextStyle } from '../../themes';
+import {Colors, TextStyle} from '../../themes';
 
 // TODO : when the result is last second occur the result is not showing
 // TODO : add the toasty message
@@ -78,7 +78,7 @@ const DistanceMeasure: React.FC = () => {
         return false;
       }
 
-      if (response.face_count !== 0 &&  response.faces[0].is_centered) {
+      if (response.face_count !== 0 && response.faces[0].is_centered) {
         if (!response.faces[0].is_centered) {
           Alert.alert('Error', 'Face is not Center. Please try again.');
           return false;
@@ -96,13 +96,14 @@ const DistanceMeasure: React.FC = () => {
           }
 
           console.log('Distance:', distance);
-          
+
           // Update all states at once to prevent multiple re-renders
           const updates = {
             headDistance: distance,
             isTooNear: response.faces[0].is_too_near,
             isTooFar: response.faces[0].is_too_far,
-            isPerfectDistance: !response.faces[0].is_too_near && !response.faces[0].is_too_far
+            isPerfectDistance:
+              !response.faces[0].is_too_near && !response.faces[0].is_too_far,
           };
 
           // Batch state updates
@@ -336,7 +337,11 @@ const DistanceMeasure: React.FC = () => {
       {!isMeasuring && (
         <BottomButton
           title="Continue"
-          onPress={() => navigation.navigate('LandoltCTest')}
+          onPress={() =>
+            navigation.navigate('LandoltInstruction', {
+              eye: 'left',
+            })
+          }
         />
       )}
     </View>

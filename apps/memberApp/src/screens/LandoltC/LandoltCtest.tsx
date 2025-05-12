@@ -1,218 +1,385 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {
-  Alert,
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
-import Animated, {
-  Easing,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, {runOnJS} from 'react-native-reanimated';
+import {useWindowDimension} from '../../../hooks/useWindowDimension';
+import Header from '../../components/Header';
+import {Colors} from '../../themes';
 
-const {width, height} = Dimensions.get('window');
+// LogMAR values for different levels
+const logMarValues = {
+  1: 1.0, // 20/200
+  2: 0.9, // 20/160
+  3: 0.8, // 20/125
+  4: 0.7, // 20/100
+  5: 0.6, // 20/80
+  6: 0.5, // 20/63
+  7: 0.4, // 20/50
+  8: 0.3, // 20/40
+  9: 0.2, // 20/32
+  10: 0.1, // 20/25
+  11: 0.0, // 20/20
+  12: -0.1, // 20/16
+};
 
-const LandoltCTest = () => {
-  // States for tracking test progress
+const logMARToSnellen = (logMAR: number) => {
+  const denominator = Math.round(20 * Math.pow(10, logMAR));
+  return `20/${denominator}`;
+};
+
+// Get stroke width based on current size
+
+const LandoltCtest = () => {
+  const {width} = useWindowDimension();
+
+  // Test state
+  const [currentEye, setCurrentEye] = useState('right'); // 'right', 'left'
   const [currentLevel, setCurrentLevel] = useState(1);
-  const [score, setScore] = useState(0);
-  const [totalAttempts, setTotalAttempts] = useState(0);
-  const [gapDirection, setGapDirection] = useState(0); // 0: top, 1: right, 2: bottom, 3: left
-  const [cSize, setCSize] = useState(150);
-  const [isTestActive, setIsTestActive] = useState(false);
+  const [direction, setDirection] = useState('up');
+  const [feedback, setFeedback] = useState('');
+  const [attemptsLeft, setAttemptsLeft] = useState(3); // 3 attempts per level
+  const [testComplete, setTestComplete] = useState(false);
+  const [testStarted, setTestStarted] = useState(false);
 
-  // Animated values
-  const scale = useSharedValue(1);
-  const rotation = useSharedValue(0);
-  const opacity = useSharedValue(1);
-
-  // Calculate gap position based on direction
-  const getGapRotation = direction => {
-    switch (direction) {
-      case 0:
-        return '0deg'; // gap at top
-      case 1:
-        return '90deg'; // gap at right
-      case 2:
-        return '180deg'; // gap at bottom
-      case 3:
-        return '270deg'; // gap at left
-      default:
-        return '0deg';
-    }
-  };
-
-  // Generate random gap direction
-  const generateRandomGap = useCallback(() => {
-    const randomDirection = Math.floor(Math.random() * 4);
-    setGapDirection(randomDirection);
-    rotation.value = withTiming(randomDirection * 90, {
-      duration: 500,
-      easing: Easing.inOut(Easing.ease),
-    });
-  }, [rotation]);
-
-  // Handle level progression
-  const progressLevel = useCallback(() => {
-    if (currentLevel < 10) {
-      setCurrentLevel(prev => prev + 1);
-      setCSize(prev => Math.max(prev - 10, 40)); // Decrease size as difficulty increases
-    } else {
-      Alert.alert(
-        'Test Complete',
-        `Your final score: ${score}/${totalAttempts} (${Math.round(
-          (score / totalAttempts) * 100,
-        )}%)`,
-        [{text: 'Start New Test', onPress: startNewTest}],
-      );
-      setIsTestActive(false);
-    }
-  }, [currentLevel, score, totalAttempts]);
-
-  // Process the user's swipe response
-  const processResponse = useCallback(
-    swipeDirection => {
-      setTotalAttempts(prev => prev + 1);
-
-      // Check if swipe direction matches gap direction
-      const isCorrect = swipeDirection === gapDirection;
-
-      if (isCorrect) {
-        setScore(prev => prev + 1);
-        // Visual feedback for correct answer
-        scale.value = withSequence(
-          withTiming(1.2, {duration: 200}),
-          withTiming(1, {duration: 200}),
-        );
-        // Delay before next question
-        setTimeout(() => {
-          opacity.value = withTiming(0, {duration: 300}, () => {
-            runOnJS(generateRandomGap)();
-            opacity.value = withTiming(1, {duration: 300});
-          });
-
-          // Progress to next level every 3 correct answers
-          if ((score + 1) % 3 === 0) {
-            runOnJS(progressLevel)();
-          }
-        }, 500);
-      } else {
-        // Visual feedback for incorrect answer
-        scale.value = withSequence(
-          withTiming(0.8, {duration: 150}),
-          withTiming(1, {duration: 150}),
-        );
-
-        setTimeout(() => {
-          opacity.value = withTiming(0, {duration: 300}, () => {
-            runOnJS(generateRandomGap)();
-            opacity.value = withTiming(1, {duration: 300});
-          });
-        }, 500);
-      }
-    },
-    [gapDirection, scale, opacity, generateRandomGap, score, progressLevel],
-  );
-
-  // Define swipe gestures
-  const swipeGesture = Gesture.Pan().onEnd(event => {
-    if (!isTestActive) return;
-
-    const {translationX, translationY} = event;
-
-    // Determine swipe direction
-    if (Math.abs(translationX) > Math.abs(translationY)) {
-      // Horizontal swipe
-      if (translationX > 50) {
-        // Right swipe
-        runOnJS(processResponse)(1);
-      } else if (translationX < -50) {
-        // Left swipe
-        runOnJS(processResponse)(3);
-      }
-    } else {
-      // Vertical swipe
-      if (translationY > 50) {
-        // Down swipe
-        runOnJS(processResponse)(2);
-      } else if (translationY < -50) {
-        // Up swipe
-        runOnJS(processResponse)(0);
-      }
-    }
+  // Results for each eye
+  const [rightEyeResults, setRightEyeResults] = useState({
+    score: 0,
+    maxLevel: 0,
+    logMAR: 1.0,
+    snellen: '20/200',
   });
 
-  // Animated styles
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{scale: scale.value}, {rotate: `${rotation.value}deg`}],
-      opacity: opacity.value,
-    };
+  const [leftEyeResults, setLeftEyeResults] = useState({
+    score: 0,
+    maxLevel: 0,
+    logMAR: 1.0,
+    snellen: '20/200',
   });
 
-  // Start a new test
-  const startNewTest = () => {
-    setCurrentLevel(1);
-    setScore(0);
-    setTotalAttempts(0);
-    setCSize(150);
-    setIsTestActive(true);
-    generateRandomGap();
+  // Calculate pixel size based on LogMAR value
+  const calculateSizeFromLogMAR = (logMAR: number, screenWidth: number) => {
+    const denominator = Math.round(20 * Math.pow(10, logMAR));
+    const result = 20 / denominator;
+    const baseSize = screenWidth * 0.4;
+    const logsize = baseSize * Math.pow(10, -result);
+    return logsize;
   };
 
-  // Start test on component mount
-  useEffect(() => {
-    startNewTest();
+  const getRandomDirection = useCallback(() => {
+    const directions = ['up', 'right', 'down', 'left'];
+    return directions[Math.floor(Math.random() * 4)];
   }, []);
 
+  // Initialize the test
+  useEffect(() => {
+    if (testStarted) {
+      setDirection(getRandomDirection());
+    }
+  }, [testStarted, getRandomDirection]);
+
+  // Update test state or advance to next level
+  const processSwipe = useCallback(
+    swipeDirection => {
+      if (!testStarted || attemptsLeft <= 0) return;
+
+      const correct = swipeDirection === direction;
+
+      // Update the current eye's score
+      if (currentEye === 'right') {
+        if (correct) {
+          setRightEyeResults(prev => ({
+            ...prev,
+            score: prev.score + 1,
+          }));
+        }
+      } else {
+        if (correct) {
+          setLeftEyeResults(prev => ({
+            ...prev,
+            score: prev.score + 1,
+          }));
+        }
+      }
+
+      setFeedback(correct ? 'Correct!' : 'Incorrect!');
+      setAttemptsLeft(prev => prev - 1);
+
+      setTimeout(() => {
+        if (attemptsLeft <= 1) {
+          const correctThreshold = 2;
+          const currentScore =
+            currentEye === 'right'
+              ? rightEyeResults.score
+              : leftEyeResults.score;
+
+          const lastLevelScore = currentScore % 3;
+
+          if (lastLevelScore >= correctThreshold) {
+            if (currentLevel < Object.keys(logMarValues).length) {
+              setCurrentLevel(prev => prev + 1);
+              setAttemptsLeft(3);
+              setDirection(getRandomDirection());
+              setFeedback('');
+            } else {
+              finishCurrentEyeTest();
+            }
+          } else {
+            finishCurrentEyeTest();
+          }
+        } else {
+          setDirection(getRandomDirection());
+          setFeedback('');
+        }
+      }, 1000);
+    },
+    [
+      attemptsLeft,
+      currentEye,
+      currentLevel,
+      direction,
+      getRandomDirection,
+      rightEyeResults.score,
+      leftEyeResults.score,
+    ],
+  );
+
+  // Finish testing the current eye
+  const finishCurrentEyeTest = () => {
+    const logMAR = logMarValues[currentLevel];
+    const snellen = logMARToSnellen(logMAR);
+
+    if (currentEye === 'right') {
+      setRightEyeResults(prev => ({
+        ...prev,
+        maxLevel: currentLevel,
+        logMAR: logMAR,
+        snellen: snellen,
+      }));
+
+      // Switch to left eye
+      setCurrentEye('left');
+      setCurrentLevel(1);
+      setAttemptsLeft(3);
+      setDirection(getRandomDirection());
+      setFeedback('');
+    } else {
+      // Both eyes are done
+      setLeftEyeResults(prev => ({
+        ...prev,
+        maxLevel: currentLevel,
+        logMAR: logMAR,
+        snellen: snellen,
+      }));
+      setTestComplete(true);
+    }
+  };
+
+  // Get current Landolt C size based on level
+  const currentSize = calculateSizeFromLogMAR(
+    logMarValues[currentLevel],
+    width,
+  );
+
+  // Setup swipe gestures
+  const swipeGesture = Gesture.Pan()
+    .activateAfterLongPress(0)
+    .onEnd(e => {
+      'worklet';
+      const {translationX, translationY} = e;
+
+      let swipeDirection;
+      // Determine swipe direction based on the largest absolute movement
+      if (Math.abs(translationX) > Math.abs(translationY)) {
+        swipeDirection = translationX > 0 ? 'right' : 'left';
+      } else {
+        swipeDirection = translationY > 0 ? 'down' : 'up';
+      }
+
+      runOnJS(processSwipe)(swipeDirection);
+    });
+
+  // Generate the appropriate styles for the Landolt C based on direction
+  const getLandoltCStyle = () => {
+    const baseStyle = {
+      width: currentSize,
+      height: currentSize,
+      borderWidth: currentSize / 5,
+      borderColor: '#000',
+      borderRadius: currentSize / 2,
+    };
+
+    switch (direction) {
+      case 'up':
+        return {...baseStyle, borderTopWidth: 0};
+      case 'right':
+        return {...baseStyle, borderRightWidth: 0};
+      case 'down':
+        return {...baseStyle, borderBottomWidth: 0};
+      case 'left':
+        return {...baseStyle, borderLeftWidth: 0};
+      default:
+        return baseStyle;
+    }
+  };
+
+  const startTest = () => {
+    setTestStarted(true);
+    setRightEyeResults({
+      score: 0,
+      maxLevel: 0,
+      logMAR: 1.0,
+      snellen: '20/200',
+    });
+    setLeftEyeResults({
+      score: 0,
+      maxLevel: 0,
+      logMAR: 1.0,
+      snellen: '20/200',
+    });
+    setCurrentEye('right');
+    setCurrentLevel(1);
+    setAttemptsLeft(3);
+    setDirection(getRandomDirection());
+    setFeedback('');
+    setTestComplete(false);
+  };
+
+  const resetTest = () => {
+    setTestStarted(false);
+    setTestComplete(false);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Landolt C Visual Acuity Test</Text>
+    <>
+      <Header
+        backHomeButton
+        title={'Landolt C Test'}
+        headerColor={Colors.white}
+      />
+      <View style={styles.container}>
+        <Text style={styles.title}>Landolt C Visual Acuity Test</Text>
 
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Level: {currentLevel}/10</Text>
-        <Text style={styles.statsText}>
-          Score: {score}/{totalAttempts}
-        </Text>
+        {!testStarted && !testComplete ? (
+          <View style={styles.instructionPanel}>
+            <Text style={styles.instructionTitle}>Test Instructions</Text>
+            <Text style={styles.instructionText}>
+              1. Cover your left eye first - we'll test your right eye
+            </Text>
+            <Text style={styles.instructionText}>
+              2. Swipe in the direction of the gap in the C
+            </Text>
+            <Text style={styles.instructionText}>
+              3. After testing your right eye, we'll test your left eye
+            </Text>
+            <Text style={styles.instructionText}>
+              4. Please ensure you're at a comfortable viewing distance
+            </Text>
+            <TouchableOpacity style={styles.startButton} onPress={startTest}>
+              <Text style={styles.buttonText}>Start Test</Text>
+            </TouchableOpacity>
+          </View>
+        ) : testComplete ? (
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultTitle}>Visual Acuity Results</Text>
+
+            <View style={styles.eyeResultContainer}>
+              <Text style={styles.eyeTitle}>Right Eye:</Text>
+              <Text style={styles.acuityValue}>
+                LogMAR: {rightEyeResults.logMAR.toFixed(1)}
+              </Text>
+              <Text style={styles.acuityValue}>
+                Snellen: {rightEyeResults.snellen}
+              </Text>
+              <Text style={styles.acuityDesc}>
+                {rightEyeResults.logMAR <= 0.0
+                  ? 'Excellent'
+                  : rightEyeResults.logMAR <= 0.3
+                  ? 'Good'
+                  : rightEyeResults.logMAR <= 0.5
+                  ? 'Fair'
+                  : 'Poor'}
+              </Text>
+            </View>
+
+            <View style={styles.eyeResultContainer}>
+              <Text style={styles.eyeTitle}>Left Eye:</Text>
+              <Text style={styles.acuityValue}>
+                LogMAR: {leftEyeResults.logMAR.toFixed(1)}
+              </Text>
+              <Text style={styles.acuityValue}>
+                Snellen: {leftEyeResults.snellen}
+              </Text>
+              <Text style={styles.acuityDesc}>
+                {leftEyeResults.logMAR <= 0.0
+                  ? 'Excellent'
+                  : leftEyeResults.logMAR <= 0.3
+                  ? 'Good'
+                  : leftEyeResults.logMAR <= 0.5
+                  ? 'Fair'
+                  : 'Poor'}
+              </Text>
+            </View>
+
+            <Text style={styles.disclaimer}>
+              This test is not a substitute for a professional eye exam. Please
+              consult with an eye care professional for accurate results.
+            </Text>
+
+            <TouchableOpacity style={styles.resetButton} onPress={resetTest}>
+              <Text style={styles.buttonText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <View style={styles.testInfo}>
+              <Text style={styles.eyeIndicator}>
+                Testing: {currentEye === 'right' ? 'RIGHT' : 'LEFT'} eye
+                {currentEye === 'right'
+                  ? ' (cover left eye)'
+                  : ' (cover right eye)'}
+              </Text>
+
+              <View style={styles.statsContainer}>
+                <Text style={styles.statsText}>
+                  Level: {currentLevel}/{Object.keys(logMarValues).length}
+                </Text>
+                <Text style={styles.statsText}>
+                  LogMAR: {logMarValues[currentLevel].toFixed(1)}
+                </Text>
+                <Text style={styles.statsText}>
+                  Snellen: {logMARToSnellen(logMarValues[currentLevel])}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.instructionContainer}>
+              <Text style={styles.instruction}>
+                Swipe in the direction of the gap in the C
+              </Text>
+            </View>
+
+            <GestureDetector gesture={swipeGesture}>
+              <Animated.View style={styles.testArea}>
+                <View style={getLandoltCStyle()} />
+                {feedback && (
+                  <Text style={styles.feedbackText}>{feedback}</Text>
+                )}
+              </Animated.View>
+            </GestureDetector>
+          </>
+        )}
       </View>
-
-      <View style={styles.instructionContainer}>
-        <Text style={styles.instruction}>
-          Swipe in the direction of the gap in the C
-        </Text>
-      </View>
-
-      <GestureDetector gesture={swipeGesture}>
-        <View style={styles.testArea}>
-          <Animated.View style={[styles.landoltCContainer, animatedStyle]}>
-            <View style={[styles.landoltC, {width: cSize, height: cSize}]} />
-          </Animated.View>
-        </View>
-      </GestureDetector>
-
-      <TouchableOpacity style={styles.button} onPress={startNewTest}>
-        <Text style={styles.buttonText}>
-          {isTestActive ? 'Restart Test' : 'Start Test'}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: Colors.backgroundColor,
   },
   title: {
     fontSize: 24,
@@ -220,33 +387,45 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#333',
   },
+  testInfo: {
+    width: '90%',
+    marginBottom: 20,
+  },
+  eyeIndicator: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+    color: Colors.darkGreen,
+  },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
-    marginBottom: 20,
+    width: '100%',
+    marginBottom: 10,
   },
   statsText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#555',
   },
   instructionContainer: {
     marginBottom: 30,
     padding: 10,
-    backgroundColor: '#e3f2fd',
+    backgroundColor: Colors.darkGreen,
     borderRadius: 8,
+    width: '90%',
   },
   instruction: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#0d47a1',
+    color: Colors.white,
   },
   testArea: {
-    width: width * 0.8,
-    height: height * 0.4,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '80%',
+    height: '40%',
     backgroundColor: '#fff',
     borderRadius: 15,
     elevation: 5,
@@ -255,31 +434,105 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  landoltCContainer: {
-    width: 200,
-    height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
+  feedbackText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+    color: '#333',
   },
-  landoltC: {
-    borderWidth: 30,
-    borderColor: '#000',
-    borderRadius: 100,
-    borderTopWidth: 0,
+  instructionPanel: {
+    width: '90%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  button: {
-    marginTop: 40,
+  instructionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: Colors.darkGreen,
+  },
+  instructionText: {
+    fontSize: 16,
+    marginBottom: 12,
+    color: '#444',
+  },
+  startButton: {
+    backgroundColor: Colors.darkGreen,
     paddingVertical: 12,
     paddingHorizontal: 30,
-    backgroundColor: '#2196F3',
-    borderRadius: 25,
-    elevation: 3,
+    borderRadius: 8,
+    marginTop: 15,
+    alignSelf: 'center',
   },
   buttonText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  resultContainer: {
+    width: '90%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  resultTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: Colors.darkGreen,
+  },
+  eyeResultContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  eyeTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  acuityValue: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#444',
+  },
+  acuityDesc: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.darkGreen,
+    marginTop: 5,
+  },
+  disclaimer: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#777',
+    textAlign: 'center',
+    marginVertical: 15,
+  },
+  resetButton: {
+    backgroundColor: Colors.darkGreen,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginTop: 10,
+    alignSelf: 'center',
   },
 });
 
-export default LandoltCTest;
+export default LandoltCtest;

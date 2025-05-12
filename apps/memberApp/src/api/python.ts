@@ -1,8 +1,8 @@
-import { BACKEND_API_URL } from '@env';
-import { useMutation } from '@tanstack/react-query';
-import { DetectFaceApi } from '@vt/core/apis/app/python';
+import {useMutation} from '@tanstack/react-query';
+import {DetectFaceApi} from '@vt/core/apis/app/python';
 
-const API_BASE_URL = BACKEND_API_URL;
+// const API_BASE_URL = BACKEND_API_URL;
+const API_BASE_URL = 'http://192.168.100.8:8000';
 // api/python.ts
 
 export const useDetectFaceAPI = () => {
