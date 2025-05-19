@@ -31,6 +31,7 @@ declare global {
     LandoltInstruction: {
       eye: 'left' | 'right';
     };
+    AudioTest: undefined;
   };
 
   // Extend the RootParamList for React Navigation

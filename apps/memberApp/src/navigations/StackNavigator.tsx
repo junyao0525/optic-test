@@ -1,5 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
+import AudioWithProvided from '../screens/AudioTest/AudioTest';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import ColorVision from '../screens/ColorVision/ColorVision';
@@ -37,6 +38,7 @@ const StackNavigator = () => {
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="AudioTest" component={AudioWithProvided} />
     </Stack.Navigator>
   );
 };
