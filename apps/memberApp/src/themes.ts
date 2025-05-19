@@ -22,7 +22,7 @@ export const FontFamilies = {
 export const Colors = {
   backgroundColor: '#E0FFFF',
   primary: '#0099ff',
-  orange: '#FF4000',
+  orange: '#FFA500',
   darkGreen: '#2F4F4F',
   lightGreen: '#8FBC8F',
   lightCyan: '#E0FFFF',

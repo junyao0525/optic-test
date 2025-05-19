@@ -1,11 +1,14 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
+import AudioWithProvided from '../screens/AudioTest/AudioTest';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import ColorVision from '../screens/ColorVision/ColorVision';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
 import DistanceMeasureWithProvider from '../screens/LandoltC/DistanceMeasure';
 import LandoltC from '../screens/LandoltC/LandoltC';
+import LandoltCTest from '../screens/LandoltC/LandoltCtest';
+import LandoltInstruction from '../screens/LandoltC/LandoltInstruction';
 import About from '../screens/Settings/About';
 import Help from '../screens/Settings/Help';
 import Language from '../screens/Settings/Language';
@@ -21,6 +24,8 @@ const StackNavigator = () => {
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="Tab" component={TabNavigator} />
       <Stack.Screen name="LandoltC" component={LandoltC} />
+      <Stack.Screen name="LandoltCTest" component={LandoltCTest} />
+      <Stack.Screen name="LandoltInstruction" component={LandoltInstruction} />
       <Stack.Screen
         name="DistanceMeasure"
         component={DistanceMeasureWithProvider}
@@ -33,6 +38,7 @@ const StackNavigator = () => {
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="AudioTest" component={AudioWithProvided} />
     </Stack.Navigator>
   );
 };

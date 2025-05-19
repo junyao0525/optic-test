@@ -24,12 +24,14 @@ type ButtonDetail = {
 const LandoltImage = require('../../assets/images/home/landolt.png');
 const EyeTirednessImage = require('../../assets/images/home/eye-tiredness.png');
 const ColorVisionImage = require('../../assets/images/home/color-vision.png');
+const AudioTestImage = require('../../assets/images/home/voice-detection.png');
 const GraphImage = require('../../assets/images/home/graph-exp.png');
 
 const buttonDetails: ButtonDetail[] = [
   {title: 'Landolt’s C Test', image: LandoltImage, route: 'LandoltC'},
   {title: 'Eye Tiredness', image: EyeTirednessImage, route: 'EyeTiredness'},
   {title: 'Color Vision', image: ColorVisionImage, route: 'ColorVision'},
+  {title: 'Audio Test', image: AudioTestImage, route: 'AudioTest'},
 ];
 const historyData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr'],

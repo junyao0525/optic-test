@@ -13,10 +13,11 @@ import {
 import {Camera, PhotoFile} from 'react-native-vision-camera';
 import CameraProvider, {useCameraContext} from '../../../hocs/CameraProvider';
 import {useDetectFaceAPI} from '../../api/python';
+import BottomButton from '../../components/BottomButton';
 import {Colors, TextStyle} from '../../themes';
 
-//TODO : oninitialise camera problem
-//TODO : same time the type of newtork request is not working on the very first time
+// TODO : when the result is last second occur the result is not showing
+// TODO : add the toasty message
 
 const MIN_DISTANCE = 21;
 const MAX_DISTANCE = 45;
@@ -25,13 +26,19 @@ const DistanceMeasure: React.FC = () => {
   const cameraRef = useRef<Camera | null>(null);
   const isActiveRef = useRef<boolean>(true);
   const capturingRef = useRef<boolean>(false);
-  const captureIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const secondsRef = useRef<number>(10);
 
   const {loaded, cameraPermission, activeDevice} = useCameraContext();
 
   const [isMeasuring, setIsMeasuring] = useState(false);
   const [headDistance, setHeadDistance] = useState<number | null>(null);
+  const [isTooNear, setTooNear] = useState(false);
+  const [isTooFar, setTooFar] = useState(false);
+  const [isPerfectDistance, setIsPerfectDistance] = useState(false);
   const [faceCount, setFaceCount] = useState<number>(0);
+  const [distanceText, setDistanceText] = useState<string>('');
+  const [secondsRemaining, setSecondsRemaining] = useState(10);
 
   const navigation = useNavigation();
   const {mutateAsync: detectFaceMutateAsync} = useDetectFaceAPI();
@@ -51,8 +58,6 @@ const DistanceMeasure: React.FC = () => {
         enableShutterSound: false,
       });
 
-      console.log('Photo captured:', photo.path);
-
       const formData = new FormData();
       formData.append('file', {
         uri: Platform.OS === 'ios' ? photo.path : `file://${photo.path}`,
@@ -63,7 +68,7 @@ const DistanceMeasure: React.FC = () => {
       const response = await detectFaceMutateAsync(formData);
       console.log('Face detection response:', response);
 
-      if (response.faces.length === 0 && response.face_count === 0) {
+      if (response.face_count === 0) {
         Alert.alert('Error', 'No faces detected. Please try again.');
         return false;
       }
@@ -73,12 +78,13 @@ const DistanceMeasure: React.FC = () => {
         return false;
       }
 
-      if (response.face_count !== 0 && response.faces.length > 0) {
+      if (response.face_count !== 0 && response.faces[0].is_centered) {
         if (!response.faces[0].is_centered) {
           Alert.alert('Error', 'Face is not Center. Please try again.');
           return false;
         }
 
+        // Update face count state
         setFaceCount(response.face_count);
 
         if (response.face_count === 1) {
@@ -90,20 +96,34 @@ const DistanceMeasure: React.FC = () => {
           }
 
           console.log('Distance:', distance);
-          setHeadDistance(distance);
 
-          if (distance < MIN_DISTANCE) {
+          // Update all states at once to prevent multiple re-renders
+          const updates = {
+            headDistance: distance,
+            isTooNear: response.faces[0].is_too_near,
+            isTooFar: response.faces[0].is_too_far,
+            isPerfectDistance:
+              !response.faces[0].is_too_near && !response.faces[0].is_too_far,
+          };
+
+          // Batch state updates
+          setHeadDistance(updates.headDistance);
+          setTooNear(updates.isTooNear);
+          setTooFar(updates.isTooFar);
+          setIsPerfectDistance(updates.isPerfectDistance);
+
+          if (updates.isTooNear) {
             Alert.alert('Too Close', 'Please move farther from the camera');
             return false;
-          } else if (distance > MAX_DISTANCE) {
+          } else if (updates.isTooFar) {
             Alert.alert('Too Far', 'Please move closer to the camera');
             return false;
-          } else {
+          } else if (updates.isPerfectDistance) {
             Alert.alert('Perfect Distance', 'Your distance is ideal!');
 
-            if (captureIntervalRef.current) {
-              clearInterval(captureIntervalRef.current);
-              captureIntervalRef.current = null;
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
               console.log('Capture interval cleared - valid distance reached');
             }
             return true;
@@ -123,80 +143,94 @@ const DistanceMeasure: React.FC = () => {
     return false;
   };
 
-  const [secondsRemaining, setSecondsRemaining] = useState(10);
+  const startCapture = () => {
+    if (cameraPermission === 'denied') {
+      handlePermissionDenied();
+      return;
+    }
+
+    if (
+      cameraPermission === 'granted' &&
+      cameraRef.current &&
+      loaded &&
+      activeDevice
+    ) {
+      // Clear any existing interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      // Reset seconds
+      secondsRef.current = 10;
+      setSecondsRemaining(10);
+
+      // Reset states
+      setHeadDistance(null);
+      setTooNear(false);
+      setTooFar(false);
+      setIsPerfectDistance(false);
+      setFaceCount(0);
+
+      intervalRef.current = setInterval(async () => {
+        // Run capture
+        const response = await capturePhoto();
+
+        // Decrease timer
+        secondsRef.current -= 1;
+        setSecondsRemaining(secondsRef.current);
+        console.log(`⏱️ Time remaining: ${secondsRef.current}s`);
+
+        // Stop condition: success or timeout
+        const timeout = secondsRef.current <= 0;
+        const success = response;
+
+        if (success || timeout) {
+          // Add a small delay to ensure the last result is shown
+          setTimeout(() => {
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            setIsMeasuring(false);
+
+            if (timeout && !success) {
+              console.log('⛔ Timeout reached, stopping capture');
+
+              Alert.alert(
+                'Timeout',
+                'Measurement session expired. Please try again.',
+                [
+                  {
+                    text: 'Cancel',
+                    onPress: () => navigation.goBack(),
+                    style: 'destructive',
+                  },
+                  {
+                    text: 'Continue',
+                    onPress: () => {
+                      console.log('Restarting measurement...');
+                      setIsMeasuring(true);
+                      startCapture();
+                    },
+                  },
+                ],
+              );
+            }
+          }, 500); // 500ms delay to ensure last result is shown
+        }
+      }, 1000);
+    }
+  };
 
   useEffect(() => {
     setIsMeasuring(true);
-
-    const setupCapture = () => {
-      if (cameraPermission === 'denied') {
-        handlePermissionDenied();
-        return;
-      }
-
-      if (
-        cameraPermission === 'granted' &&
-        cameraRef.current &&
-        loaded &&
-        activeDevice
-      ) {
-        const interval = setInterval(async () => {
-          // Run capture
-          const response = await capturePhoto();
-
-          // Decrease timer
-          setSecondsRemaining(prev => {
-            const updated = prev - 1;
-            console.log(`⏱️ Time remaining: ${updated}s`);
-
-            // Stop condition: success or timeout
-            const timeout = updated <= 0;
-            const success = response;
-
-            if (success || timeout) {
-              clearInterval(interval);
-              setIsMeasuring(false);
-
-              if (timeout && !success) {
-                console.log('⛔ Timeout reached, stopping capture');
-
-                Alert.alert(
-                  'Timeout',
-                  'Measurement session expired. Please try again.',
-                  [
-                    {
-                      text: 'Cancel',
-                      onPress: () => navigation.goBack(),
-                      style: 'destructive',
-                    },
-                    {
-                      text: 'Continue',
-                      onPress: () => {
-                        console.log('Restarting measurement...');
-                        setIsMeasuring(true);
-                        setSecondsRemaining(10);
-                        setupCapture();
-                      },
-                    },
-                  ],
-                );
-              }
-            }
-
-            return updated;
-          });
-        }, 1000);
-      }
-    };
-
-    setupCapture();
+    startCapture();
 
     return () => {
-      if (captureIntervalRef.current) {
-        clearInterval(captureIntervalRef.current);
-        captureIntervalRef.current = null;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-      console.log('Cleanup: All intervals cleared');
     };
   }, [cameraPermission, loaded, activeDevice]);
 
@@ -219,34 +253,36 @@ const DistanceMeasure: React.FC = () => {
   };
 
   const renderDistanceMessage = (): React.ReactNode => {
-    if (headDistance === null) return null;
-
-    let message = '';
     let color = Colors.black;
 
-    if (headDistance < MIN_DISTANCE) {
-      message = 'Too close! Please move back.';
+    if (isTooNear) {
       color = Colors.red;
-    } else if (headDistance > MAX_DISTANCE) {
-      message = 'Too far! Please move closer.';
+    } else if (isTooFar) {
       color = Colors.orange;
-    } else {
-      message = 'Perfect distance!';
+    } else if (isPerfectDistance) {
       color = Colors.green;
     }
 
     return (
       <View style={styles.distanceMessageContainer}>
-        <Text style={[styles.distanceText, {color}]}>{message}</Text>
-        <Text style={styles.distanceValue}>
-          Distance: {headDistance.toFixed(1)} cm
-        </Text>
+        <Text style={[styles.distanceText, {color}]}>{distanceText}</Text>
+
         {faceCount > 0 && (
           <Text style={styles.faceCountText}>Faces detected: {faceCount}</Text>
         )}
       </View>
     );
   };
+
+  useEffect(() => {
+    if (isTooNear) {
+      setDistanceText('Too close! Please move back.');
+    } else if (isTooFar) {
+      setDistanceText('Too far! Please move closer.');
+    } else if (isPerfectDistance) {
+      setDistanceText('Perfect distance!');
+    }
+  }, [isTooNear, isTooFar, isPerfectDistance]);
 
   if (!activeDevice) {
     return (
@@ -264,6 +300,7 @@ const DistanceMeasure: React.FC = () => {
     );
   }
 
+  //TODO : error on the head distance
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
@@ -281,11 +318,6 @@ const DistanceMeasure: React.FC = () => {
           device={activeDevice}
           isActive={isActiveRef.current}
           photo={true}
-          // onInitialized={() => {
-          //   if (!activeDevice) {
-          //     console.log('Camera initialized unsuccessfully');
-          //   }
-          // }}
           onError={error => {
             console.log('Camera initialization error', error);
           }}
@@ -302,6 +334,16 @@ const DistanceMeasure: React.FC = () => {
         )}
         {renderDistanceMessage()}
       </View>
+      {!isMeasuring && (
+        <BottomButton
+          title="Continue"
+          onPress={() =>
+            navigation.navigate('LandoltInstruction', {
+              eye: 'left',
+            })
+          }
+        />
+      )}
     </View>
   );
 };
@@ -395,8 +437,8 @@ const styles = StyleSheet.create({
   },
   faceGuide: {
     position: 'absolute',
-    width: 250, // Width of the circle
-    height: 300, // Height of the circle (same as width to make it circular)
+    width: 200, // Width of the circle
+    height: 250, // Height of the circle (same as width to make it circular)
     borderRadius: 125, // Half of width/height to make it circular
     borderColor: 'white',
     borderWidth: 2,

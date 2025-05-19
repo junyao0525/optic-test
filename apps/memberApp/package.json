@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-community/cli-link-assets": "^15.1.2",
+    "@react-native-voice/voice": "^3.2.4",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",
@@ -19,18 +20,23 @@
     "react": "18.2.0",
     "react-hook-form": "^7.55.0",
     "react-native": "0.74.5",
+    "react-native-audio-record": "^0.2.2",
+    "react-native-audio-recorder-player": "^3.6.12",
     "react-native-chart-kit": "^6.12.0",
     "react-native-date-picker": "^5.0.12",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-pager-view": "^6.7.0",
-    "react-native-permissions": "^5.2.4",
+    "react-native-permissions": "^5.4.0",
     "react-native-reanimated": "^3.14.0",
     "react-native-safe-area-context": "^4.14.0",
     "react-native-screens": "^3.35.0",
+    "react-native-sound": "^0.11.2",
     "react-native-svg": "^15.10.1",
     "react-native-tab-view": "^4.0.5",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-vision-camera": "^4.6.3"
+    "react-native-vision-camera": "^4.6.3",
+    "rn-fetch-blob": "^0.12.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
