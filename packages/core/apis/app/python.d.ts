@@ -17,3 +17,15 @@ export type DetectFaceApi = {
   };
   Error: ERRORS["notFound"];
 };
+
+export type DetectAudioApi = {
+  Endpoint: "/whisper-lora/audio-transcriber/";
+  Method: "POST";
+  Body: {
+    file: FormData;
+  };
+  Response: {
+    transcription: string;
+  };
+  Error: ERRORS["notFound"];
+};

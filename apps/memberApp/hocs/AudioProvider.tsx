@@ -1,88 +1,158 @@
-import React, {
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useState,
-} from 'react';
-import {Alert, Platform} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {
-  PERMISSIONS,
-  PermissionStatus,
+  check,
+  openSettings,
+  Permission,
   request,
   RESULTS,
 } from 'react-native-permissions';
 
-type AudioContextType = {
-  audioPermission: PermissionStatus | null;
-  loaded: boolean;
-};
+interface WithPermissionsProps {
+  onPermissionDenied?: () => void;
+  onPermissionBlocked?: () => void;
+  customPermissionDeniedView?: React.ReactNode;
+  customPermissionBlockedView?: React.ReactNode;
+}
 
-const initialState: AudioContextType = {
-  audioPermission: null,
-  loaded: false,
-};
+export const AudioProvider = <P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  requiredPermissions: Permission[],
+) => {
+  return (props: P & WithPermissionsProps) => {
+    const {
+      onPermissionDenied,
+      onPermissionBlocked,
+      customPermissionDeniedView,
+      customPermissionBlockedView,
+      ...restProps
+    } = props;
 
-const AudioContext = createContext<AudioContextType>({...initialState});
+    const [permissionStatus, setPermissionStatus] = useState<
+      'checking' | 'granted' | 'denied' | 'blocked'
+    >('checking');
 
-export const useAudioContext = (): AudioContextType => {
-  const context = useContext(AudioContext);
-  if (context === undefined) {
-    throw new Error('useAudio must be used within an AudioProvider');
-  }
-  return context;
-};
+    useEffect(() => {
+      checkPermissions();
+    }, []);
 
-const AudioProvider = ({children}: {children: React.ReactNode}) => {
-  const [audioPermission, setAudioPermission] =
-    useState<PermissionStatus | null>(null);
-  const [loaded, setLoaded] = useState(false);
+    const checkPermissions = async () => {
+      try {
+        setPermissionStatus('checking');
 
-  // Use useEffect to handle initialization
-  useLayoutEffect(() => {
-    const checkPermission = async (): Promise<void> => {
-      if (Platform.OS === 'android') {
-        try {
-          const grantResult = await request(PERMISSIONS.ANDROID.RECORD_AUDIO);
-          console.log('Permission result:', grantResult);
-          setAudioPermission(grantResult);
+        // Check all required permissions
+        for (const permission of requiredPermissions) {
+          const result = await check(permission);
 
-          if (grantResult === RESULTS.GRANTED) {
-            console.log('grantResult', grantResult);
-            setLoaded(true);
-          } else {
-            console.log('grantResult', grantResult);
-            setLoaded(false);
-            Alert.alert(
-              'Permission Denied',
-              'Audio recording permission is required to use this feature.',
-            );
+          switch (result) {
+            case RESULTS.GRANTED:
+              // Continue to next permission
+              break;
+            case RESULTS.DENIED:
+              // Request the permission
+              const requestResult = await request(permission);
+              if (requestResult !== RESULTS.GRANTED) {
+                setPermissionStatus('denied');
+                onPermissionDenied?.();
+                return;
+              }
+              break;
+            case RESULTS.BLOCKED:
+            case RESULTS.UNAVAILABLE:
+            case RESULTS.LIMITED:
+              setPermissionStatus('blocked');
+              onPermissionBlocked?.();
+              return;
           }
-        } catch (err) {
-          console.error('Permission request error:', err);
-          setLoaded(false);
         }
-      } else {
-        console.log(
-          'Non-Android platform detected, initializing AudioRecorderPlayer...',
-        );
+
+        // If we've gotten here, all permissions are granted
+        setPermissionStatus('granted');
+      } catch (error) {
+        console.error('Error checking permissions:', error);
+        setPermissionStatus('blocked');
+        onPermissionBlocked?.();
       }
     };
 
-    checkPermission();
+    const openAppSettings = () => {
+      openSettings().catch(() => {
+        Alert.alert(
+          'Unable to open settings',
+          'Please open your device settings and grant the required permissions manually.',
+        );
+      });
+    };
 
-    // Clean up function
-    return () => {};
-  }, []); // Empty dependency array means this runs once on mount
+    if (permissionStatus === 'checking') {
+      return (
+        <View style={styles.container}>
+          <Text style={styles.text}>Checking permissions...</Text>
+        </View>
+      );
+    }
 
-  return (
-    <AudioContext.Provider
-      value={{
-        audioPermission,
-        loaded,
-      }}>
-      {children}
-    </AudioContext.Provider>
-  );
+    if (permissionStatus === 'denied') {
+      if (customPermissionDeniedView) {
+        return <>{customPermissionDeniedView}</>;
+      }
+
+      return (
+        <View style={styles.container}>
+          <Text style={styles.text}>
+            We need microphone access to record audio.
+          </Text>
+          <TouchableOpacity style={styles.button} onPress={checkPermissions}>
+            <Text style={styles.buttonText}>Grant Permission</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    if (permissionStatus === 'blocked') {
+      if (customPermissionBlockedView) {
+        return <>{customPermissionBlockedView}</>;
+      }
+
+      return (
+        <View style={styles.container}>
+          <Text style={styles.text}>
+            Microphone access is blocked. Please enable it in your device
+            settings.
+          </Text>
+          <TouchableOpacity style={styles.button} onPress={openAppSettings}>
+            <Text style={styles.buttonText}>Open Settings</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // All permissions granted, render the wrapped component
+    return <WrappedComponent {...(restProps as P)} />;
+  };
 };
 
-export default AudioProvider;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  text: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#4285F4',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});

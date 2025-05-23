@@ -1,547 +1,350 @@
-import Voice from '@react-native-voice/voice';
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
-  NativeModules,
   Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import AudioProvider, {useAudioContext} from '../../../hocs/AudioProvider';
-import Header from '../../components/Header';
-import {Colors, TextStyle} from '../../themes';
+import AudioRecorderPlayer, {
+  AudioEncoderAndroidType,
+  AudioSourceAndroidType,
+  OutputFormatAndroidType,
+} from 'react-native-audio-recorder-player';
+import {PERMISSIONS} from 'react-native-permissions';
+import RNFetchBlob from 'rn-fetch-blob';
+import {AudioProvider} from '../../../hocs/AudioProvider';
+import {useDetectAudioAPI} from '../../api/python';
+import Visualizer from '../../components/Visualizer';
 
-const AudioTest: React.FC = () => {
-  const {loaded} = useAudioContext();
-  const [messages, setMessages] = useState<any>([]);
-  const [isListening, setIsListening] = useState(false);
-  const [recognizedText, setRecognizedText] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [voiceAvailable, setVoiceAvailable] = useState<boolean | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('Initializing...');
+// Types
+export interface AudioFile {
+  uri: string;
+  name: string;
+  type: string;
+  size: number;
+}
 
-  // Use refs to track if listeners are attached and module is initialized
-  const listenersAttached = useRef(false);
-  const voiceInitialized = useRef(false);
-  const initAttempts = useRef(0);
+export interface RecordingState {
+  isRecording: boolean;
+  currentDurationSec: number;
+  recordTime: string;
+}
 
-  // Check if the Voice native module exists
-  const checkNativeModule = () => {
-    const nativeModuleExists = !!NativeModules.Voice;
-    console.log('Voice native module exists:', nativeModuleExists);
-    setDebugInfo(
-      prev =>
-        `${prev}\nNative module exists: ${nativeModuleExists ? 'YES' : 'NO'}`,
-    );
-    return nativeModuleExists;
-  };
+export interface AudioRecorderProps {
+  onRecordingComplete: (audioFile: AudioFile) => void;
+  onRecordingError: (error: Error) => void;
+  maxDuration?: number; // in seconds
+  visualizerColor?: string;
+}
 
-  // Initialize Voice module
-  const initializeVoice = async () => {
-    try {
-      initAttempts.current += 1;
-      setDebugInfo(
-        prev => `${prev}\nInitialization attempt #${initAttempts.current}`,
-      );
+const AudioRecorder: React.FC<AudioRecorderProps> = ({
+  onRecordingComplete,
+  onRecordingError,
+  maxDuration = 300, // 5 minutes
+  visualizerColor = '#4285F4',
+}) => {
+  // State
+  const [recordingState, setRecordingState] = useState<RecordingState>({
+    isRecording: false,
+    currentDurationSec: 0,
+    recordTime: '00:00:00',
+  });
+  const [audioLevels, setAudioLevels] = useState<number[]>(Array(20).fill(0));
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [filePath, setFilePath] = useState<string>('');
 
-      // Check if the module exists at native level
-      if (!checkNativeModule()) {
-        setDebugInfo(prev => `${prev}\nNative module not found!`);
-        setVoiceAvailable(false);
-        return false;
-      }
+  // Refs
+  const audioRecorderPlayer = useRef(new AudioRecorderPlayer());
+  const levelUpdateInterval = useRef<NodeJS.Timeout | null>(null);
+  const maxDurationTimeout = useRef<NodeJS.Timeout | null>(null);
 
-      // Verify Voice object exists in JS
-      if (!Voice) {
-        console.warn('Voice module is not defined in JS');
-        setDebugInfo(prev => `${prev}\nVoice not defined in JS!`);
-        setVoiceAvailable(false);
-        return false;
-      }
+  const {mutateAsync: detectAudioMutateAsync} = useDetectAudioAPI();
 
-      // Check if methods exist on Voice
-      const methods = Object.keys(Voice);
-      setDebugInfo(prev => `${prev}\nMethods on Voice: ${methods.join(', ')}`);
-
-      if (!methods.includes('start') || !methods.includes('stop')) {
-        console.warn('Voice module missing required methods');
-        setDebugInfo(prev => `${prev}\nMissing required methods!`);
-        setVoiceAvailable(false);
-        return false;
-      }
-
-      // Try to check if Voice is available
-      if (typeof Voice.isAvailable === 'function') {
-        await Voice.isAvailable();
-        setDebugInfo(prev => `${prev}\nisAvailable check passed`);
-      }
-
-      voiceInitialized.current = true;
-      setVoiceAvailable(true);
-      setDebugInfo(prev => `${prev}\nVoice initialized successfully!`);
-      return true;
-    } catch (e) {
-      const errorMsg = e instanceof Error ? e.message : 'Unknown error';
-      console.error('Voice initialization error:', errorMsg);
-      setDebugInfo(prev => `${prev}\nInit error: ${errorMsg}`);
-
-      // Don't immediately set as unavailable, as some devices throw errors but still work
-      if (initAttempts.current >= 3) {
-        setVoiceAvailable(false);
-      }
-      return false;
-    }
-  };
-
-  // First initialization attempt
   useEffect(() => {
-    initializeVoice();
+    // Set up audio recorder player
+    audioRecorderPlayer.current.setSubscriptionDuration(0.1); // 100ms for responsive visualization
 
-    // Return cleanup function
     return () => {
-      try {
-        if (voiceInitialized.current) {
-          Voice.destroy().catch(e =>
-            console.error('Error destroying Voice:', e),
-          );
-        }
-      } catch (e) {
-        console.error('Error in cleanup:', e);
+      // Clean up
+      if (recordingState.isRecording) {
+        stopRecording();
+      }
+      if (levelUpdateInterval.current) {
+        clearInterval(levelUpdateInterval.current);
+      }
+      if (maxDurationTimeout.current) {
+        clearTimeout(maxDurationTimeout.current);
       }
     };
   }, []);
 
-  // Set up Voice listeners when available
-  useEffect(() => {
-    if (!voiceAvailable) return;
+  const getAudioFilePath = (): string => {
+    const dirPath = RNFetchBlob.fs.dirs.CacheDir;
+    const fileName = `recording_${Date.now()}.m4a`;
+    return `${dirPath}/${fileName}`;
+  };
 
+  const startRecording = async () => {
     try {
-      console.log('Setting up Voice listeners');
-      setDebugInfo(prev => `${prev}\nSetting up listeners`);
+      setIsProcessing(true);
 
-      Voice.onSpeechStart = event => {
-        console.log('Speech start event:', event);
-        setDebugInfo(prev => `${prev}\nSpeech start event`);
-        setIsListening(true);
-      };
+      const path = getAudioFilePath();
+      setFilePath(path);
 
-      Voice.onSpeechEnd = () => {
-        console.log('Speech ended');
-        setDebugInfo(prev => `${prev}\nSpeech ended`);
-        setIsListening(false);
-      };
+      const result = await audioRecorderPlayer.current.startRecorder(path, {
+        AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
+        AudioSourceAndroid: AudioSourceAndroidType.MIC,
+        OutputFormatAndroid: OutputFormatAndroidType.MPEG_4,
+      });
 
-      Voice.onSpeechResults = event => {
-        if (event && event.value && event.value.length > 0) {
-          console.log('Speech results:', event.value);
-          setRecognizedText(event.value[0]);
-          setDebugInfo(
-            prev => `${prev}\nResults: ${event.value[0].substring(0, 20)}...`,
+      console.log('Recording started:', result);
+
+      // Start visualizer simulation
+      levelUpdateInterval.current = setInterval(() => {
+        const newLevels = [...audioLevels];
+        for (let i = 0; i < newLevels.length; i++) {
+          newLevels[i] = Math.random() * 0.8 + 0.2; // Values between 0.2 and 1.0
+        }
+        setAudioLevels(newLevels);
+      }, 100);
+
+      // Set maximum recording duration
+      maxDurationTimeout.current = setTimeout(() => {
+        if (recordingState.isRecording) {
+          stopRecording();
+          Alert.alert(
+            'Maximum recording time reached',
+            'The recording has reached its maximum duration.',
           );
-        } else {
-          console.warn('Received empty speech results');
-          setDebugInfo(prev => `${prev}\nEmpty results received`);
         }
-      };
+      }, maxDuration * 1000);
 
-      Voice.onSpeechError = event => {
-        const errorMessage = event?.error?.message || 'Unknown error';
-        console.error('Speech recognition error:', errorMessage);
-        setError(`Recognition error: ${errorMessage}`);
-        setDebugInfo(prev => `${prev}\nSpeech error: ${errorMessage}`);
-        setIsListening(false);
-      };
+      audioRecorderPlayer.current.addRecordBackListener(e => {
+        setRecordingState({
+          isRecording: true,
+          currentDurationSec: e.currentPosition / 1000,
+          recordTime: audioRecorderPlayer.current.mmssss(
+            Math.floor(e.currentPosition),
+          ),
+        });
+      });
 
-      listenersAttached.current = true;
-      setDebugInfo(prev => `${prev}\nListeners attached successfully!`);
-    } catch (e) {
-      const errorMsg = e instanceof Error ? e.message : 'Unknown error';
-      console.error('Error setting up Voice listeners:', errorMsg);
-      setDebugInfo(prev => `${prev}\nListener setup error: ${errorMsg}`);
-      listenersAttached.current = false;
-    }
-
-    return () => {
-      if (listenersAttached.current) {
-        try {
-          Voice.removeAllListeners();
-          listenersAttached.current = false;
-          console.log('Voice listeners removed');
-        } catch (e) {
-          console.error('Error removing listeners:', e);
-        }
-      }
-    };
-  }, [voiceAvailable]);
-
-  const startListening = async () => {
-    setError(null);
-
-    if (!loaded) {
-      setError('Audio permissions not granted');
-      return;
-    }
-
-    // If Voice isn't available yet, try to initialize it one more time
-    if (!voiceAvailable) {
-      setDebugInfo(prev => `${prev}\nRetrying initialization before start`);
-      const initialized = await initializeVoice();
-      if (!initialized) {
-        setError('Voice recognition is not available on this device');
-        return;
-      }
-    }
-
-    // If listeners aren't attached, try to attach them
-    if (!listenersAttached.current) {
-      try {
-        setDebugInfo(prev => `${prev}\nReattaching listeners before start`);
-
-        Voice.onSpeechStart = event => {
-          console.log('Speech started:', event);
-          setDebugInfo(prev => `${prev}\nSpeech start`);
-          setIsListening(true);
-        };
-
-        Voice.onSpeechEnd = () => {
-          console.log('Speech ended');
-          setDebugInfo(prev => `${prev}\nSpeech end`);
-          setIsListening(false);
-        };
-
-        Voice.onSpeechResults = event => {
-          if (event && event.value) {
-            console.log('Results:', event.value);
-            setRecognizedText(event.value[0]);
-            setDebugInfo(prev => `${prev}\nGot results`);
-          }
-        };
-
-        Voice.onSpeechError = event => {
-          const errorMessage = event?.error?.message || 'Unknown error';
-          console.error('Speech error:', errorMessage);
-          setError(`Error: ${errorMessage}`);
-          setDebugInfo(prev => `${prev}\nSpeech error: ${errorMessage}`);
-          setIsListening(false);
-        };
-
-        listenersAttached.current = true;
-        setDebugInfo(prev => `${prev}\nListeners reattached`);
-      } catch (e) {
-        console.error('Error reattaching listeners:', e);
-        setDebugInfo(
-          prev =>
-            `${prev}\nFailed to reattach listeners: ${
-              e instanceof Error ? e.message : 'Unknown'
-            }`,
-        );
-        setError('Failed to prepare voice recognition');
-        return;
-      }
-    }
-
-    try {
-      // Starting with more detailed logging
-      setDebugInfo(prev => `${prev}\nAttempting to start recognition...`);
-
-      // Platform-specific handling
-      if (Platform.OS === 'android') {
-        setDebugInfo(prev => `${prev}\nStarting on Android`);
-      } else {
-        setDebugInfo(prev => `${prev}\nStarting on iOS`);
-      }
-
-      // Check Voice object right before use
-      if (!Voice || typeof Voice.start !== 'function') {
-        throw new Error('Voice.start is not a function');
-      }
-
-      // Start recognition with catch for common errors
-      await Voice.start('en-US');
-      setIsListening(true);
-      setDebugInfo(prev => `${prev}\nRecognition started successfully!`);
+      setIsProcessing(false);
     } catch (error) {
-      console.error('Failed to start voice recognition:', error);
-
-      // Try to determine the specific error
-      let errorMsg = 'Failed to start recognition';
-      if (error instanceof Error) {
-        errorMsg = error.message;
-
-        // Handle common errors
-        if (errorMsg.includes('startSpeech') && errorMsg.includes('null')) {
-          // This specific error indicates the native module exists but isn't working
-          errorMsg = 'Voice engine unavailable. Try restarting the app.';
-
-          // Clear listeners and try reinitializing
-          try {
-            Voice.removeAllListeners();
-            listenersAttached.current = false;
-            setDebugInfo(
-              prev => `${prev}\nRemoving listeners to attempt recovery`,
-            );
-          } catch (e) {
-            console.error('Error removing listeners:', e);
-          }
-        }
-      }
-
-      setError(errorMsg);
-      setDebugInfo(prev => `${prev}\nStart error: ${errorMsg}`);
-      setIsListening(false);
-    }
-  };
-
-  const stopListening = async () => {
-    try {
-      setDebugInfo(prev => `${prev}\nAttempting to stop recognition...`);
-
-      if (!Voice || typeof Voice.stop !== 'function') {
-        setError('Voice.stop is not a function');
-        setDebugInfo(prev => `${prev}\nVoice.stop is not a function!`);
-        setIsListening(false);
-        return;
-      }
-
-      await Voice.stop();
-      setIsListening(false);
-      setDebugInfo(prev => `${prev}\nRecognition stopped successfully`);
-    } catch (error) {
-      console.error('Failed to stop voice recognition:', error);
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      setError(`Failed to stop: ${errorMsg}`);
-      setDebugInfo(prev => `${prev}\nStop error: ${errorMsg}`);
-
-      // Force the listening state to false even if the stop call fails
-      setIsListening(false);
-    }
-  };
-
-  const sendMessage = () => {
-    if (recognizedText) {
-      setMessages([...messages, {text: recognizedText, type: 'user'}]);
-      setRecognizedText('');
-    }
-  };
-
-  const retryInitialization = async () => {
-    setDebugInfo('Retrying Voice initialization...');
-    setError(null);
-
-    // Reset state
-    setVoiceAvailable(null);
-    listenersAttached.current = false;
-    voiceInitialized.current = false;
-
-    // Try to initialize again
-    const success = await initializeVoice();
-    if (success) {
-      Alert.alert(
-        'Success',
-        'Voice recognition has been initialized successfully.',
+      setIsProcessing(false);
+      console.error('Error starting recording:', error);
+      onRecordingError(
+        error instanceof Error ? error : new Error('Unknown recording error'),
       );
-    } else {
-      setError('Failed to initialize Voice recognition');
     }
   };
 
+  const stopRecording = async () => {
+    try {
+      setIsProcessing(true);
+
+      if (levelUpdateInterval.current) {
+        clearInterval(levelUpdateInterval.current);
+        levelUpdateInterval.current = null;
+      }
+
+      if (maxDurationTimeout.current) {
+        clearTimeout(maxDurationTimeout.current);
+        maxDurationTimeout.current = null;
+      }
+
+      // Reset audio levels
+      setAudioLevels(Array(20).fill(0));
+
+      const result = await audioRecorderPlayer.current.stopRecorder();
+      audioRecorderPlayer.current.removeRecordBackListener();
+
+      setRecordingState({
+        ...recordingState,
+        isRecording: false,
+      });
+
+      // Check if file exists
+      const fileExists = await RNFetchBlob.fs.exists(filePath);
+      if (!fileExists) {
+        throw new Error('Recording file not found');
+      }
+
+      const fileName = filePath.split('/').pop() || 'recording.m4a';
+      const fileUri = Platform.OS === 'ios' ? filePath : `file://${filePath}`;
+
+      // Prepare FormData for API
+      const formData = new FormData();
+      formData.append('file', {
+        uri: fileUri,
+        type: 'audio/mpeg',
+        name: fileName,
+      } as Partial<AudioFile>);
+
+      console.log('Sending m4a file to API:', fileName);
+
+      try {
+        const response = await detectAudioMutateAsync(formData);
+        console.log('Audio detection response:', response);
+
+        const fileStat = await RNFetchBlob.fs.stat(filePath);
+        console.log('Recorded file size:', fileStat.size);
+        if (fileStat.size === 0) {
+          throw new Error('Recording file is empty');
+        }
+
+        console.log(fileStat);
+
+        // Call completion callback
+        onRecordingComplete?.({
+          uri: fileUri,
+          name: fileName,
+          type: 'audio/mpeg',
+          size: fileStat.size, // You can get actual size if needed
+        });
+      } catch (apiError) {
+        console.error('API error:', apiError);
+        onRecordingError?.(new Error('Failed to process audio file'));
+      }
+
+      setIsProcessing(false);
+    } catch (error) {
+      setIsProcessing(false);
+      console.error('Error stopping recording:', error);
+      onRecordingError?.(
+        error instanceof Error ? error : new Error('Error stopping recording'),
+      );
+    }
+  };
+
+  const toggleRecording = () => {
+    if (recordingState.isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
+  };
+
   return (
-    <>
-      <Header backButton title="Audio Test" />
-      <View style={styles.container}>
-        <Text style={[TextStyle.H1B, styles.title]}>Audio Test</Text>
-
-        {error && <Text style={styles.errorText}>{error}</Text>}
-
-        {voiceAvailable === false && (
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={retryInitialization}>
-            <Text style={styles.retryButtonText}>Retry Initialization</Text>
-          </TouchableOpacity>
-        )}
-
-        <Text style={[TextStyle.H1B, styles.recognizedText]}>
-          {recognizedText || 'Say something...'}
-        </Text>
-
-        <View style={styles.controlsContainer}>
-          <TouchableOpacity
-            style={[
-              styles.recordButton,
-              isListening && styles.recordingButton,
-              (!loaded || voiceAvailable === false) && styles.disabledButton,
-            ]}
-            disabled={!loaded || voiceAvailable === false}
-            onPress={() => (isListening ? stopListening() : startListening())}>
-            <Ionicons
-              name={isListening ? 'stop' : 'mic'}
-              size={32}
-              color="white"
-            />
-          </TouchableOpacity>
-
-          {recognizedText ? (
-            <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-              <Ionicons name="send" size={24} color="white" />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-
-        {!loaded && (
-          <Text style={styles.loadingText}>
-            Microphone permissions required
-          </Text>
-        )}
-
-        {/* Display status info for all users */}
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusText}>
-            <Text style={styles.statusLabel}>Status:</Text>
-            {voiceAvailable === null
-              ? 'Checking Voice availability...'
-              : voiceAvailable === true
-              ? 'Voice recognition ready'
-              : 'Voice recognition unavailable'}
-          </Text>
-        </View>
-
-        {/* Debug panel - expanded and visible to help troubleshoot */}
-        <View style={styles.debugContainer}>
-          <Text style={styles.debugHeader}>Debug Info</Text>
-          <Text style={styles.debugText}>Platform: {Platform.OS}</Text>
-          <Text style={styles.debugText}>
-            Voice Available:{' '}
-            {voiceAvailable === null
-              ? 'Checking...'
-              : voiceAvailable
-              ? 'YES'
-              : 'NO'}
-          </Text>
-          <Text style={styles.debugText}>
-            Permissions: {loaded ? 'Granted' : 'Not Granted'}
-          </Text>
-          <Text style={styles.debugText}>
-            Listeners: {listenersAttached.current ? 'Attached' : 'Not Attached'}
-          </Text>
-          <Text style={styles.debugText}>
-            Initialization: {voiceInitialized.current ? 'Complete' : 'Failed'}
-          </Text>
-          <Text style={styles.debugText}>Event Log:</Text>
-          <Text style={styles.debugEventLog}>{debugInfo}</Text>
-        </View>
+    <View style={styles.container}>
+      {/* Audio visualization */}
+      <View style={styles.visualizerContainer}>
+        <Visualizer levels={audioLevels} color={visualizerColor} />
       </View>
-    </>
+
+      {/* Recording time */}
+      <Text style={styles.timeText}>
+        {formatTime(recordingState.currentDurationSec)}
+      </Text>
+
+      {/* Recording controls */}
+      <View style={styles.controlsContainer}>
+        <TouchableOpacity
+          style={[
+            styles.recordButton,
+            recordingState.isRecording ? styles.stopButton : styles.startButton,
+          ]}
+          onPress={toggleRecording}
+          disabled={isProcessing}>
+          {isProcessing ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <View
+              style={
+                recordingState.isRecording ? styles.stopIcon : styles.startIcon
+              }
+            />
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Status text */}
+      <Text style={styles.statusText}>
+        {isProcessing
+          ? 'Processing...'
+          : recordingState.isRecording
+          ? 'Recording m4a'
+          : 'Ready to record m4a'}
+      </Text>
+    </View>
   );
 };
-
-const AudioTestWithProvider = () => {
-  return (
-    <AudioProvider>
-      <AudioTest />
-    </AudioProvider>
-  );
-};
-
-export default AudioTestWithProvider;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '100%',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    backgroundColor: Colors.backgroundColor,
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    color: Colors.black,
+  visualizerContainer: {
+    width: '100%',
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 16,
   },
-  recognizedText: {
-    fontSize: 18,
-    marginBottom: 40,
-    color: Colors.black,
-    textAlign: 'center',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.borderGrey,
-    borderRadius: 8,
-    minHeight: 100,
-    width: '90%',
+  timeText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    color: '#333',
   },
   controlsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   recordButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: Colors.red,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  recordingButton: {
-    backgroundColor: '#FF3B30',
+  startButton: {
+    backgroundColor: '#FF4136',
   },
-  disabledButton: {
-    backgroundColor: '#cccccc',
-    opacity: 0.6,
+  stopButton: {
+    backgroundColor: '#888',
   },
-  sendButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.black,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
+  startIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
   },
-  loadingText: {
-    marginTop: 20,
-    color: Colors.black,
-    textAlign: 'center',
+  stopIcon: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#FFF',
   },
-  errorText: {
-    color: Colors.red,
-    marginBottom: 20,
-    textAlign: 'center',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: Colors.red,
-    borderRadius: 8,
-    backgroundColor: '#FFEEEE',
-    width: '90%',
-  },
-  warningText: {
-    color: '#FF9500',
-    marginBottom: 20,
-    textAlign: 'center',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#FF9500',
-    borderRadius: 8,
-    backgroundColor: '#FFF9EE',
-    width: '90%',
-  },
-  debugContainer: {
-    marginTop: 30,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#666',
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    width: '90%',
-  },
-  debugText: {
-    fontSize: 12,
-    color: '#333',
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  statusText: {
+    marginTop: 16,
+    fontSize: 14,
+    color: '#888',
   },
 });
+
+export default AudioProvider(AudioRecorder, [PERMISSIONS.ANDROID.RECORD_AUDIO]);
