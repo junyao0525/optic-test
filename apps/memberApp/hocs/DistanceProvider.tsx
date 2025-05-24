@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native';
 import React, {
   createContext,
   useContext,
@@ -51,6 +52,7 @@ export const DistanceMeasureProvider: React.FC<{children: React.ReactNode}> = ({
   const [distanceText, setDistanceText] = useState<string>('');
   const [secondsRemaining, setSecondsRemaining] = useState<number>(10);
   const [color, setColor] = useState<ColorProps>('black');
+  const navigation = useNavigation();
 
   const capturePhoto = async (): Promise<boolean> => {
     if (!cameraRef.current || capturingRef.current) return false;
@@ -106,8 +108,16 @@ export const DistanceMeasureProvider: React.FC<{children: React.ReactNode}> = ({
     return false;
   };
 
+  const stopCapture = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setIsMeasuring(false);
+  };
+
   const startCapture = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) return;
 
     setIsMeasuring(true);
     secondsRef.current = 10;
@@ -117,14 +127,44 @@ export const DistanceMeasureProvider: React.FC<{children: React.ReactNode}> = ({
     setHeadDistance(null);
 
     intervalRef.current = setInterval(async () => {
-      const result = await capturePhoto();
+      let response = false;
+      try {
+        response = await capturePhoto();
+      } catch (err) {
+        console.error('Capture failed:', err);
+      }
+
       secondsRef.current -= 1;
       setSecondsRemaining(secondsRef.current);
 
-      if (result || secondsRef.current <= 0) {
-        clearInterval(intervalRef.current!);
-        intervalRef.current = null;
-        setIsMeasuring(false);
+      const timeout = secondsRef.current <= 0;
+      const success = response;
+
+      if (success || timeout) {
+        setTimeout(() => {
+          stopCapture();
+
+          if (timeout && !success) {
+            Alert.alert(
+              'Timeout',
+              'Measurement session expired. Please try again.',
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => navigation.goBack(),
+                  style: 'destructive',
+                },
+                {
+                  text: 'Continue',
+                  onPress: () => {
+                    console.log('Restarting measurement...');
+                    startCapture();
+                  },
+                },
+              ],
+            );
+          }
+        }, 500);
       }
     }, 1000);
   };

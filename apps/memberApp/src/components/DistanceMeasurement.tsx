@@ -30,11 +30,6 @@ const DistanceMeasureView = ({handleButtonPress}: Props) => {
   } = useDistanceMeasure();
   const {cameraPermission, activeDevice, loaded} = useCameraContext();
 
-  // const handleButtonPress = useCallback(() => {
-  //   // Handle button press logic here
-  //   console.log('Button pressed');
-  // }, []);
-
   useEffect(() => {
     if (cameraPermission === 'granted' && loaded && activeDevice) {
       startCapture();
