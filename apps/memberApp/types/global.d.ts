@@ -8,6 +8,12 @@ declare global {
     Settings: undefined;
   };
 
+  type CameraScreenParam = {
+    CameraScreen: {
+      screen: 'LandoltC'; // You can add more options if needed
+    };
+  };
+
   // A helper type to access the keys of the TabParamList
   type TabParamListKey = keyof TabParamList;
 

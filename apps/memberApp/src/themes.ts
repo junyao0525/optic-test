@@ -36,6 +36,8 @@ export const Colors = {
   forgetPassword: '#5b2c92',
 };
 
+export type ColorProps = keyof typeof Colors;
+
 export const TextStyle = StyleSheet.create({
   H1: {
     fontSize: 32,
