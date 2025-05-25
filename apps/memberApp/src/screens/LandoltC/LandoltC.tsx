@@ -12,7 +12,7 @@ const LandoltC = () => {
   const [showDistanceMeasurement, setShowDistanceMeasurement] = useState(false);
 
   const handleButtonPress = useCallback(() => {
-    navigation.navigate('LandoltInstruction', {eye: 'left'});
+    navigation.navigate('LandoltCTest');
   }, [navigation]);
 
   return (

@@ -9,7 +9,6 @@ import ColorVision from '../screens/ColorVision/ColorVision';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
 import LandoltC from '../screens/LandoltC/LandoltC';
 import LandoltCTest from '../screens/LandoltC/LandoltCtest';
-import LandoltInstruction from '../screens/LandoltC/LandoltInstruction';
 import About from '../screens/Settings/About';
 import Help from '../screens/Settings/Help';
 import Language from '../screens/Settings/Language';
@@ -39,11 +38,6 @@ const StackNavigator = () => {
       <Stack.Screen name="Tab" component={TabNavigator} />
       <Stack.Screen name="CameraScreen" component={CameraScreen} />
       <Stack.Screen name="LandoltCTest" component={LandoltCTest} />
-      <Stack.Screen name="LandoltInstruction" component={LandoltInstruction} />
-      {/* <Stack.Screen
-        name="DistanceMeasure"
-        component={DistanceMeasureWithProvider}
-      /> */}
       <Stack.Screen name="EyeTiredness" component={EyeTiredness} />
       <Stack.Screen name="ColorVision" component={ColorVision} />
       <Stack.Screen name="About" component={About} />

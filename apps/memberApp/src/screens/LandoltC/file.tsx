@@ -5,43 +5,18 @@ import Animated, {runOnJS} from 'react-native-reanimated';
 import {useWindowDimension} from '../../../hooks/useWindowDimension';
 import Header from '../../components/Header';
 import {Colors} from '../../themes';
-
-// LogMAR values for different levels
-const logMarValues = {
-  1: 1.0, // 20/200
-  2: 0.9, // 20/160
-  3: 0.8, // 20/125
-  4: 0.7, // 20/100
-  5: 0.6, // 20/80
-  6: 0.5, // 20/63
-  7: 0.4, // 20/50
-  8: 0.3, // 20/40
-  9: 0.2, // 20/32
-  10: 0.1, // 20/25
-  11: 0.0, // 20/20
-  12: -0.1, // 20/16
-};
-
-const logMARToSnellen = (logMAR: number) => {
-  const denominator = Math.round(20 * Math.pow(10, logMAR));
-  return `20/${denominator}`;
-};
-
-// Get stroke width based on current size
+import {logMARToSnellen, logMarValues} from '../../utils/logMar';
 
 const LandoltCtest = () => {
   const {width} = useWindowDimension();
 
-  // Test state
-  const [currentEye, setCurrentEye] = useState('right'); // 'right', 'left'
+  const [currentEye, setCurrentEye] = useState('right');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [direction, setDirection] = useState('up');
   const [feedback, setFeedback] = useState('');
-  const [attemptsLeft, setAttemptsLeft] = useState(3); // 3 attempts per level
+  const [attemptsLeft, setAttemptsLeft] = useState(3);
   const [testComplete, setTestComplete] = useState(false);
   const [testStarted, setTestStarted] = useState(false);
-
-  // Results for each eye
   const [rightEyeResults, setRightEyeResults] = useState({
     score: 0,
     maxLevel: 0,
@@ -55,15 +30,6 @@ const LandoltCtest = () => {
     logMAR: 1.0,
     snellen: '20/200',
   });
-
-  // Calculate pixel size based on LogMAR value
-  const calculateSizeFromLogMAR = (logMAR: number, screenWidth: number) => {
-    const denominator = Math.round(20 * Math.pow(10, logMAR));
-    const result = 20 / denominator;
-    const baseSize = screenWidth * 0.4;
-    const logsize = baseSize * Math.pow(10, -result);
-    return logsize;
-  };
 
   const getRandomDirection = useCallback(() => {
     const directions = ['up', 'right', 'down', 'left'];
