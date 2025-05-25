@@ -1,7 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
-import CameraProvider from '../../hocs/CameraProvider';
-import {DistanceMeasureProvider} from '../../hocs/DistanceProvider';
 import AudioWithProvided from '../screens/AudioTest/AudioTest';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
@@ -14,6 +12,8 @@ import Help from '../screens/Settings/Help';
 import Language from '../screens/Settings/Language';
 import Profile from '../screens/Settings/Profile';
 import TabNavigator from './TabNavigator';
+import CameraProvider from '../providers/CameraProvider';
+import {DistanceMeasureProvider} from '../providers/DistanceProvider';
 
 const Stack = createNativeStackNavigator();
 const CameraStack = createNativeStackNavigator();
