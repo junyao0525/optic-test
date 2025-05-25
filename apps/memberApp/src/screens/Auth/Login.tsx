@@ -1,6 +1,6 @@
 // screens/Login.tsx
 import {useNavigation} from '@react-navigation/native';
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {
   Alert,
@@ -10,11 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Divider from '../../components/Divider';
-import Header from '../../components/Header';
 import InputField from '../../components/InputField';
 import {Colors, TextStyle} from '../../themes';
 import {useAuth} from '../../providers/AuthProvider';
+import LoadingOverlay from '../../components/Loading';
 
 type FormData = {
   email: string;
@@ -24,15 +23,21 @@ type FormData = {
 const Login = () => {
   const navigation = useNavigation();
   const {login} = useAuth();
-
+  const [loading, setLoading] = useState(false);
   const {control, handleSubmit} = useForm<FormData>({
     defaultValues: {email: '', password: ''},
   });
 
   const onSubmit = async (data: FormData) => {
-    await login(data);
-    // Optional: navigate to Home screen after login
-    // navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    setLoading(true);
+    try {
+      await login(data);
+      // navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    } catch (err) {
+      Alert.alert('Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onSignUp = useCallback(() => {
@@ -41,8 +46,6 @@ const Login = () => {
 
   return (
     <>
-      <Header title={''} backButton headerColor={Colors.white} />
-      <Divider marginVertical={0} thickness={0.2} />
       <View style={styles.container}>
         <Text style={[TextStyle.H1, styles.mainText]}>
           Sign in to your Account
@@ -95,6 +98,7 @@ const Login = () => {
             </TouchableOpacity>
           </View>
         </View>
+        <LoadingOverlay visible={loading} />
       </View>
     </>
   );
@@ -107,8 +111,8 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
     justifyContent: 'space-between',
-    paddingBottom: 40,
-    paddingTop: 20,
+    paddingTop: 100,
+    paddingBottom: 20,
   },
   mainText: {
     fontSize: 40,

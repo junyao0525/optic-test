@@ -11,8 +11,8 @@ import {AuthController} from '../api/auth/controller';
 
 type User = {
   email: string;
-  accessToken: string;
-  expiresAt: string;
+  name: string;
+  id: string;
 };
 
 type LoginData = {

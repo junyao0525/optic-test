@@ -1,9 +1,10 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Header from '../../components/Header';
 import SettingList from '../../components/SettingList';
 import {Colors, TextStyle} from '../../themes';
+import {useAuth} from '../../providers/AuthProvider';
 
 const personImage = require('../../../assets/images/person.png');
 
@@ -12,17 +13,11 @@ export type User = {
   firstName: string;
   lastName: string;
   userEmail: string;
-  userImage: string;
+  userImage: any;
   userDOB: string;
 };
 
-const UserForm: User = {
-  // userName: 'John Doe',
-  // firstName: 'John',
-  // lastName: 'Doe',
-  // userEmail: 'JohnDoe@gmail.com',
-  // userImage: personImage,
-  // userDOB: '3/12/1995',
+const initialUserForm: User = {
   userName: '',
   firstName: '',
   lastName: '',
@@ -33,7 +28,18 @@ const UserForm: User = {
 
 const SettingScreen = () => {
   const navigation = useNavigation();
-  const [userForm, setUserForm] = useState(UserForm);
+  const {user, logout} = useAuth();
+  const [userForm, setUserForm] = useState<User>(initialUserForm);
+
+  useEffect(() => {
+    if (user) {
+      setUserForm(prev => ({
+        ...prev,
+        userName: user.name || '',
+        userEmail: user.email || '',
+      }));
+    }
+  }, [user]);
 
   const settingsData = {
     title: 'Personal Data',
@@ -54,7 +60,7 @@ const SettingScreen = () => {
   };
 
   const otherData = {
-    title: 'other',
+    title: 'Other',
     items: [
       {
         title: 'Language',
@@ -71,56 +77,53 @@ const SettingScreen = () => {
         icon: 'alert-circle-outline',
         onPress: () => navigation.navigate('About'),
       },
+      {
+        title: 'Log Out',
+        icon: 'log-out-outline',
+        onPress: () => logout(),
+      },
     ],
     iconSize: 34,
     iconColor: Colors.lightGreen,
   };
+
   return (
-    <>
-      <View>
-        <Header title="Setting" menuButton />
-        <View style={styles.userInfoContainer}>
-          <View style={styles.userInfoStyle}>
-            <Image
-              source={userForm.userImage}
-              style={styles.userImageContainer}
-            />
-            <View>
-              {userForm.userName ? (
-                <>
-                  <Text style={{...TextStyle.H3B, color: Colors.black}}>
-                    {userForm.userName}
-                  </Text>
-                  <Text style={{...TextStyle.P1B, color: Colors.darkGreen}}>
-                    {userForm.userEmail}
-                  </Text>
-                </>
-              ) : (
-                <View>
-                  <Text style={{...TextStyle.H3B, color: Colors.black}}>
-                    Guess
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('Login')}
-                    style={{
-                      width: 100,
-                      height: 30,
-                      backgroundColor: Colors.red,
-                      borderRadius: 10,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
-                    <Text style={(TextStyle.P1B, styles.login)}>Sign In</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
+    <View>
+      <Header title="Setting" menuButton />
+      <View style={styles.userInfoContainer}>
+        <View style={styles.userInfoStyle}>
+          <Image
+            source={userForm.userImage || personImage}
+            style={styles.userImageContainer}
+          />
+          <View>
+            {userForm.userName ? (
+              <>
+                <Text style={{...TextStyle.H3B, color: Colors.black}}>
+                  {userForm.userName}
+                </Text>
+                <Text style={{...TextStyle.P1B, color: Colors.darkGreen}}>
+                  {userForm.userEmail}
+                </Text>
+              </>
+            ) : (
+              <View>
+                <Text style={{...TextStyle.H3B, color: Colors.black}}>
+                  Guest
+                </Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Login')}
+                  style={styles.loginButton}>
+                  <Text style={styles.login}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
-        <SettingList {...settingsData} />
-        <SettingList {...otherData} />
       </View>
-    </>
+      <SettingList {...settingsData} />
+      <SettingList {...otherData} />
+    </View>
   );
 };
 
@@ -146,6 +149,14 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderGrey,
     borderWidth: 2,
     backgroundColor: Colors.borderGrey,
+  },
+  loginButton: {
+    width: 100,
+    height: 30,
+    backgroundColor: Colors.red,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   login: {
     color: Colors.white,
