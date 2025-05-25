@@ -7,11 +7,11 @@ import {
   View,
 } from 'react-native';
 import {Camera} from 'react-native-vision-camera';
-import {useCameraContext} from '../../hocs/CameraProvider';
 
-import {useDistanceMeasure} from '../../hocs/DistanceProvider';
 import {Colors, TextStyle} from '../themes';
 import BottomButton from './BottomButton';
+import {useDistanceMeasure} from '../providers/DistanceProvider';
+import {useCameraContext} from '../providers/CameraProvider';
 
 type Props = {
   handleButtonPress: () => void;
