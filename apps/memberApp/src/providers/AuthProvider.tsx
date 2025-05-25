@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import {Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useUserLoginApi} from '../src/api/auth';
+import {AuthController} from '../api/auth/controller';
 
 type User = {
   email: string;
@@ -24,43 +24,37 @@ type AuthContextType = {
   user: User | null;
   login: (data: LoginData) => Promise<void>;
   logout: () => void;
-  isLoggingIn: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
-  const {mutateAsync, isPending} = useUserLoginApi();
-
-  // Load user from AsyncStorage on mount (optional)
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await AsyncStorage.getItem('user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
+      console.log('user', storedUser);
     };
     loadUser();
   }, []);
 
   const login = async (data: LoginData) => {
     try {
-      const response = await mutateAsync(data);
-      const userData: User = {
-        email: response.user.email,
-        accessToken: response.accessToken,
-        expiresAt: response.expiresAt,
-      };
-      setUser(userData);
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-      Alert.alert('Login Success', `Welcome ${userData.email}`);
+      const result = await AuthController.login(data.email, data.password);
+
+      if (result.success == true) {
+        setUser(result.user);
+        await AsyncStorage.setItem('user', JSON.stringify(result.user));
+        Alert.alert('Login Success', `Welcome ${result.user.email}`);
+      } else {
+        Alert.alert('Login Failed', result.message);
+      }
     } catch (error) {
       console.log('Login error:', error);
-      Alert.alert(
-        'Login Failed',
-        'Please check your credentials and try again.',
-      );
+      Alert.alert('Login Failed', 'An unexpected error occurred.');
     }
   };
 
@@ -70,7 +64,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   };
 
   return (
-    <AuthContext.Provider value={{user, login, logout, isLoggingIn: isPending}}>
+    <AuthContext.Provider value={{user, login, logout}}>
       {children}
     </AuthContext.Provider>
   );

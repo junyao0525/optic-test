@@ -11,10 +11,10 @@ import {
   View,
 } from 'react-native';
 import {Camera, PhotoFile} from 'react-native-vision-camera';
-import CameraProvider, {useCameraContext} from '../../../hocs/CameraProvider';
 import {useDetectFaceAPI} from '../../api/python';
 import BottomButton from '../../components/BottomButton';
 import {Colors, TextStyle} from '../../themes';
+import CameraProvider, {useCameraContext} from '../../providers/CameraProvider';
 
 // TODO : when the result is last second occur the result is not showing
 // TODO : add the toasty message

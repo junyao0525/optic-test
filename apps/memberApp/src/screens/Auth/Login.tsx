@@ -14,7 +14,7 @@ import Divider from '../../components/Divider';
 import Header from '../../components/Header';
 import InputField from '../../components/InputField';
 import {Colors, TextStyle} from '../../themes';
-import {useAuth} from '../../../hocs/AuthProvider';
+import {useAuth} from '../../providers/AuthProvider';
 
 type FormData = {
   email: string;
@@ -23,7 +23,7 @@ type FormData = {
 
 const Login = () => {
   const navigation = useNavigation();
-  const {login, isLoggingIn} = useAuth();
+  const {login} = useAuth();
 
   const {control, handleSubmit} = useForm<FormData>({
     defaultValues: {email: '', password: ''},
@@ -82,7 +82,7 @@ const Login = () => {
                   borderRadius: 5,
                 },
               ]}>
-              {isLoggingIn ? 'Logging in...' : 'Log in'}
+              {'Log in'}
             </Text>
           </TouchableHighlight>
           <View style={styles.signUpRow}>
