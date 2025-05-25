@@ -1,31 +1,31 @@
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {Image, ImageProps, StyleSheet, Text, View} from 'react-native';
-import {useWindowDimension} from '../../../hooks/useWindowDimension';
-import BottomButton from '../../components/BottomButton';
-import {Colors, TextStyle} from '../../themes';
+import {useWindowDimension} from '../../hooks/useWindowDimension';
+import {Colors, TextStyle} from '../themes';
+import BottomButton from './BottomButton';
 
-const coverLeftImage = require('../../../assets/images/cover-left.png');
-const coverRightImage = require('../../../assets/images/cover-right.png');
+const coverLeftImage = require('../../assets/images/cover-left.png');
+const coverRightImage = require('../../assets/images/cover-right.png');
 
-type InstructionRouteProp = RouteProp<RootStackParamList, 'LandoltInstruction'>;
 type messageType = {
   title: string;
   description: string;
   photo: ImageProps | null;
 };
 
-const LandoltInstruction = () => {
+const LandoltInstruction = ({
+  eye = 'left',
+  onContinue = () => {},
+}: {
+  eye: string;
+  onContinue?: () => void;
+}) => {
   const {width, height} = useWindowDimension();
-  const navigation = useNavigation();
-  const route = useRoute<InstructionRouteProp>();
   const [message, setMessage] = useState<messageType>({
     title: '',
     description: '',
     photo: null,
   });
-
-  const {eye} = route.params;
 
   console.log(eye);
 
@@ -63,11 +63,7 @@ const LandoltInstruction = () => {
           }}
         />
       )}
-      <BottomButton
-        title="Continue"
-        onPress={() => {
-          navigation.navigate('LandoltCTest');
-        }}></BottomButton>
+      <BottomButton title="Continue" onPress={onContinue}></BottomButton>
     </>
   );
 };

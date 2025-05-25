@@ -19,6 +19,7 @@ type ButtonDetail = {
   title: string;
   image: ImageSourcePropType;
   route: string;
+  param?: {screen: string};
 };
 
 const LandoltImage = require('../../assets/images/home/landolt.png');
@@ -28,7 +29,12 @@ const AudioTestImage = require('../../assets/images/home/voice-detection.png');
 const GraphImage = require('../../assets/images/home/graph-exp.png');
 
 const buttonDetails: ButtonDetail[] = [
-  {title: 'Landolt’s C Test', image: LandoltImage, route: 'LandoltC'},
+  {
+    title: 'Landolt’s C Test',
+    image: LandoltImage,
+    route: 'CameraScreen',
+    param: {screen: 'LandoltC'},
+  },
   {title: 'Eye Tiredness', image: EyeTirednessImage, route: 'EyeTiredness'},
   {title: 'Color Vision', image: ColorVisionImage, route: 'ColorVision'},
   {title: 'Audio Test', image: AudioTestImage, route: 'AudioTest'},
@@ -43,8 +49,8 @@ const historyData = {
 };
 const HomeScreen = () => {
   const {navigate} = useNavigation();
-  const handleButtonPress = (route: string) => {
-    navigate(route as never);
+  const handleButtonPress = (route: string, param?: string) => {
+    navigate(route as never, param as never);
     console.log(`${route} button pressed`);
   };
 
