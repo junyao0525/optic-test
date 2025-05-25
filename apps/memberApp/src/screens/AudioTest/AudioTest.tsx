@@ -15,9 +15,9 @@ import AudioRecorderPlayer, {
 } from 'react-native-audio-recorder-player';
 import {PERMISSIONS} from 'react-native-permissions';
 import RNFetchBlob from 'rn-fetch-blob';
-import {AudioProvider} from '../../../hocs/AudioProvider';
 import {useDetectAudioAPI} from '../../api/python';
 import Visualizer from '../../components/Visualizer';
+import {AudioProvider} from '../../providers/AudioProvider';
 
 // Types
 export interface AudioFile {

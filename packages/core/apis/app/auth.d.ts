@@ -9,7 +9,13 @@ export type LoginUserApi = {
     password: string;
   };
   Response: {
-    success: boolean;
+    user: {
+      id: number;
+      email: string;
+      name?: string;
+    };
+    accessToken: string;
+    expiresAt: string;
   };
   Error: ERRORS["notFound"];
 };
