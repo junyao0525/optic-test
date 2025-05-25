@@ -8,8 +8,8 @@ import React, {
 } from 'react';
 import {Alert, Platform} from 'react-native';
 import {Camera, PhotoFile} from 'react-native-vision-camera';
-import {useDetectFaceAPI} from '../src/api/python';
-import {ColorProps} from '../src/themes';
+import {useDetectFaceAPI} from '../api/python';
+import {ColorProps} from '../themes';
 
 type DistanceMeasureContextType = {
   cameraRef: React.MutableRefObject<Camera | null>;

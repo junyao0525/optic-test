@@ -14,7 +14,7 @@ import {
   CameraPermissionStatus,
   PhotoFile,
 } from 'react-native-vision-camera';
-import {useDetectFaceAPI} from '../src/api/python';
+import {useDetectFaceAPI} from '../api/python';
 
 // Define the shape of the context value
 export type CameraContextValue = {
