@@ -1,4 +1,4 @@
-export const logMarValues = {
+export const logMarValues: {[key: number]: number} = {
   1: 1.0, // 20/200
   2: 0.9, // 20/160
   3: 0.8, // 20/125
@@ -29,3 +29,5 @@ export const calculateSizeFromLogMAR = (
   const logsize = baseSize * Math.pow(10, -result);
   return logsize;
 };
+
+export type Direction = 'up' | 'right' | 'down' | 'left';

@@ -4,4 +4,4 @@ import 'react-native-url-polyfill/auto';
 
 export const BackendApiUrl = BACKEND_API_URL;
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-console.log(supabase);
+// console.log(supabase);

@@ -5,7 +5,11 @@ import Animated, {runOnJS} from 'react-native-reanimated';
 import {useWindowDimension} from '../../../hooks/useWindowDimension';
 import Header from '../../components/Header';
 import {Colors} from '../../themes';
-import {logMARToSnellen, logMarValues} from '../../utils/logMar';
+import {
+  calculateSizeFromLogMAR,
+  logMARToSnellen,
+  logMarValues,
+} from '../../utils/logMar';
 
 const LandoltCtest = () => {
   const {width} = useWindowDimension();
