@@ -1,4 +1,4 @@
-import {useNavigation} from '@react-navigation/native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useCallback, useState} from 'react';
 import {Animated, StyleSheet, Text, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
@@ -21,7 +21,7 @@ const LandoltCtest = () => {
     'left' | 'leftTest' | 'right' | 'rightTest' | 'done'
   >('left');
   const [currentLevel, setCurrentLevel] = useState(1);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<TabParamList>>();
 
   const getRandomDirection: () => Direction = useCallback(() => {
     const directions: Direction[] = ['up', 'right', 'down', 'left'];
