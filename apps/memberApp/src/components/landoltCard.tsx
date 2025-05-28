@@ -1,10 +1,6 @@
 import {useMemo} from 'react';
 import {Animated, StyleSheet, Text, View} from 'react-native';
-import {
-  Gesture,
-  GestureDetector,
-  GestureType,
-} from 'react-native-gesture-handler';
+import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {runOnJS} from 'react-native-reanimated';
 import {Colors} from '../themes';
 import {Direction} from '../utils/logMar';
@@ -16,7 +12,6 @@ type LandoltCardProps = {
   title: string;
   subTitle?: string;
   instruction: string;
-  gesture?: GestureType; // Replace with your actual type
   onSwipe: (direction: Direction) => void;
   getLandoltCStyle: () => object; // Function to get the style of the Landolt C
   children?: React.ReactNode;
@@ -28,7 +23,6 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
   title,
   subTitle,
   instruction,
-  gesture,
   onSwipe,
   getLandoltCStyle,
   children,

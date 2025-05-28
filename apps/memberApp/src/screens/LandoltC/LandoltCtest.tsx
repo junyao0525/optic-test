@@ -85,7 +85,6 @@ const LandoltCtest = () => {
     }
   };
 
-  // Update test state or advance to next level
   const processSwipe = useCallback(
     (swipeDirection: Direction) => {
       const isCorrect = swipeDirection === direction;
