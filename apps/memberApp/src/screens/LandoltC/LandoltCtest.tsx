@@ -1,12 +1,12 @@
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useCallback, useState} from 'react';
-import {Animated, StyleSheet, Text, View} from 'react-native';
-import {Gesture, GestureDetector} from 'react-native-gesture-handler';
-import {runOnJS} from 'react-native-reanimated';
+import {StyleSheet, Text, View} from 'react-native';
 import {useWindowDimension} from '../../../hooks/useWindowDimension';
 import BottomButton from '../../components/BottomButton';
 import Header from '../../components/Header';
+import LandoltCard from '../../components/landoltCard';
 import LandoltInstruction from '../../components/LandoltCInstruction';
+import TestCard from '../../components/TestCard';
 import {Colors} from '../../themes';
 import {
   calculateSizeFromLogMAR,
@@ -18,10 +18,21 @@ import {
 const LandoltCtest = () => {
   const {width} = useWindowDimension();
   const [step, setStep] = useState<
-    'left' | 'leftTest' | 'right' | 'rightTest' | 'done'
-  >('left');
+    | 'type'
+    | 'left'
+    | 'leftTest'
+    | 'right'
+    | 'rightTest'
+    | 'done'
+    | 'leftSpeakTest'
+    | 'rightSpeakTest'
+  >('type');
   const [currentLevel, setCurrentLevel] = useState(1);
   const navigation = useNavigation<NavigationProp<TabParamList>>();
+  const [testType, setTestType] = useState<'swipe' | 'audio' | null>(null);
+
+  const swipeTestImage = require('../../../assets/images/LandoltCtestType/swipe-test.png');
+  const speakTestImage = require('../../../assets/images/LandoltCtestType/speak-test.png');
 
   const getRandomDirection: () => Direction = useCallback(() => {
     const directions: Direction[] = ['up', 'right', 'down', 'left'];
@@ -156,25 +167,54 @@ const LandoltCtest = () => {
     [step, direction, currentLevel, getRandomDirection],
   );
 
-  const swipeGesture = Gesture.Pan()
-    .activateAfterLongPress(0)
-    .onEnd(e => {
-      'worklet';
-      const {translationX, translationY} = e;
-
-      let detectedDirection: Direction;
-
-      if (Math.abs(translationX) > Math.abs(translationY)) {
-        detectedDirection = translationX > 0 ? 'right' : 'left';
-      } else {
-        detectedDirection = translationY > 0 ? 'down' : 'up';
-      }
-
-      runOnJS(processSwipe)(detectedDirection);
-    });
+  const handleTestTypeSelection = useCallback((type: string) => {
+    console.log(`Selected test type: ${type}`);
+    if (type === 'swipe') {
+      setTestType('swipe');
+      setStep('left');
+    } else if (type === 'audio') {
+      setTestType('audio');
+      setStep('leftSpeakTest');
+    }
+  }, []);
 
   return (
     <>
+      {step === 'type' && (
+        <>
+          <View style={styles.container}>
+            <Text style={styles.resultTitle}>Select Test Type</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}>
+              <TestCard
+                title="Swipe Test"
+                image={swipeTestImage} // Replace with your image
+                onPress={() => {
+                  // setTestType('swipe');
+                  handleTestTypeSelection('swipe');
+                }}
+                gradient={['#E3F2FD', '#2196F3']}
+                icon="👆"
+              />
+
+              <TestCard
+                title="Speak Test"
+                image={speakTestImage} // Replace with your image
+                onPress={() => {
+                  // setTestType('audio');
+                  handleTestTypeSelection('audio');
+                }}
+                gradient={['#E3F2FD', '#2196F3']}
+                icon="🎵"
+              />
+            </View>
+          </View>
+        </>
+      )}
+
       {step === 'left' && (
         <LandoltInstruction eye="left" onContinue={() => setStep('leftTest')} />
       )}
@@ -190,7 +230,6 @@ const LandoltCtest = () => {
         <>
           <Header backHomeButton title="Test Complete" />
           <View style={styles.container}>
-            {/* <Text style={styles.title}>Landolt C Visual Acuity Test</Text> */}
             <View style={styles.resultContainer}>
               <Text style={styles.resultTitle}>Visual Acuity Results</Text>
 
@@ -263,44 +302,26 @@ const LandoltCtest = () => {
       )}
 
       {(step === 'leftTest' || step === 'rightTest') && (
-        <>
-          <Header backHomeButton title="Landolt C Test" />
-          <View style={styles.container}>
-            <Text style={styles.title}>Landolt C Visual Acuity Test</Text>
-            <View style={styles.testInfo}>
-              <Text style={styles.eyeIndicator}>
-                Testing: {step === 'rightTest' ? 'RIGHT' : 'LEFT'} eye
-                {step === 'rightTest'
-                  ? ' (cover left eye)'
-                  : ' (cover right eye)'}
-              </Text>
-            </View>
-            <View style={styles.instructionContainer}>
-              <Text style={styles.instruction}>
-                Swipe in the direction of the gap in the C
-              </Text>
-            </View>
+        <LandoltCard
+          step={step}
+          eye={step === 'rightTest' ? 'RIGHT' : 'LEFT'}
+          title="Landolt C Visual Acuity Test"
+          instruction="Swipe in the direction of the gap in the C"
+          getLandoltCStyle={getLandoltCStyle}
+          onSwipe={processSwipe}
+        />
+      )}
 
-            <GestureDetector gesture={swipeGesture}>
-              <Animated.View style={styles.testArea}>
-                <View style={getLandoltCStyle()} />
-                {/* {feedback && (
-                  <Text style={styles.feedbackText}>{feedback}</Text>
-                )} */}
-              </Animated.View>
-            </GestureDetector>
-          </View>
-          <BottomButton
-            title={step === 'leftTest' ? 'Continue' : 'View Results'}
-            onPress={() => {
-              if (step === 'leftTest') {
-                setStep('right');
-              } else if (step === 'rightTest') {
-                setStep('done');
-              }
-            }}
-          />
-        </>
+      {(step === 'leftSpeakTest' || step === 'rightSpeakTest') && (
+        <LandoltCard
+          step={step}
+          eye={step === 'leftSpeakTest' ? 'RIGHT' : 'LEFT'}
+          title="Landolt C Visual Acuity Test"
+          subTitle="Speak Test"
+          instruction="Please hold the button and speak the direction of the gap"
+          getLandoltCStyle={getLandoltCStyle}
+          onSwipe={processSwipe}
+        />
       )}
     </>
   );
@@ -465,6 +486,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 10,
     alignSelf: 'center',
+  },
+  cardsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 16,
   },
 });
 
