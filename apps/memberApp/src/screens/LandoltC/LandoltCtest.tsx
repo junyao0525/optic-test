@@ -4,6 +4,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import {useWindowDimension} from '../../../hooks/useWindowDimension';
 import BottomButton from '../../components/BottomButton';
 import Header from '../../components/Header';
+import LandoltAudioCard from '../../components/LandoltAudioCard';
 import LandoltCard from '../../components/landoltCard';
 import LandoltInstruction from '../../components/LandoltCInstruction';
 import TestCard from '../../components/TestCard';
@@ -173,7 +174,7 @@ const LandoltCtest = () => {
       setStep('left');
     } else if (type === 'audio') {
       setTestType('audio');
-      setStep('leftSpeakTest');
+      setStep('left');
     }
   }, []);
 
@@ -187,6 +188,7 @@ const LandoltCtest = () => {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+                gap: 10,
               }}>
               <TestCard
                 title="Swipe Test"
@@ -215,13 +217,24 @@ const LandoltCtest = () => {
       )}
 
       {step === 'left' && (
-        <LandoltInstruction eye="left" onContinue={() => setStep('leftTest')} />
+        <LandoltInstruction
+          eye="left"
+          onContinue={() =>
+            testType === 'swipe'
+              ? setStep('leftTest')
+              : setStep('leftSpeakTest')
+          }
+        />
       )}
 
       {step === 'right' && (
         <LandoltInstruction
           eye="right"
-          onContinue={() => setStep('rightTest')}
+          onContinue={() =>
+            testType === 'swipe'
+              ? setStep('rightTest')
+              : setStep('rightSpeakTest')
+          }
         />
       )}
 
@@ -312,14 +325,13 @@ const LandoltCtest = () => {
       )}
 
       {(step === 'leftSpeakTest' || step === 'rightSpeakTest') && (
-        <LandoltCard
+        <LandoltAudioCard
           step={step}
           eye={step === 'leftSpeakTest' ? 'RIGHT' : 'LEFT'}
           title="Landolt C Visual Acuity Test"
-          subTitle="Speak Test"
+          // subTitle="Speak Test"
           instruction="Please hold the button and speak the direction of the gap"
           getLandoltCStyle={getLandoltCStyle}
-          onSwipe={processSwipe}
         />
       )}
     </>

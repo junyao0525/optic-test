@@ -6,13 +6,13 @@ import DistanceMeasurement from '../../components/DistanceMeasurement';
 import {Colors, TextStyle} from '../../themes';
 
 const LandoltC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<RootStackNavigationProp>();
   const {width, height} = useWindowDimensions();
 
   const [showDistanceMeasurement, setShowDistanceMeasurement] = useState(false);
 
   const handleButtonPress = useCallback(() => {
-    navigation.navigate('LandoltCTest');
+    navigation.navigate('AudioScreen');
   }, [navigation]);
 
   return (

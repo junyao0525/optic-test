@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Platform,
   StyleSheet,
   Text,
@@ -13,13 +14,25 @@ import AudioRecorderPlayer, {
   AudioSourceAndroidType,
   OutputFormatAndroidType,
 } from 'react-native-audio-recorder-player';
-import {PERMISSIONS} from 'react-native-permissions';
 import RNFetchBlob from 'rn-fetch-blob';
-import {useDetectAudioAPI} from '../../api/python';
-import Visualizer from '../../components/Visualizer';
-import {AudioProvider} from '../../providers/AudioHOC';
+import {useDetectAudioAPI} from '../api/python';
+import {Colors} from '../themes';
+import Header from './Header';
 
-// Types
+type LandoltCardProps = {
+  step: string;
+  eye: 'LEFT' | 'RIGHT';
+  title: string;
+  subTitle?: string;
+  instruction: string;
+  getLandoltCStyle: () => object;
+  children?: React.ReactNode;
+  onRecordingComplete?: (audioFile: AudioFile) => void;
+  onRecordingError?: (error: Error) => void;
+  maxDuration?: number;
+  visualizerColor?: string;
+};
+
 export interface AudioFile {
   uri: string;
   name: string;
@@ -33,18 +46,17 @@ export interface RecordingState {
   recordTime: string;
 }
 
-export interface AudioRecorderProps {
-  onRecordingComplete: (audioFile: AudioFile) => void;
-  onRecordingError: (error: Error) => void;
-  maxDuration?: number; // in seconds
-  visualizerColor?: string;
-}
-
-const AudioRecorder: React.FC<AudioRecorderProps> = ({
+const LandoltAudioCard: React.FC<LandoltCardProps> = ({
+  step,
+  eye,
+  title,
+  subTitle,
+  instruction,
+  getLandoltCStyle,
+  children,
   onRecordingComplete,
   onRecordingError,
-  maxDuration = 300, // 5 minutes
-  visualizerColor = '#4285F4',
+  maxDuration = 5,
 }) => {
   // State
   const [recordingState, setRecordingState] = useState<RecordingState>({
@@ -136,7 +148,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
     } catch (error) {
       setIsProcessing(false);
       console.error('Error starting recording:', error);
-      onRecordingError(
+      onRecordingError?.(
         error instanceof Error ? error : new Error('Unknown recording error'),
       );
     }
@@ -203,7 +215,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
           uri: fileUri,
           name: fileName,
           type: 'audio/mpeg',
-          size: fileStat.size, // You can get actual size if needed
+          size: fileStat.size,
         });
       } catch (apiError) {
         console.error('API error:', apiError);
@@ -237,58 +249,119 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      {/* Audio visualization */}
-      <View style={styles.visualizerContainer}>
-        <Visualizer levels={audioLevels} color={visualizerColor} />
+    <>
+      <Header backHomeButton title="Landolt C Test" />
+      <View style={styles.container}>
+        <Text style={styles.title}>{title}</Text>
+        {subTitle && <Text style={styles.title}>{subTitle}</Text>}
+
+        <View style={styles.testInfo}>
+          <Text style={styles.eyeIndicator}>
+            Testing: {eye} eye (
+            {eye === 'LEFT' ? 'cover right eye' : 'cover left eye'})
+          </Text>
+        </View>
+
+        <View style={styles.instructionContainer}>
+          <Text style={styles.instruction}>{instruction}</Text>
+        </View>
+
+        <Animated.View style={styles.testArea}>
+          <View style={getLandoltCStyle()} />
+          {children}
+        </Animated.View>
+
+        <Text style={styles.timeText}>
+          {formatTime(recordingState.currentDurationSec)}
+        </Text>
+
+        <View style={styles.controlsContainer}>
+          <TouchableOpacity
+            style={[
+              styles.recordButton,
+              recordingState.isRecording
+                ? styles.stopButton
+                : styles.startButton,
+            ]}
+            onPress={toggleRecording}
+            disabled={isProcessing}>
+            {isProcessing ? (
+              <ActivityIndicator color="#FFF" size="small" />
+            ) : (
+              <View
+                style={
+                  recordingState.isRecording
+                    ? styles.stopIcon
+                    : styles.startIcon
+                }
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Status text */}
+        {/* <Text style={styles.statusText}>
+          {isProcessing
+            ? 'Processing...'
+            : recordingState.isRecording
+            ? 'Recording m4a'
+            : 'Ready to record m4a'}
+        </Text> */}
       </View>
-
-      {/* Recording time */}
-      <Text style={styles.timeText}>
-        {formatTime(recordingState.currentDurationSec)}
-      </Text>
-
-      {/* Recording controls */}
-      <View style={styles.controlsContainer}>
-        <TouchableOpacity
-          style={[
-            styles.recordButton,
-            recordingState.isRecording ? styles.stopButton : styles.startButton,
-          ]}
-          onPress={toggleRecording}
-          disabled={isProcessing}>
-          {isProcessing ? (
-            <ActivityIndicator color="#FFF" size="small" />
-          ) : (
-            <View
-              style={
-                recordingState.isRecording ? styles.stopIcon : styles.startIcon
-              }
-            />
-          )}
-        </TouchableOpacity>
-      </View>
-
-      {/* Status text */}
-      <Text style={styles.statusText}>
-        {isProcessing
-          ? 'Processing...'
-          : recordingState.isRecording
-          ? 'Recording m4a'
-          : 'Ready to record m4a'}
-      </Text>
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
+    backgroundColor: Colors.backgroundColor,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  testInfo: {
+    width: '90%',
+    marginBottom: 20,
+  },
+  eyeIndicator: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+    color: Colors.darkGreen,
+  },
+  instructionContainer: {
+    marginBottom: 30,
+    padding: 10,
+    backgroundColor: Colors.darkGreen,
+    borderRadius: 8,
+    width: '90%',
+  },
+  instruction: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: Colors.white,
+  },
+  testArea: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '80%',
+    height: '30%',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    marginBottom: 20,
   },
   visualizerContainer: {
     width: '100%',
@@ -307,6 +380,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 16,
   },
   recordButton: {
     width: 64,
@@ -347,4 +421,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AudioProvider(AudioRecorder, [PERMISSIONS.ANDROID.RECORD_AUDIO]);
+// Export with AudioProvider HOC to handle permissions
+export default LandoltAudioCard;

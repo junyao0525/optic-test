@@ -1,6 +1,9 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
-import AudioWithProvided from '../screens/AudioTest/AudioTest';
+import {AudioProvider} from '../providers/AudioProvider';
+import CameraProvider from '../providers/CameraProvider';
+import {DistanceMeasureProvider} from '../providers/DistanceProvider';
+import AudioTestScreen from '../screens/AudioTest/AudioTest';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import ColorVision from '../screens/ColorVision/ColorVision';
@@ -12,11 +15,10 @@ import Help from '../screens/Settings/Help';
 import Language from '../screens/Settings/Language';
 import Profile from '../screens/Settings/Profile';
 import TabNavigator from './TabNavigator';
-import CameraProvider from '../providers/CameraProvider';
-import {DistanceMeasureProvider} from '../providers/DistanceProvider';
 
 const Stack = createNativeStackNavigator();
 const CameraStack = createNativeStackNavigator();
+const AudioStack = createNativeStackNavigator();
 
 const CameraScreen = () => {
   return (
@@ -30,6 +32,16 @@ const CameraScreen = () => {
   );
 };
 
+const AudioScreen = () => {
+  return (
+    <AudioProvider>
+      <AudioStack.Navigator screenOptions={{headerShown: false}}>
+        <AudioStack.Screen name="LandoltCTest" component={LandoltCTest} />
+      </AudioStack.Navigator>
+    </AudioProvider>
+  );
+};
+
 const StackNavigator = () => {
   return (
     <Stack.Navigator
@@ -37,7 +49,7 @@ const StackNavigator = () => {
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="Tab" component={TabNavigator} />
       <Stack.Screen name="CameraScreen" component={CameraScreen} />
-      <Stack.Screen name="LandoltCTest" component={LandoltCTest} />
+      <Stack.Screen name="AudioScreen" component={AudioScreen} />
       <Stack.Screen name="EyeTiredness" component={EyeTiredness} />
       <Stack.Screen name="ColorVision" component={ColorVision} />
       <Stack.Screen name="About" component={About} />
@@ -46,7 +58,7 @@ const StackNavigator = () => {
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
-      <Stack.Screen name="AudioTest" component={AudioWithProvided} />
+      <Stack.Screen name="AudioTest" component={AudioTestScreen} />
     </Stack.Navigator>
   );
 };
