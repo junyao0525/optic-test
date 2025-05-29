@@ -44,7 +44,7 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@babel/preset-env": "^7.20.0",
-    "@babel/runtime": "^7.20.0",
+    "@babel/runtime": "^7.27.3",
     "@bam.tech/react-native-make": "^3.0.3",
     "@react-native-community/cli": "latest",
     "@react-native/babel-preset": "0.74.87",
