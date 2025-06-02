@@ -47,7 +47,7 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
       });
   }, [onSwipe]);
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -58,8 +58,10 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
 
         <View style={styles.testInfo}>
           <Text style={styles.eyeIndicator}>
-            Testing: {eye} eye (
-            {eye === 'LEFT' ? 'cover right eye' : 'cover left eye'})
+          {t('landolt.testing_eye', {
+              eye: eye === 'LEFT' ? t('landolt.left_eye').replace('：', '') : t('landolt.right_eye').replace('：', ''),
+              cover_instruction: eye === 'LEFT' ? t('landolt.cover_right_eye') : t('landolt.cover_left_eye')
+            })}
           </Text>
         </View>
 

@@ -1,8 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { DetectAudioApi, DetectFaceApi } from '@vt/core/apis/app/python';
 
+//TODO : manual change the backend url
 // const API_BASE_URL = BackendApiUrl;
-const API_BASE_URL = 'http://192.168.1.22:8000/';
+const API_BASE_URL = 'http://192.168.1.12:8000/';
 // api/python.ts
 
 export const useDetectFaceAPI = () => {

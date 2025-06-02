@@ -81,7 +81,8 @@
     "home": "首页",
     "history": "历史",
     "setting": "设置",
-    "continue": "继续"
+    "continue": "继续",
+    "overview": "概览"
   },
   "landolt": {
     "header": "兰氏环测试",
@@ -115,6 +116,13 @@
     "rightEye": {
       "title": "测试右眼",
       "description": "请按照下图所示遮住您的右眼。"
+    },
+    "testing_eye": "测试{{eye}}眼（{{cover_instruction}}）",
+    "cover_right_eye": "请遮住右眼",
+    "cover_left_eye": "请遮住左眼",
+    "max_recording_time": {
+      "title": "已达到最大录音时间",
+      "message": "录音已达到最大时长限制。"
     }
   },
   "eye_tiredness": {

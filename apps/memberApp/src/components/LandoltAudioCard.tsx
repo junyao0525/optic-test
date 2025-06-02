@@ -76,6 +76,8 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
   const {mutateAsync: detectAudioMutateAsync} = useDetectAudioAPI();
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     // Set up audio recorder player
     audioRecorderPlayer.current.setSubscriptionDuration(0.1); // 100ms for responsive visualization
@@ -129,8 +131,9 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
         if (recordingState.isRecording) {
           stopRecording();
           Alert.alert(
-            'Maximum recording time reached',
-            'The recording has reached its maximum duration.',
+            t('landolt.max_recording_time.title'),
+            t('landolt.max_recording_time.message'),
+            [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
           );
         }
       }, maxDuration * 1000);
@@ -248,7 +251,6 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
       .toString()
       .padStart(2, '0')}`;
   };
-  const {t} = useTranslation();
   
   return (
     <>
@@ -259,8 +261,10 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
         <View style={styles.testInfo}>
           <Text style={styles.eyeIndicator}>
-            Testing: {eye} eye (
-            {eye === 'LEFT' ? 'cover right eye' : 'cover left eye'})
+            {t('landolt.testing_eye', {
+              eye: eye === 'LEFT' ? t('landolt.left_eye').replace('：', '') : t('landolt.right_eye').replace('：', ''),
+              cover_instruction: eye === 'LEFT' ? t('landolt.cover_right_eye') : t('landolt.cover_left_eye')
+            })}
           </Text>
         </View>
 

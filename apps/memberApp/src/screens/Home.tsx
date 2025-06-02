@@ -61,7 +61,11 @@ const HomeScreen = () => {
     {title: t('common.speakTest'), image: AudioTestImage, route: 'AudioTest'},
   ];
   const handleButtonPress = (route: string, param?: {screen: string}) => {
-    navigate(route, param);
+    if (param) {
+      navigate(route as any, {screen: param.screen});
+    } else {
+      navigate(route as any);
+    }
     console.log(`${route} button pressed`);
   };
 
@@ -69,7 +73,7 @@ const HomeScreen = () => {
     <>
       <Header title={t('home.title')} menuButton />
       <ScrollView style={styles.container}>
-        <Card title="Overview">
+        <Card title={t('common.overview')}>
           <LineChart
             data={historyData}
             width={width - 90}

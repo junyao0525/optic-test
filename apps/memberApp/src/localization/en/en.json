@@ -81,14 +81,15 @@
     "home": "Home",
     "history": "History",
     "setting": "Setting",
-    "continue": "Continue"
+    "continue": "Continue",
+    "overview": "Overview"
   },
   "landolt":{
     "header":"Landolt C Test",
     "title": "Landolt C Visual Acuity Test",
-    "swipe_instruction": "Swipe in the direction of the gap in the C",
-    "speak_instruction": "Please hold the button and speak the direction of the gap",
-    "start": "Let's start with measuring the distance",
+    "swipe_instruction": "Swipe in the direction of the C gap",
+    "speak_instruction": "Hold the button and speak the direction of the gap",
+    "start": "Let's start by measuring the distance",
     "proceed": "Proceed",
     "test_complete": "Test Complete",
     "visual_acuity_results": "Visual Acuity Results",
@@ -97,24 +98,31 @@
     "score": "Score:",
     "logmar": "LogMAR:",
     "snellen": "Snellen:",
-    "disclaimer": "Note: This test is for screening purposes only and should not replace a professional eye examination.",
+    "disclaimer": "Note: This test is for screening purposes only and is not a substitute for professional eye examination.",
     "vision_status": {
-      "normal": "Normal vision",
-      "mild": "Mild visual impairment",
-      "moderate": "Moderate impairment",
-      "poor": "Poor"
+      "normal": "Normal Vision",
+      "mild": "Mild Vision Impairment",
+      "moderate": "Moderate Vision Impairment",
+      "poor": "Poor Vision"
     },
     "select_test_type": "Select Test Type",
     "swipe_test": "Swipe Test",
-    "speak_test": "Speak Test",
-    "tap_to_start": "Tap to start",
+    "speak_test": "Voice Test",
+    "tap_to_start": "Tap to Start",
     "leftEye": {
-      "title": "Testing Left Eye",
-      "description": "Please cover your left eye as the picture shown below."
+      "title": "Test Left Eye",
+      "description": "Please cover your left eye as shown in the image below."
     },
     "rightEye": {
-      "title": "Testing Right Eye",
-      "description": "Please cover your right eye as the picture shown below."
+      "title": "Test Right Eye",
+      "description": "Please cover your right eye as shown in the image below."
+    },
+    "testing_eye": "Testing: {{eye}} eye ({{cover_instruction}})",
+    "cover_right_eye": "cover right eye",
+    "cover_left_eye": "cover left eye",
+    "max_recording_time": {
+      "title": "Maximum recording time reached",
+      "message": "The recording has reached its maximum duration."
     }
   },
   "eye_tiredness": {
