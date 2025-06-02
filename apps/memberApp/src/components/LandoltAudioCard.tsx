@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -15,8 +16,8 @@ import AudioRecorderPlayer, {
   OutputFormatAndroidType,
 } from 'react-native-audio-recorder-player';
 import RNFetchBlob from 'rn-fetch-blob';
-import {useDetectAudioAPI} from '../api/python';
-import {Colors} from '../themes';
+import { useDetectAudioAPI } from '../api/python';
+import { Colors } from '../themes';
 import Header from './Header';
 
 type LandoltCardProps = {
@@ -247,10 +248,11 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
       .toString()
       .padStart(2, '0')}`;
   };
-
+  const {t} = useTranslation();
+  
   return (
     <>
-      <Header backHomeButton title="Landolt C Test" />
+      <Header backHomeButton title={t("landolt.header")} />
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
         {subTitle && <Text style={styles.title}>{subTitle}</Text>}

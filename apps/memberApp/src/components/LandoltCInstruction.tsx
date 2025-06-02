@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {Image, ImageProps, StyleSheet, Text, View} from 'react-native';
-import {useWindowDimension} from '../../hooks/useWindowDimension';
-import {Colors, TextStyle} from '../themes';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Image, ImageProps, StyleSheet, Text, View } from 'react-native';
+import { useWindowDimension } from '../../hooks/useWindowDimension';
+import { Colors, TextStyle } from '../themes';
 import BottomButton from './BottomButton';
 
-const coverLeftImage = require('../../assets/images/cover-left.png');
-const coverRightImage = require('../../assets/images/cover-right.png');
+const coverRightImage = require('../../assets/images/cover-left.png');
+const coverLeftImage = require('../../assets/images/cover-right.png');
 
 type messageType = {
   title: string;
@@ -28,19 +29,20 @@ const LandoltInstruction = ({
   });
 
   console.log(eye);
+  const {t} = useTranslation();
 
   useEffect(() => {
     console.log(eye);
     if (eye === 'left') {
       setMessage({
-        title: 'TESTING LEFT EYE',
-        description: 'Please cover your left eye as the picture shown below.',
+        title: t('landolt.leftEye.title'),
+        description: t('landolt.rightEye.description'),
         photo: coverLeftImage,
       });
     } else {
       setMessage({
-        title: 'TESTING RIGHT EYE',
-        description: 'Please cover your right eye as the picture shown below.',
+        title: t('landolt.rightEye.title'),
+        description: t('landolt.leftEye.description'),
         photo: coverRightImage,
       });
     }
@@ -63,7 +65,7 @@ const LandoltInstruction = ({
           }}
         />
       )}
-      <BottomButton title="Continue" onPress={onContinue}></BottomButton>
+      <BottomButton title={t('common.continue')} onPress={onContinue}></BottomButton>
     </>
   );
 };

@@ -1,0 +1,174 @@
+{
+  "app": {
+    "name": "Vision App",
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "retry": "Retry"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "confirm_password": "Confirm Password",
+    "forgot_password": "Forgot Password?",
+    "remember_me": "Remember Me",
+    "welcome_back": "Welcome Back!",
+    "login_subtitle": "Sign in to continue",
+    "create_account": "Create Account",
+    "register_subtitle": "Sign up to get started",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "login_failed": "Login Failed",
+    "registration_failed": "Registration Failed",
+    "success": "Success",
+    "account_created": "Account created successfully",
+    "name_required": "Name is required",
+    "email_required": "Email is required",
+    "email_invalid": "Email is not valid",
+    "password_required": "Password is required",
+    "password_min_length": "Password must be at least 6 characters"
+  },
+  "home": {
+    "title": "Home",
+    "greeting": "Hello, {{name}}!",
+    "dashboard": "Dashboard",
+    "testTypes": "Test Types"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "privacy": "Privacy Policy",
+    "about": "About",
+    "profile": "My Profile",
+    "history": "My History",
+    "help": "Help",
+    "logout": "Logout",
+    "signIn": "Sign In",
+    "personalData": "Personal Data",
+    "other": "Other",
+    "guest": "Guest"
+  },
+  "language": {
+    "en": "English",
+    "zh": "Chinese",
+    "current": "Current Language",
+    "popular": "Popular Languages",
+    "changed": "Language changed to {{language}}",
+    "change_error": "Failed to change language",
+    "change_info": "Changing the language will update the app interface. Some content may require an app restart."
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "next": "Next",
+    "previous": "Previous",
+    "success": "Success",
+    "error": "Error",
+    "landoltTest": "Landolt'C Test",
+    "eyeTiredness": "Eye Tiredness",
+    "colorVision": "Color Vision",
+    "speakTest": "Speak Test",
+    "home": "Home",
+    "history": "History",
+    "setting": "Setting",
+    "continue": "Continue"
+  },
+  "landolt":{
+    "header":"Landolt C Test",
+    "title": "Landolt C Visual Acuity Test",
+    "swipe_instruction": "Swipe in the direction of the gap in the C",
+    "speak_instruction": "Please hold the button and speak the direction of the gap",
+    "start": "Let's start with measuring the distance",
+    "proceed": "Proceed",
+    "test_complete": "Test Complete",
+    "visual_acuity_results": "Visual Acuity Results",
+    "left_eye": "Left Eye:",
+    "right_eye": "Right Eye:",
+    "score": "Score:",
+    "logmar": "LogMAR:",
+    "snellen": "Snellen:",
+    "disclaimer": "Note: This test is for screening purposes only and should not replace a professional eye examination.",
+    "vision_status": {
+      "normal": "Normal vision",
+      "mild": "Mild visual impairment",
+      "moderate": "Moderate impairment",
+      "poor": "Poor"
+    },
+    "select_test_type": "Select Test Type",
+    "swipe_test": "Swipe Test",
+    "speak_test": "Speak Test",
+    "tap_to_start": "Tap to start",
+    "leftEye": {
+      "title": "Testing Left Eye",
+      "description": "Please cover your left eye as the picture shown below."
+    },
+    "rightEye": {
+      "title": "Testing Right Eye",
+      "description": "Please cover your right eye as the picture shown below."
+    }
+  },
+  "eye_tiredness": {
+    "title": "Eye Tiredness Test",
+    "instructions": "Hold your device and match your face within the circle and sit in a well-lit room.",
+    "camera_permission_required": "Camera permission is required.",
+    "camera_permission_alert": {
+      "title": "Permission Required",
+      "message": "Camera access is needed to use this feature. Please grant camera permissions in your device settings."
+    },
+    "loading_camera": "Loading front camera...",
+    "capture": "Capture"
+  },
+  "splash": {
+    "app_name": "OptiTest"
+  },
+  "distance_measurement": {
+    "title": "Distance Measurement",
+    "instructions": "Hold your device and match your face within the circle and sit in a well-lit room.",
+    "success": "Distance measured successfully",
+    "measuring": "Measuring... {{seconds}}s",
+    "faces_detected": "Faces detected: {{count}}",
+    "camera_error": "Camera not ready or permission denied",
+    "continue": "Continue",
+    "alerts": {
+      "invalid_position": {
+        "title": "Invalid Face Position",
+        "message": "Ensure one centered face is detected."
+      },
+      "too_close": {
+        "title": "Too Close",
+        "message": "Move farther."
+      },
+      "too_far": {
+        "title": "Too Far",
+        "message": "Move closer."
+      },
+      "perfect": {
+        "title": "Perfect",
+        "message": "Distance is ideal."
+      },
+      "error": {
+        "title": "Error",
+        "message": "Could not process the image."
+      },
+      "timeout": {
+        "title": "Timeout",
+        "message": "Measurement session expired. Please try again."
+      }
+    },
+    "messages": {
+      "too_close": "Too close! Please move back.",
+      "too_far": "Too far! Please move closer.",
+      "perfect": "Perfect distance!"
+    }
+  }
+}

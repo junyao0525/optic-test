@@ -1,9 +1,9 @@
-import {NavigationProp} from '@react-navigation/native';
+import { NavigationProp } from '@react-navigation/native';
 
 declare global {
   // Define the main stack parameter list based on your StackNavigator
   type RootStackParamList = {
-    Tab: undefined;
+    Tab: { screen?: keyof TabParamList };
     CameraScreen: undefined;
     AudioScreen: undefined;
     EyeTiredness: undefined;
@@ -51,4 +51,5 @@ declare global {
   }
 }
 
-export {};
+export { };
+

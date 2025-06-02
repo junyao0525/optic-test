@@ -1,9 +1,10 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useState} from 'react';
-import {StyleSheet, Text, useWindowDimensions, View} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Button from '../../components/Button';
 import DistanceMeasurement from '../../components/DistanceMeasurement';
-import {Colors, TextStyle} from '../../themes';
+import { Colors, TextStyle } from '../../themes';
 
 const LandoltC = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
@@ -15,6 +16,8 @@ const LandoltC = () => {
     navigation.navigate('AudioScreen');
   }, [navigation]);
 
+  const {t} = useTranslation();
+
   return (
     <>
       {showDistanceMeasurement ? (
@@ -23,10 +26,10 @@ const LandoltC = () => {
         <>
           <View style={[styles.container, {width, minHeight: height}]}>
             <Text style={[TextStyle.H3, styles.text]}>
-              Let's start with measuring the distance
+              {t('landolt.start')}
             </Text>
             <Button
-              title="Proceed"
+              title={t('landolt.proceed')}
               onPress={() => {
                 setShowDistanceMeasurement(true);
               }}

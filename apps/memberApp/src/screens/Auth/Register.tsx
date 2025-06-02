@@ -1,12 +1,18 @@
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import {useForm} from 'react-hook-form';
-import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import Divider from '../../components/Divider';
-import Header from '../../components/Header';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { AuthController } from '../../api/auth/controller';
 import InputField from '../../components/InputField';
-import {Colors, TextStyle} from '../../themes';
-import {AuthController} from '../../api/auth/controller';
+import { Colors, TextStyle } from '../../themes';
 
 type FormData = {
   name: string;
@@ -16,6 +22,7 @@ type FormData = {
 
 const Register = () => {
   const navigation = useNavigation();
+  const {t} = useTranslation();
 
   const {
     control,
@@ -34,65 +41,70 @@ const Register = () => {
       const {error} = await AuthController.register(data);
 
       if (error) {
-        Alert.alert('Registration Failed', error.message);
+        Alert.alert(t('auth.registration_failed'), error.message);
       } else {
-        Alert.alert('Success', 'Account created successfully', [
+        Alert.alert(t('auth.success'), t('auth.account_created'), [
           {
-            text: 'OK',
+            text: t('common.ok'),
             onPress: () => navigation.navigate('Login'),
           },
         ]);
       }
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Something went wrong');
+      Alert.alert(t('common.error'), err.message || t('common.something_went_wrong'));
     }
   };
 
   return (
-    <>
-      <Header title={'Register'} backButton headerColor={Colors.white} />
-      <Divider marginVertical={0} thickness={0.2} />
-      <View style={styles.container}>
-        <Text style={[TextStyle.H1, styles.mainText]}>Sign up</Text>
-        <Text style={styles.secondText}>Create an account to continue.</Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Image
+          source={require('../../../assets/images/BR_appIcon.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.title}>{t('auth.create_account')}</Text>
+        <Text style={styles.subtitle}>{t('auth.register_subtitle')}</Text>
+      </View>
 
+      <View style={styles.form}>
         <InputField
-          containerStyle={{paddingBottom: 10}}
-          label="Name"
+          containerStyle={styles.inputContainer}
+          label={t('auth.name')}
           control={control}
           name="name"
-          rules={{required: 'Name is required'}}
+          rules={{required: t('auth.name_required')}}
         />
         {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
 
         <InputField
-          containerStyle={{paddingBottom: 10}}
-          label="Email"
+          containerStyle={styles.inputContainer}
+          label={t('auth.email')}
           control={control}
           name="email"
+          keyboardType="email-address"
+          autoCapitalize="none"
           rules={{
-            required: 'Email is required',
+            required: t('auth.email_required'),
             pattern: {
               value: /^\S+@\S+\.\S+$/,
-              message: 'Email is not valid',
+              message: t('auth.email_invalid'),
             },
           }}
         />
-        {errors.email && (
-          <Text style={styles.error}>{errors.email.message}</Text>
-        )}
+        {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
 
         <InputField
-          containerStyle={{paddingBottom: 10}}
-          label="Password"
+          containerStyle={styles.inputContainer}
+          label={t('auth.password')}
           control={control}
           name="password"
           secureTextEntry
           rules={{
-            required: 'Password is required',
+            required: t('auth.password_required'),
             minLength: {
               value: 6,
-              message: 'Password must be at least 6 characters',
+              message: t('auth.password_min_length'),
             },
           }}
         />
@@ -101,52 +113,84 @@ const Register = () => {
         )}
 
         <TouchableOpacity
-          style={styles.button}
+          style={styles.registerButton}
           onPress={handleSubmit(onSubmit)}>
-          <Text style={styles.buttonText}>Register</Text>
+          <Text style={styles.registerButtonText}>{t('auth.register')}</Text>
         </TouchableOpacity>
+
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>{t('auth.have_account')}</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginLink}>{t('auth.login')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
     flex: 1,
-    width: '100%',
-    paddingHorizontal: 20,
-    justifyContent: 'flex-start',
-    paddingBottom: 40,
-    paddingTop: 20,
+    backgroundColor: Colors.white,
+    padding: 20,
   },
-  mainText: {
-    fontSize: 40,
-    fontWeight: 'bold',
+  header: {
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  logo: {
+    width: 180,
+    height: 180,
+  },
+  title: {
+    ...TextStyle.H1,
     color: Colors.black,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    ...TextStyle.P2,
+    color: Colors.darkGreen,
+    textAlign: 'center',
+  },
+  form: {
+    flex: 1,
+  },
+  inputContainer: {
     marginBottom: 10,
   },
-  secondText: {
-    paddingVertical: 20,
-    fontSize: 14,
-    color: Colors.darkGreen,
+  error: {
+    ...TextStyle.P3,
+    color: Colors.red,
+    marginBottom: 15,
   },
-  button: {
+  registerButton: {
     backgroundColor: Colors.primary,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 15,
+    borderRadius: 10,
     marginTop: 20,
+    marginBottom: 20,
   },
-  buttonText: {
+  registerButtonText: {
+    ...TextStyle.P1B,
     color: Colors.white,
     textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
-  error: {
-    color: 'red',
-    fontSize: 13,
-    marginBottom: 5,
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loginText: {
+    ...TextStyle.P2,
+    color: Colors.black,
+  },
+  loginLink: {
+    ...TextStyle.P2B,
+    color: Colors.primary,
+    marginLeft: 5,
   },
 });
 

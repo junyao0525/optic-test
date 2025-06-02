@@ -1,15 +1,16 @@
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
-import {Alert, Platform} from 'react-native';
-import {Camera, PhotoFile} from 'react-native-vision-camera';
-import {useDetectFaceAPI} from '../api/python';
-import {ColorProps} from '../themes';
+import { useTranslation } from 'react-i18next';
+import { Alert, Platform } from 'react-native';
+import { Camera, PhotoFile } from 'react-native-vision-camera';
+import { useDetectFaceAPI } from '../api/python';
+import { ColorProps } from '../themes';
 
 type DistanceMeasureContextType = {
   cameraRef: React.MutableRefObject<Camera | null>;
@@ -43,6 +44,7 @@ export const DistanceMeasureProvider: React.FC<{children: React.ReactNode}> = ({
   const capturingRef = useRef(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const secondsRef = useRef<number>(10);
+  const {t} = useTranslation();
 
   const {mutateAsync: detectFaceMutateAsync} = useDetectFaceAPI();
 
@@ -75,8 +77,8 @@ export const DistanceMeasureProvider: React.FC<{children: React.ReactNode}> = ({
 
       if (response.face_count !== 1 || !response.faces[0].is_centered) {
         Alert.alert(
-          'Invalid Face Position',
-          'Ensure one centered face is detected.',
+          t('distance_measurement.alerts.invalid_position.title'),
+          t('distance_measurement.alerts.invalid_position.message'),
         );
         return false;
       }
@@ -86,21 +88,33 @@ export const DistanceMeasureProvider: React.FC<{children: React.ReactNode}> = ({
       setFaceCount(1);
 
       if (response.faces[0].is_too_near) {
-        setDistanceText('Too close! Please move back.');
+        setDistanceText(t('distance_measurement.messages.too_close'));
         setColor('red');
-        Alert.alert('Too Close', 'Move farther.');
+        Alert.alert(
+          t('distance_measurement.alerts.too_close.title'),
+          t('distance_measurement.alerts.too_close.message'),
+        );
       } else if (response.faces[0].is_too_far) {
-        setDistanceText('Too far! Please move closer.');
-        Alert.alert('Too Far', 'Move closer.');
+        setDistanceText(t('distance_measurement.messages.too_far'));
+        Alert.alert(
+          t('distance_measurement.alerts.too_far.title'),
+          t('distance_measurement.alerts.too_far.message'),
+        );
         setColor('orange');
       } else {
-        setDistanceText('Perfect distance!');
+        setDistanceText(t('distance_measurement.messages.perfect'));
         setColor('green');
-        Alert.alert('Perfect', 'Distance is ideal.');
+        Alert.alert(
+          t('distance_measurement.alerts.perfect.title'),
+          t('distance_measurement.alerts.perfect.message'),
+        );
         return true;
       }
     } catch (e) {
-      Alert.alert('Error', 'Could not process the image.');
+      Alert.alert(
+        t('distance_measurement.alerts.error.title'),
+        t('distance_measurement.alerts.error.message'),
+      );
     } finally {
       capturingRef.current = false;
     }
@@ -146,16 +160,16 @@ export const DistanceMeasureProvider: React.FC<{children: React.ReactNode}> = ({
 
           if (timeout && !success) {
             Alert.alert(
-              'Timeout',
-              'Measurement session expired. Please try again.',
+              t('distance_measurement.alerts.timeout.title'),
+              t('distance_measurement.alerts.timeout.message'),
               [
                 {
-                  text: 'Cancel',
+                  text: t('common.cancel'),
                   onPress: () => navigation.goBack(),
                   style: 'destructive',
                 },
                 {
-                  text: 'Continue',
+                  text: t('common.continue'),
                   onPress: () => {
                     console.log('Restarting measurement...');
                     startCapture();

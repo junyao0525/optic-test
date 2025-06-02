@@ -1,9 +1,10 @@
-import {useMemo} from 'react';
-import {Animated, StyleSheet, Text, View} from 'react-native';
-import {Gesture, GestureDetector} from 'react-native-gesture-handler';
-import {runOnJS} from 'react-native-reanimated';
-import {Colors} from '../themes';
-import {Direction} from '../utils/logMar';
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
+import { Colors } from '../themes';
+import { Direction } from '../utils/logMar';
 import Header from './Header';
 
 type LandoltCardProps = {
@@ -46,9 +47,11 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
       });
   }, [onSwipe]);
 
+  const {t} = useTranslation();
+
   return (
     <>
-      <Header backHomeButton title="Landolt C Test" />
+      <Header backHomeButton title= {t("landolt.header")} />
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
         {subTitle && <Text style={styles.title}>{subTitle}</Text>}

@@ -1,0 +1,174 @@
+{
+  "app": {
+    "name": "视力测试应用",
+    "welcome": "欢迎",
+    "loading": "加载中...",
+    "retry": "重试"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "register": "注册",
+    "email": "邮箱",
+    "password": "密码",
+    "name": "姓名",
+    "confirm_password": "确认密码",
+    "forgot_password": "忘记密码？",
+    "remember_me": "记住我",
+    "welcome_back": "欢迎回来！",
+    "login_subtitle": "登录以继续",
+    "create_account": "创建账号",
+    "register_subtitle": "注册以开始使用",
+    "no_account": "还没有账号？",
+    "have_account": "已有账号？",
+    "login_failed": "登录失败",
+    "registration_failed": "注册失败",
+    "success": "成功",
+    "account_created": "账号创建成功",
+    "name_required": "请输入姓名",
+    "email_required": "请输入邮箱",
+    "email_invalid": "邮箱格式不正确",
+    "password_required": "请输入密码",
+    "password_min_length": "密码至少需要6个字符"
+  },
+  "home": {
+    "title": "首页",
+    "greeting": "你好，{{name}}！",
+    "dashboard": "仪表板",
+    "testTypes": "测试类型"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "theme": "主题",
+    "notifications": "通知",
+    "privacy": "隐私政策",
+    "about": "关于",
+    "profile": "我的资料",
+    "history": "我的历史",
+    "help": "帮助",
+    "logout": "登出",
+    "signIn": "登录",
+    "personalData": "个人资料",
+    "other": "其他",
+    "guest": "访客"
+  },
+  "language": {
+    "en": "英语",
+    "zh": "中文",
+    "current": "当前语言",
+    "popular": "常用语言",
+    "changed": "语言已更改为{{language}}",
+    "change_error": "更改语言失败",
+    "change_info": "更改语言将更新应用界面。某些内容可能需要重启应用。"
+  },
+  "common": {
+    "yes": "是",
+    "no": "否",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "edit": "编辑",
+    "delete": "删除",
+    "next": "下一步",
+    "previous": "上一步",
+    "success": "成功",
+    "error": "错误",
+    "landoltTest": "兰氏环测试",
+    "eyeTiredness": "眼睛疲劳",
+    "colorVision": "色觉",
+    "speakTest": "说话测试",
+    "home": "首页",
+    "history": "历史",
+    "setting": "设置",
+    "continue": "继续"
+  },
+  "landolt": {
+    "header": "兰氏环测试",
+    "title": "兰氏环视力测试",
+    "swipe_instruction": "请向C形缺口的方向滑动",
+    "speak_instruction": "请按住按钮并说出缺口的方向",
+    "start": "让我们从测量距离开始",
+    "proceed": "继续",
+    "test_complete": "测试完成",
+    "visual_acuity_results": "视力测试结果",
+    "left_eye": "左眼：",
+    "right_eye": "右眼：",
+    "score": "得分：",
+    "logmar": "LogMAR：",
+    "snellen": "Snellen：",
+    "disclaimer": "注意：此测试仅用于筛查目的，不能替代专业的眼科检查。",
+    "vision_status": {
+      "normal": "正常视力",
+      "mild": "轻度视力障碍",
+      "moderate": "中度视力障碍",
+      "poor": "视力较差"
+    },
+    "select_test_type": "选择测试类型",
+    "swipe_test": "滑动测试",
+    "speak_test": "语音测试",
+    "tap_to_start": "点击开始",
+    "leftEye": {
+      "title": "测试左眼",
+      "description": "请按照下图所示遮住您的左眼。"
+    },
+    "rightEye": {
+      "title": "测试右眼",
+      "description": "请按照下图所示遮住您的右眼。"
+    }
+  },
+  "eye_tiredness": {
+    "title": "眼睛疲劳测试",
+    "instructions": "请将设备对准您的脸部，使其在圆圈内，并确保在光线充足的环境中进行测试。",
+    "camera_permission_required": "需要相机权限。",
+    "camera_permission_alert": {
+      "title": "需要权限",
+      "message": "此功能需要相机访问权限。请在设备设置中授予相机权限。"
+    },
+    "loading_camera": "正在加载前置相机...",
+    "capture": "拍摄"
+  },
+  "splash": {
+    "app_name": "视力测试"
+  },
+  "distance_measurement": {
+    "title": "距离测量",
+    "instructions": "请将设备对准您的脸部，使其在圆圈内，并确保在光线充足的环境中进行测试。",
+    "success": "距离测量成功",
+    "measuring": "测量中... {{seconds}}秒",
+    "faces_detected": "检测到的人脸数：{{count}}",
+    "camera_error": "相机未就绪或权限被拒绝",
+    "continue": "继续",
+    "alerts": {
+      "invalid_position": {
+        "title": "人脸位置无效",
+        "message": "请确保检测到一个居中的人脸。"
+      },
+      "too_close": {
+        "title": "距离太近",
+        "message": "请向后移动。"
+      },
+      "too_far": {
+        "title": "距离太远",
+        "message": "请向前移动。"
+      },
+      "perfect": {
+        "title": "完美",
+        "message": "距离合适。"
+      },
+      "error": {
+        "title": "错误",
+        "message": "无法处理图像。"
+      },
+      "timeout": {
+        "title": "超时",
+        "message": "测量会话已过期。请重试。"
+      }
+    },
+    "messages": {
+      "too_close": "太近了！请向后移动。",
+      "too_far": "太远了！请向前移动。",
+      "perfect": "距离完美！"
+    }
+  }
+}

@@ -1,14 +1,15 @@
-import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {useCallback, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {useWindowDimension} from '../../../hooks/useWindowDimension';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, View } from 'react-native';
+import { useWindowDimension } from '../../../hooks/useWindowDimension';
 import BottomButton from '../../components/BottomButton';
 import Header from '../../components/Header';
 import LandoltAudioCard from '../../components/LandoltAudioCard';
 import LandoltCard from '../../components/landoltCard';
 import LandoltInstruction from '../../components/LandoltCInstruction';
 import TestCard from '../../components/TestCard';
-import {Colors} from '../../themes';
+import { Colors } from '../../themes';
 import {
   calculateSizeFromLogMAR,
   Direction,
@@ -31,6 +32,7 @@ const LandoltCtest = () => {
   const [currentLevel, setCurrentLevel] = useState(1);
   const navigation = useNavigation<NavigationProp<TabParamList>>();
   const [testType, setTestType] = useState<'swipe' | 'audio' | null>(null);
+  const {t} = useTranslation();
 
   const swipeTestImage = require('../../../assets/images/LandoltCtestType/swipe-test.png');
   const speakTestImage = require('../../../assets/images/LandoltCtestType/speak-test.png');
@@ -183,7 +185,7 @@ const LandoltCtest = () => {
       {step === 'type' && (
         <>
           <View style={styles.container}>
-            <Text style={styles.resultTitle}>Select Test Type</Text>
+            <Text style={styles.resultTitle}>{t('landolt.select_test_type')}</Text>
             <View
               style={{
                 flexDirection: 'row',
@@ -191,7 +193,7 @@ const LandoltCtest = () => {
                 gap: 10,
               }}>
               <TestCard
-                title="Swipe Test"
+                title={t('landolt.swipe_test')}
                 image={swipeTestImage} // Replace with your image
                 onPress={() => {
                   // setTestType('swipe');
@@ -202,10 +204,9 @@ const LandoltCtest = () => {
               />
 
               <TestCard
-                title="Speak Test"
+                title={t('landolt.speak_test')}
                 image={speakTestImage} // Replace with your image
                 onPress={() => {
-                  // setTestType('audio');
                   handleTestTypeSelection('audio');
                 }}
                 gradient={['#E3F2FD', '#2196F3']}
@@ -240,69 +241,65 @@ const LandoltCtest = () => {
 
       {step === 'done' && (
         <>
-          <Header backHomeButton title="Test Complete" />
+          <Header backHomeButton title={t('landolt.test_complete')} />
           <View style={styles.container}>
             <View style={styles.resultContainer}>
-              <Text style={styles.resultTitle}>Visual Acuity Results</Text>
+              <Text style={styles.resultTitle}>{t('landolt.visual_acuity_results')}</Text>
 
               <View style={styles.eyeResultContainer}>
-                <Text style={styles.eyeTitle}>Left Eye:</Text>
+                <Text style={styles.eyeTitle}>{t('landolt.left_eye')}</Text>
                 <Text style={styles.acuityValue}>
-                  Score:{' '}
+                  {t('landolt.score')}{' '}
                   {leftEyeResults.score +
                     '/' +
                     Object.keys(logMarValues).length}
                 </Text>
                 <Text style={styles.acuityValue}>
-                  LogMAR: {leftEyeResults.logMAR.toFixed(1)}
+                  {t('landolt.logmar')} {leftEyeResults.logMAR.toFixed(1)}
                 </Text>
 
                 <Text style={styles.acuityValue}>
-                  Snellen: {leftEyeResults.snellen}
+                  {t('landolt.snellen')} {leftEyeResults.snellen}
                 </Text>
                 <Text style={styles.acuityDesc}>
                   {leftEyeResults.logMAR <= 0.0
-                    ? 'Normal vision'
+                    ? t('landolt.vision_status.normal')
                     : leftEyeResults.logMAR <= 0.3
-                    ? 'Mild visual impairment'
+                    ? t('landolt.vision_status.mild')
                     : leftEyeResults.logMAR <= 0.7
-                    ? 'Moderate impairment'
-                    : // leftEyeResults.logMAR <= 1.0
-                      'Poor'}
+                    ? t('landolt.vision_status.moderate')
+                    : t('landolt.vision_status.poor')}
                 </Text>
               </View>
 
               <View style={styles.eyeResultContainer}>
-                <Text style={styles.eyeTitle}>Right Eye:</Text>
+                <Text style={styles.eyeTitle}>{t('landolt.right_eye')}</Text>
                 <Text style={styles.acuityValue}>
-                  Score:{' '}
+                  {t('landolt.score')}{' '}
                   {rightEyeResults.score +
                     '/' +
                     Object.keys(logMarValues).length}
                 </Text>
                 <Text style={styles.acuityValue}>
-                  LogMAR: {rightEyeResults.logMAR.toFixed(1)}
+                  {t('landolt.logmar')} {rightEyeResults.logMAR.toFixed(1)}
                 </Text>
 
                 <Text style={styles.acuityValue}>
-                  Snellen: {rightEyeResults.snellen}
+                  {t('landolt.snellen')} {rightEyeResults.snellen}
                 </Text>
                 <Text style={styles.acuityDesc}>
                   {rightEyeResults.logMAR <= 0.0
-                    ? 'Normal vision'
+                    ? t('landolt.vision_status.normal')
                     : rightEyeResults.logMAR <= 0.3
-                    ? 'Mild visual impairment'
+                    ? t('landolt.vision_status.mild')
                     : rightEyeResults.logMAR <= 0.7
-                    ? 'Moderate impairment'
-                    : // rightEyeResults.logMAR <= 1.0
-                      'Poor'}
+                    ? t('landolt.vision_status.moderate')
+                    : t('landolt.vision_status.poor')}
                 </Text>
               </View>
 
               <Text style={styles.disclaimer}>
-                This test is not a substitute for a professional eye exam.
-                Please consult with an eye care professional for accurate
-                results.
+                {t('landolt.disclaimer')}
               </Text>
             </View>
           </View>
@@ -317,8 +314,8 @@ const LandoltCtest = () => {
         <LandoltCard
           step={step}
           eye={step === 'rightTest' ? 'RIGHT' : 'LEFT'}
-          title="Landolt C Visual Acuity Test"
-          instruction="Swipe in the direction of the gap in the C"
+          title={t('landolt.title')}
+          instruction={t('landolt.swipe_instruction')}
           getLandoltCStyle={getLandoltCStyle}
           onSwipe={processSwipe}
         />
@@ -328,9 +325,8 @@ const LandoltCtest = () => {
         <LandoltAudioCard
           step={step}
           eye={step === 'leftSpeakTest' ? 'RIGHT' : 'LEFT'}
-          title="Landolt C Visual Acuity Test"
-          // subTitle="Speak Test"
-          instruction="Please hold the button and speak the direction of the gap"
+          title={t('landolt.title')}
+          instruction={t('landolt.speak_instruction')}
           getLandoltCStyle={getLandoltCStyle}
         />
       )}

@@ -1,4 +1,5 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -6,12 +7,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import {Camera} from 'react-native-vision-camera';
+import { Camera } from 'react-native-vision-camera';
 
-import {Colors, TextStyle} from '../themes';
+import { useCameraContext } from '../providers/CameraProvider';
+import { useDistanceMeasure } from '../providers/DistanceProvider';
+import { Colors, TextStyle } from '../themes';
 import BottomButton from './BottomButton';
-import {useDistanceMeasure} from '../providers/DistanceProvider';
-import {useCameraContext} from '../providers/CameraProvider';
 
 type Props = {
   handleButtonPress: () => void;
@@ -29,6 +30,7 @@ const DistanceMeasureView = ({handleButtonPress}: Props) => {
     startCapture,
   } = useDistanceMeasure();
   const {cameraPermission, activeDevice, loaded} = useCameraContext();
+  const {t} = useTranslation();
 
   useEffect(() => {
     if (cameraPermission === 'granted' && loaded && activeDevice) {
@@ -40,7 +42,7 @@ const DistanceMeasureView = ({handleButtonPress}: Props) => {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.errorText}>
-          Camera not ready or permission denied
+          {t('distance_measurement.camera_error')}
         </Text>
       </SafeAreaView>
     );
@@ -51,8 +53,8 @@ const DistanceMeasureView = ({handleButtonPress}: Props) => {
       <View style={styles.textContainer}>
         <Text style={[TextStyle.H3, styles.text]}>
           {headDistance === null
-            ? 'Hold your device and match your face within the circle and sit in a well-lit room.'
-            : 'Distance measured successfully'}
+            ? t('distance_measurement.instructions')
+            : t('distance_measurement.success')}
         </Text>
       </View>
 
@@ -75,19 +77,24 @@ const DistanceMeasureView = ({handleButtonPress}: Props) => {
           <View style={styles.measureTextContainer}>
             <ActivityIndicator color={Colors.primary} />
             <Text style={styles.measuringText}>
-              Measuring... {secondsRemaining}s
+              {t('distance_measurement.measuring', {seconds: secondsRemaining})}
             </Text>
           </View>
         )}
         <Text style={[styles.distanceText, {color}]}>{distanceText}</Text>
 
         {faceCount > 0 && (
-          <Text style={styles.faceCountText}>Faces detected: {faceCount}</Text>
+          <Text style={styles.faceCountText}>
+            {t('distance_measurement.faces_detected', {count: faceCount})}
+          </Text>
         )}
       </View>
 
-      {distanceText === 'Perfect distance!' && (
-        <BottomButton title="Continue" onPress={handleButtonPress} />
+      {distanceText === t('distance_measurement.messages.perfect') && (
+        <BottomButton
+          title={t('distance_measurement.continue')}
+          onPress={handleButtonPress}
+        />
       )}
     </View>
   );

@@ -2,37 +2,31 @@ import {
   BottomTabBarProps,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
-import React, {useRef} from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import IonIcon from 'react-native-vector-icons/Ionicons';
+import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import HistoryScreen from '../screens/Historys';
 import HomeScreen from '../screens/Home';
 import SettingScreen from '../screens/Settings';
-import {Colors, TextStyle} from '../themes';
+import { Colors, TextStyle } from '../themes';
 
-export const tabHeight = 64;
+export const tabHeight = 70;
 const Tab = createBottomTabNavigator();
 
-const iconMapping: Record<string, {name: string; iconSet: 'Ionicons'}> = {
-  Home: {name: 'home-outline', iconSet: 'Ionicons'},
-  Test: {name: 'eye-outline', iconSet: 'Ionicons'},
-  History: {name: 'stats-chart-outline', iconSet: 'Ionicons'},
-  Setting: {name: 'settings-outline', iconSet: 'Ionicons'},
-};
-
-const renderIcon = (
-  iconName: string,
-  iconSet: string,
-  color: string,
-  size: number,
-) => {
-  switch (iconSet) {
-    case 'Ionicons':
-      return <IonIcon name={iconName} size={size} color={color} />;
-    default:
-      return <Icon name="question-circle" size={size} color={color} />; // Default icon if none match
-  }
+const iconMapping: Record<string, {name: string; activeName: string}> = {
+  Home: {
+    name: 'home-outline',
+    activeName: 'home',
+  },
+  History: {
+    name: 'stats-chart-outline',
+    activeName: 'stats-chart',
+  },
+  Setting: {
+    name: 'settings-outline',
+    activeName: 'settings',
+  },
 };
 
 const TabItem = ({
@@ -50,31 +44,31 @@ const TabItem = ({
   routerName: string;
   onPress: () => void;
 }) => {
-  const {name: iconName, iconSet} = iconMapping[routerName] || {
-    name: 'question-circle',
-    iconSet: 'FontAwesome',
+  const {name, activeName} = iconMapping[routerName] || {
+    name: 'help-circle-outline',
+    activeName: 'help-circle',
   };
 
   return (
-    <Pressable style={styles.tabItem} onPress={onPress}>
-      {renderIcon(
-        iconName,
-        iconSet,
-        selected ? Colors.lightBlue : Colors.black,
-        30,
-      )}
-      {showBadge && (
-        <View style={styles.badgeContainer}>
-          <Text style={[TextStyle.P3, styles.badgeText]}>{badgeNumber}</Text>
-        </View>
-      )}
+    <Pressable
+      style={[styles.tabItem, selected && styles.selectedTabItem]}
+      onPress={onPress}>
+      <View style={styles.iconContainer}>
+        <Icon
+          name={selected ? activeName : name}
+          size={24}
+          color={selected ? Colors.primary : Colors.darkGreen}
+        />
+        {showBadge && (
+          <View style={styles.badgeContainer}>
+            <Text style={styles.badgeText}>{badgeNumber}</Text>
+          </View>
+        )}
+      </View>
       <Text
         style={[
-          TextStyle.P2,
           styles.tabItemText,
-          selected && {
-            color: Colors.black,
-          },
+          selected && styles.selectedTabItemText,
         ]}
         numberOfLines={1}>
         {title}
@@ -84,6 +78,21 @@ const TabItem = ({
 };
 
 const TabBar = (props: BottomTabBarProps) => {
+  const {t} = useTranslation();
+  
+  const getTabTitle = (routeName: string) => {
+    switch (routeName) {
+      case 'Home':
+        return t('common.home');
+      case 'History':
+        return t('common.history');
+      case 'Setting':
+        return t('common.setting');
+      default:
+        return routeName;
+    }
+  };
+
   return (
     <View
       style={[
@@ -95,7 +104,7 @@ const TabBar = (props: BottomTabBarProps) => {
       {props.state.routes.map((route, idx) => (
         <TabItem
           key={route.key}
-          title={route.name as ReactNavigation.TabParamListKey}
+          title={getTabTitle(route.name)}
           selected={idx === props.state.index}
           onPress={() => {
             props.navigation.navigate(route.name);
@@ -138,35 +147,47 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.borderGrey,
     flexDirection: 'row',
+    paddingBottom: 8,
+    paddingTop: 8,
   },
   tabItem: {
-    paddingTop: 13,
-    paddingBottom: 10,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 'auto',
-    padding: 0,
-    flex: 1,
-    gap: 2,
+    paddingVertical: 8,
+  },
+  selectedTabItem: {
+    transform: [{scale: 1.05}],
+  },
+  iconContainer: {
+    position: 'relative',
+    marginBottom: 4,
   },
   tabItemText: {
+    ...TextStyle.P2,
+    color: Colors.darkGreen,
     textAlign: 'center',
-    fontWeight: '400',
-    color: Colors.black,
+  },
+  selectedTabItemText: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
   badgeContainer: {
     position: 'absolute',
-    top: 6,
-    right: 20,
-    backgroundColor: 'red',
+    top: -6,
+    right: -6,
+    backgroundColor: Colors.red,
     borderRadius: 10,
-    width: 15,
-    height: 15,
+    minWidth: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 4,
   },
   badgeText: {
+    ...TextStyle.P3,
     color: Colors.white,
+    fontWeight: '600',
   },
 });
 

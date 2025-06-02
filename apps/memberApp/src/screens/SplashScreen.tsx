@@ -1,10 +1,12 @@
-import React, {ReactNode, useEffect, useState} from 'react';
-import {StyleSheet, Text, useWindowDimensions, View} from 'react-native';
-import {Colors, TextStyle} from '../themes';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Colors, TextStyle } from '../themes';
 
 const SplashScreen = ({children}: {children: ReactNode}) => {
   const [show, setShow] = useState(true);
   const {width, height} = useWindowDimensions();
+  const {t} = useTranslation();
 
   useEffect(() => {
     setTimeout(() => {
@@ -15,7 +17,7 @@ const SplashScreen = ({children}: {children: ReactNode}) => {
   if (show) {
     return (
       <View style={[styles.container, {width, minHeight: height}]}>
-        <Text style={[TextStyle.H2B, styles.text]}>OptiTest</Text>
+        <Text style={[TextStyle.H2B, styles.text]}>{t('splash.app_name')}</Text>
       </View>
     );
   }
@@ -30,7 +32,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundColor,
   },
   text: {
-    fontWeight: 'bold', // 700 , normal 400
     color: Colors.black,
   },
 });

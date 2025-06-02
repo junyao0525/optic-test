@@ -1,16 +1,17 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {View, StyleSheet, Text, Alert, TouchableOpacity} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   Camera,
-  useCameraDevice,
-  useCameraPermission,
+  useCameraDevice
 } from 'react-native-vision-camera';
-import {Colors, TextStyle} from '../../themes';
+import { Colors, TextStyle } from '../../themes';
 
 export default function EyeTiredness() {
   const cameraRef = useRef(null);
   const [permission, setPermission] = useState('');
   const device = useCameraDevice('front');
+  const { t } = useTranslation();
 
   useEffect(() => {
     (async () => {
@@ -19,12 +20,12 @@ export default function EyeTiredness() {
       console.log('Camera permission status:', status);
       if (status !== 'granted') {
         Alert.alert(
-          'Permission Required',
-          'Camera access is needed to use this feature. Please grant camera permissions in your device settings.',
+          t('eye_tiredness.camera_permission_alert.title'),
+          t('eye_tiredness.camera_permission_alert.message'),
         );
       }
     })();
-  }, []);
+  }, [t]);
 
   const capturePhoto = async () => {
     if (cameraRef.current) {
@@ -32,15 +33,14 @@ export default function EyeTiredness() {
     }
   };
 
-  if (!device) return <Text>Loading front camera...</Text>;
+  if (!device) return <Text>{t('eye_tiredness.loading_camera')}</Text>;
 
   return permission === 'granted' ? (
     <View style={styles.container}>
       {/* Text Section */}
       <View style={styles.textContainer}>
         <Text style={[TextStyle.H3, styles.text]}>
-          Hold your device and match your face within the circle and sit in a
-          well-lit room.
+          {t('eye_tiredness.instructions')}
         </Text>
       </View>
 
@@ -64,7 +64,7 @@ export default function EyeTiredness() {
       </View>
     </View>
   ) : (
-    <Text>Camera permission is required.</Text>
+    <Text>{t('eye_tiredness.camera_permission_required')}</Text>
   );
 }
 

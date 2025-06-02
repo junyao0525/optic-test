@@ -1,7 +1,7 @@
-import {useNavigation} from '@react-navigation/core';
+import { useNavigation } from '@react-navigation/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  Dimensions,
   FlatList,
   ImageSourcePropType,
   ScrollView,
@@ -9,11 +9,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import {LineChart} from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
+import { useWindowDimension } from '../../hooks/useWindowDimension';
 import Card from '../components/Card';
 import Header from '../components/Header';
 import TypeButton from '../components/TypeButton';
-import {Colors, TextStyle} from '../themes';
+import { Colors, TextStyle } from '../themes';
+
+// const {t} = useTranslation();
 
 type ButtonDetail = {
   title: string;
@@ -26,19 +29,8 @@ const LandoltImage = require('../../assets/images/home/landolt.png');
 const EyeTirednessImage = require('../../assets/images/home/eye-tiredness.png');
 const ColorVisionImage = require('../../assets/images/home/color-vision.png');
 const AudioTestImage = require('../../assets/images/home/voice-detection.png');
-const GraphImage = require('../../assets/images/home/graph-exp.png');
 
-const buttonDetails: ButtonDetail[] = [
-  {
-    title: 'Landolt’s C Test',
-    image: LandoltImage,
-    route: 'CameraScreen',
-    param: {screen: 'LandoltC'},
-  },
-  {title: 'Eye Tiredness', image: EyeTirednessImage, route: 'EyeTiredness'},
-  {title: 'Color Vision', image: ColorVisionImage, route: 'ColorVision'},
-  {title: 'Audio Test', image: AudioTestImage, route: 'AudioTest'},
-];
+
 const historyData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr'],
   datasets: [
@@ -48,30 +40,48 @@ const historyData = {
   ],
 };
 const HomeScreen = () => {
+  
   const {navigate} = useNavigation();
-  const handleButtonPress = (route: string, param?: string) => {
-    navigate(route as never, param as never);
+  const {t} = useTranslation();
+  const {width} = useWindowDimension();
+
+  const buttonDetails: ButtonDetail[] = [
+    {
+      title: t('common.landoltTest'),
+      image: LandoltImage,
+      route: 'CameraScreen',
+      param: {screen: 'LandoltC'},
+    },
+    {
+      title: t('common.eyeTiredness'),
+      image: EyeTirednessImage,
+      route: 'EyeTiredness',
+    },
+    {title: t('common.colorVision'), image: ColorVisionImage, route: 'ColorVision'},
+    {title: t('common.speakTest'), image: AudioTestImage, route: 'AudioTest'},
+  ];
+  const handleButtonPress = (route: string, param?: {screen: string}) => {
+    navigate(route, param);
     console.log(`${route} button pressed`);
   };
 
   return (
     <>
-      <Header title={'Home'} menuButton />
+      <Header title={t('home.title')} menuButton />
       <ScrollView style={styles.container}>
         <Card title="Overview">
-          {/**Hard code for Image */}
           <LineChart
             data={historyData}
-            width={Dimensions.get('window').width - 90}
+            width={width - 90}
             height={180}
             yAxisLabel=""
             yAxisSuffix=""
-            yAxisInterval={1} // optional, defaults to 1
+            yAxisInterval={1}
             chartConfig={{
               backgroundColor: Colors.white,
               backgroundGradientFrom: Colors.white,
               backgroundGradientTo: Colors.white,
-              decimalPlaces: 2, // optional, defaults to 2dp
+              decimalPlaces: 2,
               color: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
               style: {
@@ -89,7 +99,9 @@ const HomeScreen = () => {
             }}
           />
         </Card>
-        <Text style={[TextStyle.H1B, styles.textTypes]}>Test Types</Text>
+        <Text style={[TextStyle.H1B, styles.textTypes]}>
+          {t('home.testTypes')}
+        </Text>
         <View>
           <FlatList
             data={buttonDetails}

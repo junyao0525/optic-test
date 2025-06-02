@@ -1,19 +1,20 @@
 // screens/Login.tsx
-import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useState} from 'react';
-import {useForm} from 'react-hook-form';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
+  Image,
   StyleSheet,
   Text,
-  TouchableHighlight,
   TouchableOpacity,
   View,
 } from 'react-native';
 import InputField from '../../components/InputField';
-import {Colors, TextStyle} from '../../themes';
-import {useAuth} from '../../providers/AuthProvider';
 import LoadingOverlay from '../../components/Loading';
+import { useAuth } from '../../providers/AuthProvider';
+import { Colors, TextStyle } from '../../themes';
 
 type FormData = {
   email: string;
@@ -24,6 +25,7 @@ const Login = () => {
   const navigation = useNavigation();
   const {login} = useAuth();
   const [loading, setLoading] = useState(false);
+  const {t} = useTranslation();
   const {control, handleSubmit} = useForm<FormData>({
     defaultValues: {email: '', password: ''},
   });
@@ -32,9 +34,8 @@ const Login = () => {
     setLoading(true);
     try {
       await login(data);
-      // navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     } catch (err) {
-      Alert.alert('Login failed');
+      Alert.alert(t('auth.login_failed'));
     } finally {
       setLoading(false);
     }
@@ -45,93 +46,123 @@ const Login = () => {
   }, []);
 
   return (
-    <>
-      <View style={styles.container}>
-        <Text style={[TextStyle.H1, styles.mainText]}>
-          Sign in to your Account
-        </Text>
-        <Text style={styles.secondText}>
-          Enter your email and password to login.
-        </Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Image
+          source={require('../../../assets/images/BR_appIcon.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <Text style={styles.title}>{t('auth.welcome_back')}</Text>
+        <Text style={styles.subtitle}>{t('auth.login_subtitle')}</Text>
+      </View>
+
+      <View style={styles.form}>
         <InputField
-          containerStyle={{paddingBottom: 10}}
-          label="Email"
+          containerStyle={styles.inputContainer}
+          label={t('auth.email')}
           control={control}
           name="email"
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
         <InputField
-          containerStyle={{paddingBottom: 10}}
-          label="Password"
+          containerStyle={styles.inputContainer}
+          label={t('auth.password')}
           control={control}
           name="password"
+          secureTextEntry
         />
-        <TouchableOpacity style={{alignSelf: 'flex-end', paddingVertical: 10}}>
-          <Text style={[TextStyle.P2, {color: Colors.forgetPassword}]}>
-            Forget Password?
+
+        <TouchableOpacity style={styles.forgotPassword}>
+          <Text style={styles.forgotPasswordText}>
+            {t('auth.forgot_password')}
           </Text>
         </TouchableOpacity>
-        <View style={styles.buttonContainer}>
-          <TouchableHighlight
-            onPress={handleSubmit(onSubmit)}
-            underlayColor="white">
-            <Text
-              style={[
-                TextStyle.P1B,
-                {
-                  backgroundColor: Colors.primary,
-                  color: Colors.white,
-                  paddingVertical: 10,
-                  textAlign: 'center',
-                  borderRadius: 5,
-                },
-              ]}>
-              {'Log in'}
-            </Text>
-          </TouchableHighlight>
-          <View style={styles.signUpRow}>
-            <Text style={{fontSize: 18}}>Don’t have an account?</Text>
-            <TouchableOpacity onPress={onSignUp}>
-              <Text style={{color: Colors.primary, fontSize: 18}}>
-                {' '}
-                Sign up
-              </Text>
-            </TouchableOpacity>
-          </View>
+
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleSubmit(onSubmit)}>
+          <Text style={styles.loginButtonText}>{t('auth.login')}</Text>
+        </TouchableOpacity>
+
+        <View style={styles.signUpContainer}>
+          <Text style={styles.signUpText}>{t('auth.no_account')}</Text>
+          <TouchableOpacity onPress={onSignUp}>
+            <Text style={styles.signUpLink}>{t('auth.register')}</Text>
+          </TouchableOpacity>
         </View>
-        <LoadingOverlay visible={loading} />
       </View>
-    </>
+
+      <LoadingOverlay visible={loading} />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
     flex: 1,
-    width: '100%',
-    paddingHorizontal: 20,
-    justifyContent: 'space-between',
-    paddingTop: 100,
-    paddingBottom: 20,
+    backgroundColor: Colors.white,
+    padding: 20,
   },
-  mainText: {
-    fontSize: 40,
-    fontWeight: 'bold',
+  header: {
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  logo: {
+    width: 180,
+    height: 180,
+  },
+  title: {
+    ...TextStyle.H1,
     color: Colors.black,
-    marginBottom: 10,
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  secondText: {
-    paddingVertical: 20,
-    fontSize: 14,
+  subtitle: {
+    ...TextStyle.P2,
+    color: Colors.darkGreen,
+    textAlign: 'center',
+  },
+  form: {
+    flex: 1,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 30,
+  },
+  forgotPasswordText: {
+    ...TextStyle.P2,
     color: Colors.darkGreen,
   },
-  buttonContainer: {
-    marginTop: 10,
+  loginButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginBottom: 20,
   },
-  signUpRow: {
+  loginButtonText: {
+    ...TextStyle.P1B,
+    color: Colors.white,
+    textAlign: 'center',
+  },
+  signUpContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  signUpText: {
+    ...TextStyle.P2,
+    color: Colors.black,
+  },
+  signUpLink: {
+    ...TextStyle.P2B,
+    color: Colors.primary,
+    marginLeft: 5,
   },
 });
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Image,
   ImageProps,
@@ -22,23 +23,29 @@ const TestCard: React.FC<TestCardProps> = ({
   onPress,
   gradient,
   icon,
-}) => (
-  <TouchableOpacity
-    style={styles.testCard}
-    onPress={onPress}
-    activeOpacity={0.8}>
-    <View style={[styles.cardContent, {backgroundColor: gradient[0]}]}>
-      <View style={styles.imageContainer}>
-        <Image source={image} style={styles.testImage} resizeMode="contain" />
-        <View style={[styles.iconOverlay, {backgroundColor: gradient[1]}]}>
-          <Text style={styles.iconText}>{icon}</Text>
+}) => {
+  const {t} = useTranslation();
+
+  return (
+    <>
+      <TouchableOpacity
+        style={styles.testCard}
+        onPress={onPress}
+        activeOpacity={0.8}>
+        <View style={[styles.cardContent, {backgroundColor: gradient[0]}]}>
+          <View style={styles.imageContainer}>
+            <Image source={image} style={styles.testImage} resizeMode="contain" />
+            <View style={[styles.iconOverlay, {backgroundColor: gradient[1]}]}>
+              <Text style={styles.iconText}>{icon}</Text>
+            </View>
+          </View>
+          <Text style={styles.cardTitle}>{title}</Text>
+          <Text style={styles.cardSubtitle}>{t('landolt.tap_to_start')}</Text>
         </View>
-      </View>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardSubtitle}>Tap to start</Text>
-    </View>
-  </TouchableOpacity>
-);
+      </TouchableOpacity>
+    </>
+  )
+};
 
 const styles = StyleSheet.create({
   testCard: {
