@@ -129,7 +129,7 @@
     "correct_answer":"正确答案",
     "incorrect_answer":"错误答案",
     "expected_direction" : "预期方向",
-    "previous_level" : "上一级"
+    "previous_level" : "回到上一级"
   },
   "eye_tiredness": {
     "title": "眼睛疲劳测试",
