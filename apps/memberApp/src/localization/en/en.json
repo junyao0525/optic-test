@@ -123,7 +123,13 @@
     "max_recording_time": {
       "title": "Maximum recording time reached",
       "message": "The recording has reached its maximum duration."
-    }
+    },
+    "level" : "Level",
+    "remaining_attempts" : "Remaining Attempts",
+    "correct_answer":"Correct Answer",
+    "incorrect_answer":"Incorrect Answer",
+    "expected_direction" : "Expected Direction",
+    "previous_level" : "Previous Level"
   },
   "eye_tiredness": {
     "title": "Eye Tiredness Test",

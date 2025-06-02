@@ -1,5 +1,5 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { useWindowDimension } from '../../../hooks/useWindowDimension';
@@ -9,59 +9,38 @@ import LandoltAudioCard from '../../components/LandoltAudioCard';
 import LandoltCard from '../../components/landoltCard';
 import LandoltInstruction from '../../components/LandoltCInstruction';
 import TestCard from '../../components/TestCard';
+import { useLandoltTest } from '../../hooks/useLandoltTest';
 import { Colors } from '../../themes';
 import {
   calculateSizeFromLogMAR,
-  Direction,
-  logMARToSnellen,
-  logMarValues,
+  logMarValues
 } from '../../utils/logMar';
+
+const swipeTestImage = require('../../../assets/images/LandoltCtestType/swipe-test.png');
+const speakTestImage = require('../../../assets/images/LandoltCtestType/speak-test.png');
 
 const LandoltCtest = () => {
   const {width} = useWindowDimension();
-  const [step, setStep] = useState<
-    | 'type'
-    | 'left'
-    | 'leftTest'
-    | 'right'
-    | 'rightTest'
-    | 'done'
-    | 'leftSpeakTest'
-    | 'rightSpeakTest'
-  >('type');
-  const [currentLevel, setCurrentLevel] = useState(1);
   const navigation = useNavigation<NavigationProp<TabParamList>>();
-  const [testType, setTestType] = useState<'swipe' | 'audio' | null>(null);
   const {t} = useTranslation();
 
-  const swipeTestImage = require('../../../assets/images/LandoltCtestType/swipe-test.png');
-  const speakTestImage = require('../../../assets/images/LandoltCtestType/speak-test.png');
+  const {
+    step,
+    setStep,
+    testType,
+    direction,
+    leftEyeResults,
+    rightEyeResults,
+    processSwipe,
+    handleTestTypeSelection,
+    getTestInfo,
+    feedback,
+    isProcessing,
+  } = useLandoltTest();
 
-  const getRandomDirection: () => Direction = useCallback(() => {
-    const directions: Direction[] = ['up', 'right', 'down', 'left'];
-    return directions[Math.floor(Math.random() * directions.length)];
-  }, []);
-
-  const [direction, setDirection] = useState<Direction>(() =>
-    getRandomDirection(),
-  );
-
-  const [leftEyeResults, setLeftEyeResults] = useState({
-    score: 0,
-    finalLevel: 1,
-    logMAR: 1.0,
-    snellen: '20/200',
-  });
-
-  const [rightEyeResults, setRightEyeResults] = useState({
-    score: 0,
-    finalLevel: 1,
-    logMAR: 1.0,
-    snellen: '20/200',
-  });
-
+  const testInfo = getTestInfo();
   const currentSize = calculateSizeFromLogMAR(
-    logMarValues[currentLevel],
+    logMarValues[testInfo.currentLevel],
     width,
   );
 
@@ -88,98 +67,6 @@ const LandoltCtest = () => {
     }
   };
 
-  const processSwipe = useCallback(
-    (swipeDirection: Direction) => {
-      const isCorrect = swipeDirection === direction;
-      const isLastLevel = currentLevel >= Object.keys(logMarValues).length;
-
-      console.log(
-        `Swipe: ${swipeDirection} | Expected: ${direction} | Correct: ${isCorrect}`,
-      );
-
-      switch (step) {
-        case 'leftTest':
-          setLeftEyeResults(prev => ({
-            ...prev,
-            score: prev.score + (isCorrect ? 1 : 0),
-            finalLevel: isCorrect ? currentLevel : prev.finalLevel,
-            logMAR: logMarValues[currentLevel],
-            snellen: logMARToSnellen(logMarValues[currentLevel]),
-          }));
-
-          if (isCorrect) {
-            if (!isLastLevel) {
-              setCurrentLevel(prev => prev + 1);
-              setDirection(getRandomDirection());
-            } else {
-              console.log('✅ Left eye complete');
-              setCurrentLevel(1);
-              setDirection(getRandomDirection());
-              setStep('right');
-            }
-          } else {
-            console.log('❌ Incorrect swipe (left eye)');
-            // Optional: add retry or decrement logic here
-            setCurrentLevel(1);
-            setDirection(getRandomDirection());
-            setStep('right');
-          }
-          break;
-
-        case 'rightTest':
-          setRightEyeResults(prev => ({
-            ...prev,
-            score: prev.score + (isCorrect ? 1 : 0),
-            finalLevel: isCorrect ? currentLevel : prev.finalLevel,
-            logMAR: logMarValues[currentLevel],
-            snellen: logMARToSnellen(logMarValues[currentLevel]),
-          }));
-
-          if (isCorrect) {
-            if (!isLastLevel) {
-              setCurrentLevel(prev => prev + 1);
-              setDirection(getRandomDirection());
-            } else {
-              console.log('✅ Right eye complete');
-              setCurrentLevel(1);
-              setDirection(getRandomDirection());
-              setStep('done');
-            }
-          } else {
-            console.log('❌ Incorrect swipe (right eye)');
-            // Optional: add retry or decrement logic here
-            setCurrentLevel(1);
-            setDirection(getRandomDirection());
-            setStep('done');
-          }
-          break;
-
-        default:
-          console.warn(`⚠️ Unhandled step: ${step}`);
-          break;
-      }
-
-      console.log({
-        step,
-        currentLevel,
-        leftEyeResults,
-        rightEyeResults,
-      });
-    },
-    [step, direction, currentLevel, getRandomDirection],
-  );
-
-  const handleTestTypeSelection = useCallback((type: string) => {
-    console.log(`Selected test type: ${type}`);
-    if (type === 'swipe') {
-      setTestType('swipe');
-      setStep('left');
-    } else if (type === 'audio') {
-      setTestType('audio');
-      setStep('left');
-    }
-  }, []);
-
   return (
     <>
       {step === 'type' && (
@@ -194,21 +81,16 @@ const LandoltCtest = () => {
               }}>
               <TestCard
                 title={t('landolt.swipe_test')}
-                image={swipeTestImage} // Replace with your image
-                onPress={() => {
-                  // setTestType('swipe');
-                  handleTestTypeSelection('swipe');
-                }}
+                image={swipeTestImage}
+                onPress={() => handleTestTypeSelection('swipe')}
                 gradient={['#E3F2FD', '#2196F3']}
                 icon="👆"
               />
 
               <TestCard
                 title={t('landolt.speak_test')}
-                image={speakTestImage} // Replace with your image
-                onPress={() => {
-                  handleTestTypeSelection('audio');
-                }}
+                image={speakTestImage}
+                onPress={() => handleTestTypeSelection('audio')}
                 gradient={['#E3F2FD', '#2196F3']}
                 icon="🎵"
               />
@@ -318,6 +200,9 @@ const LandoltCtest = () => {
           instruction={t('landolt.swipe_instruction')}
           getLandoltCStyle={getLandoltCStyle}
           onSwipe={processSwipe}
+          testInfo={testInfo}
+          feedback={feedback}
+          isProcessing={isProcessing}
         />
       )}
 
