@@ -23,7 +23,7 @@ interface FeedbackState {
   expectedDirection: Direction | null;
 }
 
-export const useLandoltTest = () => {
+export const useAudioTest = () => {
   const [step, setStep] = useState<TestStep>('type');
   const [testType, setTestType] = useState<'swipe' | 'audio' | null>(null);
   const [testState, setTestState] = useState<TestState>({
@@ -101,12 +101,12 @@ export const useLandoltTest = () => {
     setDirection(getRandomDirection());
   }, [getRandomDirection]);
 
-  const debouncedProcessInput = useDebounce(500);
+  const debouncedProcessAudio = useDebounce(500);
 
-  const processInput = useCallback(
+  const processAudio = useCallback(
     (detectedDirection: Direction) => {
       if (isProcessing) {
-        console.log('⚠️ Still processing previous input');
+        console.log('⚠️ Still processing previous audio');
         return;
       }
 
@@ -115,7 +115,7 @@ export const useLandoltTest = () => {
       const isLastLevel = testState.level >= Object.keys(logMarValues).length;
 
       console.log(
-        `${testType === 'audio' ? 'Audio' : 'Swipe'}: ${detectedDirection} | Expected: ${direction} | Correct: ${isCorrect}`,
+        `Audio: ${detectedDirection} | Expected: ${direction} | Correct: ${isCorrect}`,
       );
 
       // Show feedback
@@ -130,36 +130,69 @@ export const useLandoltTest = () => {
         setFeedback(prev => ({ ...prev, show: false }));
       }, 2000);
 
-      debouncedProcessInput(() => {
-        const currentStep = step;
-        const isLeftEye = currentStep === 'leftTest' || currentStep === 'leftSpeakTest';
-        const setResults = isLeftEye ? setLeftEyeResults : setRightEyeResults;
+      debouncedProcessAudio(() => {
+        switch (step) {
+          case 'leftSpeakTest':
+            if (isCorrect) {
+              setLeftEyeResults(prev => ({
+                ...prev,
+                score: prev.score + 1,
+                finalLevel: testState.level,
+                logMAR: logMarValues[testState.level],
+                snellen: logMARToSnellen(logMarValues[testState.level]),
+              }));
 
-        if (isCorrect) {
-          setResults(prev => ({
-            ...prev,
-            score: prev.score + 1,
-            finalLevel: testState.level,
-            logMAR: logMarValues[testState.level],
-            snellen: logMARToSnellen(logMarValues[testState.level]),
-          }));
+              if (!isLastLevel) {
+                setTestState(prev => ({
+                  ...prev,
+                  level: prev.level + 1,
+                  attempts: 0,
+                  isPreviousLevel: false,
+                }));
+              } else {
+                console.log('✅ Left eye complete');
+                resetTestState();
+                setStep('right');
+              }
+              setDirection(getRandomDirection());
+            } else {
+              console.log('❌ Incorrect audio (left eye)');
+              handleIncorrectAnswer('left');
+            }
+            break;
 
-          if (!isLastLevel) {
-            setTestState(prev => ({
-              ...prev,
-              level: prev.level + 1,
-              attempts: 0,
-              isPreviousLevel: false,
-            }));
-          } else {
-            console.log(`✅ ${isLeftEye ? 'Left' : 'Right'} eye complete`);
-            resetTestState();
-            setStep(isLeftEye ? 'right' : 'done');
-          }
-          setDirection(getRandomDirection());
-        } else {
-          console.log(`❌ Incorrect ${testType} (${isLeftEye ? 'left' : 'right'} eye)`);
-          handleIncorrectAnswer(isLeftEye ? 'left' : 'right');
+          case 'rightSpeakTest':
+            if (isCorrect) {
+              setRightEyeResults(prev => ({
+                ...prev,
+                score: prev.score + 1,
+                finalLevel: testState.level,
+                logMAR: logMarValues[testState.level],
+                snellen: logMARToSnellen(logMarValues[testState.level]),
+              }));
+
+              if (!isLastLevel) {
+                setTestState(prev => ({
+                  ...prev,
+                  level: prev.level + 1,
+                  attempts: 0,
+                  isPreviousLevel: false,
+                }));
+              } else {
+                console.log('✅ Right eye complete');
+                resetTestState();
+                setStep('done');
+              }
+              setDirection(getRandomDirection());
+            } else {
+              console.log('❌ Incorrect audio (right eye)');
+              handleIncorrectAnswer('right');
+            }
+            break;
+
+          default:
+            console.warn(`⚠️ Unhandled step: ${step}`);
+            break;
         }
 
         console.log({
@@ -175,7 +208,7 @@ export const useLandoltTest = () => {
         }, 100);
       });
     },
-    [step, direction, testState, getRandomDirection, handleIncorrectAnswer, resetTestState, debouncedProcessInput, isProcessing, testType],
+    [step, direction, testState, getRandomDirection, handleIncorrectAnswer, resetTestState, debouncedProcessAudio, isProcessing],
   );
 
   const handleTestTypeSelection = useCallback((type: string) => {
@@ -213,8 +246,7 @@ export const useLandoltTest = () => {
     direction,
     leftEyeResults,
     rightEyeResults,
-    processSwipe: processInput,
-    processAudio: processInput,
+    processAudio,
     handleTestTypeSelection,
     getTestInfo,
     feedback,

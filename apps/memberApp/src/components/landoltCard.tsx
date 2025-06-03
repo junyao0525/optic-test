@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { Colors } from '../themes';
@@ -80,11 +80,13 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
     }
   };
 
+  const {height} = useWindowDimensions();
+
   return (
     <>
       <Header backHomeButton title={t("landolt.header")} />
       <View style={styles.container}>
-        <Text style={styles.title}>{title}</Text>
+        {/* <Text style={styles.title}>{title}</Text> */}
         {subTitle && <Text style={styles.title}>{subTitle}</Text>}
 
         <View style={styles.testInfo}>
@@ -95,24 +97,40 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
             })}
           </Text>
           
-          {testInfo && (
-            <View style={styles.levelInfo}>
-              <Text style={styles.levelText}>
-                {t('landolt.level')} {testInfo.currentLevel}/{testInfo.totalLevels}
-              </Text>
-              <Text style={styles.snellenText}>
-                {t('landolt.snellen')} {testInfo.currentSnellen}
-              </Text>
-              <Text style={styles.attemptsText}>
-                {t('landolt.remaining_attempts')}: {testInfo.remainingAttempts}
-              </Text>
-              {testInfo.isPreviousLevel && (
-                <Text style={styles.previousLevelText}>
-                  {t('landolt.previous_level')}
-                </Text>
-              )}
+          {testInfo &&(
+            <View style={{ width: '100%', height: height*0.16, backgroundColor: '#fff', borderRadius: 10, elevation: 5, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 4 }}>
+            <Text style={styles.levelText}>
+              {t('landolt.level')} {testInfo?.currentLevel}/{testInfo?.totalLevels}
+            </Text>
+            <View style={styles.progressBarContainer}>
+              <View 
+                style={[
+                  styles.progressBar,
+                  { width: `${(testInfo?.currentLevel / testInfo?.totalLevels) * 100}%` }
+                ]} 
+              />
             </View>
-          )}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' ,paddingHorizontal: 20,paddingTop: 10}}>
+                <View>
+                  <Text style={styles.snellenText}>
+                    {t('landolt.snellen')}
+                  </Text>
+                  <Text style={styles.attemptsText}>
+                  {testInfo.currentSnellen}
+                    
+                  </Text>
+                </View>
+                <View>
+                <Text style={styles.snellenText}>
+                {t('landolt.remaining_attempts')}
+                  </Text>
+                  <Text style={styles.attemptsText}>
+                  {testInfo.remainingAttempts}
+                  </Text>
+                </View>
+              </View>
+          </View>
+        )}
         </View>
 
         <View style={styles.instructionContainer}>
@@ -189,6 +207,7 @@ const styles = StyleSheet.create({
     color: Colors.darkGreen,
     textAlign: 'center',
     marginBottom: 5,
+    paddingTop: 10,
   },
   snellenText: {
     fontSize: 16,
@@ -262,6 +281,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     textAlign: 'center',
+  },
+  progressBarContainer: {
+    width: '90%',
+    height: 10,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 5,
+    marginHorizontal: '5%',
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#2196F3',
+    borderRadius: 5,
   },
 });
 

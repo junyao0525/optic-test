@@ -32,6 +32,7 @@ const LandoltCtest = () => {
     leftEyeResults,
     rightEyeResults,
     processSwipe,
+    processAudio,
     handleTestTypeSelection,
     getTestInfo,
     feedback,
@@ -213,6 +214,11 @@ const LandoltCtest = () => {
           title={t('landolt.title')}
           instruction={t('landolt.speak_instruction')}
           getLandoltCStyle={getLandoltCStyle}
+          onAudioProcessed={processAudio}
+          maxDuration={6}
+          testInfo={testInfo}
+          feedback={feedback}
+          isProcessing={isProcessing}
         />
       )}
     </>

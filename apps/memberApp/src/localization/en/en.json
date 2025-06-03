@@ -93,11 +93,11 @@
     "proceed": "Proceed",
     "test_complete": "Test Complete",
     "visual_acuity_results": "Visual Acuity Results",
-    "left_eye": "Left Eye:",
-    "right_eye": "Right Eye:",
+    "left_eye": "Left Eye",
+    "right_eye": "Right Eye",
     "score": "Score:",
     "logmar": "LogMAR:",
-    "snellen": "Snellen:",
+    "snellen": "Snellen",
     "disclaimer": "Note: This test is for screening purposes only and is not a substitute for professional eye examination.",
     "vision_status": {
       "normal": "Normal Vision",
@@ -117,7 +117,7 @@
       "title": "Test Right Eye",
       "description": "Please cover your right eye as shown in the image below."
     },
-    "testing_eye": "Testing: {{eye}} eye ({{cover_instruction}})",
+    "testing_eye": "Testing: {{eye}} ({{cover_instruction}})",
     "cover_right_eye": "cover right eye",
     "cover_left_eye": "cover left eye",
     "max_recording_time": {
