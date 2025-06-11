@@ -1,12 +1,11 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {AudioProvider} from '../providers/AudioProvider';
+import { AudioProvider } from '../providers/AudioProvider';
 import CameraProvider from '../providers/CameraProvider';
-import {DistanceMeasureProvider} from '../providers/DistanceProvider';
+import { DistanceMeasureProvider } from '../providers/DistanceProvider';
 import AudioTestScreen from '../screens/AudioTest/AudioTest';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
-import ColorVision from '../screens/ColorVision/ColorVision';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
 import LandoltC from '../screens/LandoltC/LandoltC';
 import LandoltCTest from '../screens/LandoltC/LandoltCtest';
@@ -51,7 +50,6 @@ const StackNavigator = () => {
       <Stack.Screen name="CameraScreen" component={CameraScreen} />
       <Stack.Screen name="AudioScreen" component={AudioScreen} />
       <Stack.Screen name="EyeTiredness" component={EyeTiredness} />
-      <Stack.Screen name="ColorVision" component={ColorVision} />
       <Stack.Screen name="About" component={About} />
       <Stack.Screen name="Help" component={Help} />
       <Stack.Screen name="Language" component={Language} />

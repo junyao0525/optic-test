@@ -7,7 +7,6 @@ declare global {
     CameraScreen: undefined;
     AudioScreen: undefined;
     EyeTiredness: undefined;
-    ColorVision: undefined;
     About: undefined;
     Help: undefined;
     Language: undefined;

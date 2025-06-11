@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
-import {StyleSheet, Text, useWindowDimensions, View} from 'react-native';
-import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
+import React, { useState } from 'react';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import Header from '../../components/Header';
-import {Colors} from '../../themes';
+import { Colors } from '../../themes';
 
 const PlaceholderScreen: React.FC<{title: string}> = ({title}) => (
   <View style={styles.scene}>
@@ -10,23 +10,20 @@ const PlaceholderScreen: React.FC<{title: string}> = ({title}) => (
   </View>
 );
 
-const LandoltsTestRoute = () => <PlaceholderScreen title="Landolt’s Test" />;
+const LandoltsTestRoute = () => <PlaceholderScreen title="Landolt's Test" />;
 const EyeTirednessRoute = () => <PlaceholderScreen title="Eye Tiredness" />;
-const ColorVisionRoute = () => <PlaceholderScreen title="Color Vision" />;
 
 const renderScene = SceneMap({
   landoltsTest: LandoltsTestRoute,
   eyeTiredness: EyeTirednessRoute,
-  colorVision: ColorVisionRoute,
 });
 
 const HistoryScreen = () => {
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    {key: 'landoltsTest', title: 'Landolt’s Test'},
+    {key: 'landoltsTest', title: "Landolt's Test"},
     {key: 'eyeTiredness', title: 'Eye Tiredness'},
-    {key: 'colorVision', title: 'Color Vision'},
   ]);
 
   return (

@@ -2,12 +2,12 @@ import { useNavigation } from '@react-navigation/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  FlatList,
-  ImageSourcePropType,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    FlatList,
+    ImageSourcePropType,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useWindowDimension } from '../../hooks/useWindowDimension';
@@ -27,9 +27,7 @@ type ButtonDetail = {
 
 const LandoltImage = require('../../assets/images/home/landolt.png');
 const EyeTirednessImage = require('../../assets/images/home/eye-tiredness.png');
-const ColorVisionImage = require('../../assets/images/home/color-vision.png');
 const AudioTestImage = require('../../assets/images/home/voice-detection.png');
-
 
 const historyData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr'],
@@ -39,8 +37,8 @@ const historyData = {
     },
   ],
 };
+
 const HomeScreen = () => {
-  
   const {navigate} = useNavigation();
   const {t} = useTranslation();
   const {width} = useWindowDimension();
@@ -57,9 +55,9 @@ const HomeScreen = () => {
       image: EyeTirednessImage,
       route: 'EyeTiredness',
     },
-    {title: t('common.colorVision'), image: ColorVisionImage, route: 'ColorVision'},
     {title: t('common.speakTest'), image: AudioTestImage, route: 'AudioTest'},
   ];
+
   const handleButtonPress = (route: string, param?: {screen: string}) => {
     if (param) {
       navigate(route as any, {screen: param.screen});
