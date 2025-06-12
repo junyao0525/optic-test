@@ -1,0 +1,189 @@
+{
+  "app": {
+    "name": "Aplikasi Ujian Penglihatan",
+    "welcome": "Selamat Datang",
+    "loading": "Memuat...",
+    "retry": "Cuba Lagi"
+  },
+  "auth": {
+    "login": "Log Masuk",
+    "logout": "Log Keluar",
+    "register": "Daftar",
+    "email": "E-mel",
+    "password": "Kata Laluan",
+    "name": "Nama",
+    "confirm_password": "Sahkan Kata Laluan",
+    "forgot_password": "Lupa Kata Laluan?",
+    "remember_me": "Ingat Saya",
+    "welcome_back": "Selamat Kembali!",
+    "login_subtitle": "Log masuk untuk teruskan",
+    "create_account": "Buat Akaun",
+    "register_subtitle": "Daftar untuk bermula",
+    "no_account": "Tiada akaun?",
+    "have_account": "Sudah ada akaun?",
+    "login_failed": "Log Masuk Gagal",
+    "registration_failed": "Pendaftaran Gagal",
+    "success": "Berjaya",
+    "account_created": "Akaun berjaya dibuat",
+    "name_required": "Nama diperlukan",
+    "email_required": "E-mel diperlukan",
+    "email_invalid": "E-mel tidak sah",
+    "password_required": "Kata laluan diperlukan",
+    "password_min_length": "Kata laluan mesti sekurang-kurangnya 6 aksara"
+  },
+  "home": {
+    "title": "Utama",
+    "greeting": "Hai, {{name}}!",
+    "dashboard": "Papan Pemuka",
+    "testTypes": "Jenis Ujian"
+  },
+  "settings": {
+    "title": "Tetapan",
+    "language": "Bahasa",
+    "theme": "Tema",
+    "notifications": "Pemberitahuan",
+    "privacy": "Dasar Privasi",
+    "about": "Mengenai",
+    "profile": "Profil Saya",
+    "history": "Sejarah Saya",
+    "help": "Bantuan",
+    "logout": "Log Keluar",
+    "signIn": "Log Masuk",
+    "personalData": "Data Peribadi",
+    "other": "Lain-lain",
+    "guest": "Tetamu"
+  },
+  "language": {
+    "en": "Bahasa Inggeris",
+    "zh": "Bahasa Cina",
+    "ms": "Bahasa Melayu",
+    "current": "Bahasa Semasa",
+    "popular": "Bahasa Popular",
+    "changed": "Bahasa telah ditukar ke {{language}}",
+    "change_error": "Gagal menukar bahasa",
+    "change_info": "Menukar bahasa akan mengemas kini antara muka aplikasi. Sesetengah kandungan mungkin memerlukan aplikasi dimulakan semula."
+  },
+  "common": {
+    "yes": "Ya",
+    "no": "Tidak",
+    "cancel": "Batal",
+    "confirm": "Sahkan",
+    "save": "Simpan",
+    "edit": "Edit",
+    "delete": "Padam",
+    "next": "Seterusnya",
+    "previous": "Sebelumnya",
+    "success": "Berjaya",
+    "error": "Ralat",
+    "landoltTest": "Ujian Landolt C",
+    "eyeTiredness": "Keletihan Mata",
+    "colorVision": "Penglihatan Warna",
+    "speakTest": "Ujian Pertuturan",
+    "home": "Utama",
+    "history": "Sejarah",
+    "setting": "Tetapan",
+    "continue": "Teruskan",
+    "overview": "Gambaran Keseluruhan"
+  },
+  "landolt": {
+    "header": "Ujian Landolt C",
+    "title": "Ujian Ketajaman Penglihatan Landolt C",
+    "swipe_instruction": "Leret ke arah jurang C",
+    "speak_instruction": "Tekan butang dan sebut arah jurang",
+    "start": "Mari kita mulakan dengan mengukur jarak",
+    "proceed": "Teruskan",
+    "test_complete": "Ujian Selesai",
+    "visual_acuity_results": "Keputusan Ketajaman Penglihatan",
+    "left_eye": "Mata Kiri",
+    "right_eye": "Mata Kanan",
+    "score": "Skor:",
+    "logmar": "LogMAR:",
+    "snellen": "Snellen:",
+    "disclaimer": "Nota: Ujian ini adalah untuk tujuan saringan sahaja dan bukan pengganti pemeriksaan mata profesional.",
+    "vision_status": {
+      "normal": "Penglihatan Normal",
+      "mild": "Kecacatan Penglihatan Ringan",
+      "moderate": "Kecacatan Penglihatan Sederhana",
+      "poor": "Penglihatan Lemah"
+    },
+    "select_test_type": "Pilih Jenis Ujian",
+    "swipe_test": "Ujian Leret",
+    "speak_test": "Ujian Suara",
+    "tap_to_start": "Ketik untuk Mula",
+    "leftEye": {
+      "title": "Uji Mata Kiri",
+      "description": "Sila tutup mata kiri anda seperti yang ditunjukkan dalam imej di bawah."
+    },
+    "rightEye": {
+      "title": "Uji Mata Kanan",
+      "description": "Sila tutup mata kanan anda seperti yang ditunjukkan dalam imej di bawah."
+    },
+    "testing_eye": "Menguji: {{eye}} ({{cover_instruction}})",
+    "cover_right_eye": "tutup mata kanan",
+    "cover_left_eye": "tutup mata kiri",
+    "max_recording_time": {
+      "title": "Masa rakaman maksimum dicapai",
+      "message": "Rakaman telah mencapai tempoh maksimum."
+    },
+    "level": "Tahap",
+    "remaining_attempts": "Percubaan Berbaki",
+    "correct_answer": "Jawapan Betul",
+    "incorrect_answer": "Jawapan Salah",
+    "expected_direction": "Arah Dijangka",
+    "previous_level": "Tahap Sebelumnya"
+  },
+  "eye_tiredness": {
+    "title": "Ujian Keletihan Mata",
+    "instructions": "Pegang peranti anda dan sesuaikan muka anda dalam bulatan dan duduk di bilik yang terang.",
+    "camera_permission_required": "Kebenaran kamera diperlukan.",
+    "camera_permission_alert": {
+      "title": "Kebenaran Diperlukan",
+      "message": "Akses kamera diperlukan untuk menggunakan ciri ini. Sila berikan kebenaran kamera dalam tetapan peranti anda."
+    },
+    "loading_camera": "Memuatkan kamera hadapan...",
+    "capture": "Tangkap"
+  },
+  "splash": {
+    "app_name": "OptiTest"
+  },
+  "distance_measurement": {
+    "title": "Pengukuran Jarak",
+    "instructions": "Pegang peranti anda dan sesuaikan muka anda dalam bulatan dan duduk di bilik yang terang.",
+    "success": "Jarak berjaya diukur",
+    "measuring": "Mengukur... {{seconds}}s",
+    "faces_detected": "Muka dikesan: {{count}}",
+    "camera_error": "Kamera tidak bersedia atau kebenaran ditolak",
+    "continue": "Teruskan",
+    "alerts": {
+      "invalid_position": {
+        "title": "Kedudukan Muka Tidak Sah",
+        "message": "Pastikan satu muka tengah dikesan."
+      },
+      "too_close": {
+        "title": "Terlalu Dekat",
+        "message": "Undur ke belakang."
+      },
+      "too_far": {
+        "title": "Terlalu Jauh",
+        "message": "Dekatkan."
+      },
+      "perfect": {
+        "title": "Sempurna",
+        "message": "Jarak adalah sesuai."
+      },
+      "error": {
+        "title": "Ralat",
+        "message": "Tidak dapat memproses imej."
+      },
+      "timeout": {
+        "title": "Masa Tamat",
+        "message": "Sesi pengukuran telah tamat. Sila cuba lagi."
+      }
+    },
+    "messages": {
+      "too_close": "Terlalu dekat! Sila undur ke belakang.",
+      "too_far": "Terlalu jauh! Sila dekatkan.",
+      "perfect": "Jarak sempurna!"
+    }
+  }
+} 

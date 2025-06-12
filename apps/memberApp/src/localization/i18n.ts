@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './en/en.json';
+import ms from './ms/ms.json';
 import zh from './zh/zh.json';
 
 const LANG_STORAGE_KEY = '@app_language';
@@ -16,6 +17,9 @@ i18n
       },
       zh: {
         translation: zh
+      },
+      ms: {
+        translation: ms
       }
     },
     lng: 'en', // Default language

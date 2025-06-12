@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../../components/Header';
@@ -61,6 +61,13 @@ const Language = () => {
       name: 'Chinese',
       nativeName: '中文',
       flag: '🇨🇳',
+      isPopular: true,
+    },
+    {
+      code: 'ms',
+      name: 'Malay',
+      nativeName: 'Bahasa Melayu',
+      flag: '🇲🇾',
       isPopular: true,
     },
   ];
