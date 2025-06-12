@@ -1,79 +1,60 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from 'react';
-import {Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AuthController} from '../api/auth/controller';
-
-type User = {
-  email: string;
-  name: string;
-  id: string;
-};
-
-type LoginData = {
-  email: string;
-  password: string;
-};
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useState
+} from 'react';
+import { User } from '../../types/app/user';
 
 type AuthContextType = {
   user: User | null;
-  login: (data: LoginData) => Promise<void>;
-  logout: () => void;
+  updateUser: (user: User) => void;
+  signOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  updateUser: () => {},
+  signOut: async () => {},
+});
 
-export const AuthProvider = ({children}: {children: ReactNode}) => {
+export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
   const [user, setUser] = useState<User | null>(null);
+
   useEffect(() => {
-    const loadUser = async () => {
-      const storedUser = await AsyncStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      console.log('user', storedUser);
-    };
     loadUser();
   }, []);
 
-  const login = async (data: LoginData) => {
+  const loadUser = async () => {
     try {
-      const result = await AuthController.login(data.email, data.password);
-
-      if (result.success == true) {
-        setUser(result.user);
-        await AsyncStorage.setItem('user', JSON.stringify(result.user));
-        Alert.alert('Login Success', `Welcome ${result.user.email}`);
-      } else {
-        Alert.alert('Login Failed', result.message);
+      const userJson = await AsyncStorage.getItem('user');
+      if (userJson) {
+        setUser(JSON.parse(userJson));
       }
     } catch (error) {
-      console.log('Login error:', error);
-      Alert.alert('Login Failed', 'An unexpected error occurred.');
+      console.error('Error loading user:', error);
     }
   };
 
-  const logout = async () => {
-    setUser(null);
-    await AsyncStorage.removeItem('user');
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
+  const signOut = async () => {
+    try {
+      await AsyncStorage.removeItem('user');
+      setUser(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{user, login, logout}}>
+    <AuthContext.Provider value={{user, updateUser, signOut}}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

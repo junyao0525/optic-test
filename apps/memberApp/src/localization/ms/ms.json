@@ -53,6 +53,19 @@
     "other": "Lain-lain",
     "guest": "Tetamu"
   },
+  "profile": {
+    "name": "Nama",
+    "email": "E-mel",
+    "dob": "Tarikh Lahir",
+    "gender": "Jantina",
+    "male": "Lelaki",
+    "female": "Perempuan",
+    "changePhoto": "Tukar Foto",
+    "namePlaceholder": "Masukkan nama anda",
+    "emailPlaceholder": "Masukkan e-mel anda",
+    "saveSuccess": "Profil berjaya dikemas kini",
+    "saveError": "Gagal mengemas kini profil"
+  },
   "language": {
     "en": "Bahasa Inggeris",
     "zh": "Bahasa Cina",

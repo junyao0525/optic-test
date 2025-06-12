@@ -53,6 +53,19 @@
     "other": "Other",
     "guest": "Guest"
   },
+  "profile": {
+    "name": "Name",
+    "email": "Email",
+    "dob": "Date of Birth",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "changePhoto": "Change Photo",
+    "namePlaceholder": "Enter your name",
+    "emailPlaceholder": "Enter your email",
+    "saveSuccess": "Profile updated successfully",
+    "saveError": "Failed to update profile"
+  },
   "language": {
     "en": "English",
     "zh": "Chinese",

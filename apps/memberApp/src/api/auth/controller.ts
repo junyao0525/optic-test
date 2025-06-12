@@ -1,5 +1,7 @@
-import {supabase} from '../../config';
 import bcrypt from 'react-native-bcrypt';
+import { UpdateProfileData, User } from '../../../types/app/user';
+import { supabase } from '../../config';
+
 export const AuthController = {
   login: async (
     email: string,
@@ -81,6 +83,36 @@ export const AuthController = {
         error: {
           message: err instanceof Error ? err.message : 'Registration failed',
         },
+      };
+    }
+  },
+
+  updateProfile: async (userId: number, profileData: UpdateProfileData) => {
+    try {
+      const { data, error } = await supabase
+        .from('Users')
+        .update({
+          name: profileData.name,
+          gender: profileData.gender,
+          dob: profileData.dob,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        success: true,
+        data: data as User,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err.message || 'Failed to update profile',
       };
     }
   },

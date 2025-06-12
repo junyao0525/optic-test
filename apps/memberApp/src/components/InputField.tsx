@@ -1,7 +1,7 @@
 // InputText.tsx
 
-import React, {ComponentProps} from 'react';
-import {Controller} from 'react-hook-form';
+import React, { ComponentProps } from 'react';
+import { Controller } from 'react-hook-form';
 import {
   StyleProp,
   StyleSheet,
@@ -11,7 +11,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import {Colors, FontFamilies, TextStyle} from '../themes'; // Adjust this import based on your project structure
+import { Colors, FontFamilies, TextStyle } from '../themes'; // Adjust this import based on your project structure
 
 interface InputTextProps extends TextInputProps {
   control: any;
@@ -71,11 +71,10 @@ const InputField: React.FC<InputTextProps> = ({
               numberOfLines={rest.numberOfLines}
               {...rest}
               style={[
-                TextStyle.P2,
                 styles.input,
                 multiline && styles.textArea,
-                !editable && {backgroundColor: Colors.green},
-                error ? {borderColor: Colors.borderGrey} : undefined,
+                !editable && {backgroundColor: Colors.borderGrey},
+                error ? {borderColor: Colors.red} : undefined,
                 rest?.style,
               ]}
             />
@@ -99,8 +98,6 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 4,
     color: Colors.black,
-    fontSize: 16,
-    fontWeight: 700,
   },
   topError: {
     color: Colors.red,
@@ -119,8 +116,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     justifyContent: 'space-between',
     minHeight: 50,
-    fontSize: 14,
-    lineHeight: 16,
+    fontSize: 18,
+    lineHeight: 24,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },

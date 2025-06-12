@@ -53,6 +53,19 @@
     "other": "其他",
     "guest": "访客"
   },
+  "profile": {
+    "name": "姓名",
+    "email": "邮箱",
+    "dob": "出生日期",
+    "gender": "性别",
+    "male": "男",
+    "female": "女",
+    "changePhoto": "更换照片",
+    "namePlaceholder": "请输入您的姓名",
+    "emailPlaceholder": "请输入您的邮箱",
+    "saveSuccess": "资料更新成功",
+    "saveError": "资料更新失败"
+  },
   "language": {
     "en": "英语",
     "zh": "中文",
