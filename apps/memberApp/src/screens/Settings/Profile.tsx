@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DatePicker from 'react-native-date-picker';
-import { launchImageLibrary } from 'react-native-image-picker';
 import { User } from '../../../types/app/user';
 import { AuthController } from '../../api/auth/controller';
 import { FileUploadController } from '../../api/fileUpload/controller';
 import Header from '../../components/Header';
 import InputField from '../../components/InputField';
 import { useAuth } from '../../providers/AuthProvider';
+import { useStoragePermission } from '../../providers/StoragePermissionProvider';
 import { Colors, TextStyle } from '../../themes';
 
 type ProfileFormData = {
@@ -20,10 +20,13 @@ type ProfileFormData = {
 };
 
 const Profile = () => {
-  const {t} = useTranslation();
-  const {user, updateUser} = useAuth();
+  const { t } = useTranslation();
+  const { user, updateUser } = useAuth();
+  const { hasStoragePermission, requestStoragePermission } = useStoragePermission();
   const [showDatePicker, setShowDatePicker] = React.useState(false);
   const [profileImage, setProfileImage] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const {
     control,
@@ -50,22 +53,80 @@ const Profile = () => {
   }, [user, setValue]);
 
   const handleImagePicker = async () => {
-    const result = await launchImageLibrary({
-      mediaType: 'photo',
-      quality: 0.8,
-    });
-
-    if (result.assets && result.assets[0] && user?.id) {
-      const response = await FileUploadController.uploadProfileImage(
-        user.id,
-        result.assets[0],
-      );
-      if (response.success && response.data?.url) {
-        setProfileImage(response.data.url);
-        if (user) {
-          updateUser({...user, profile_image_url: response.data.url});
+    try {
+      if (!hasStoragePermission) {
+        const granted = await requestStoragePermission();
+        console.log(granted)
+        if (!granted) {
+          Alert.alert(
+            t('common.error'),
+            t('profile.storage_permission_required'),
+            [
+              {
+                text: t('common.settings'),
+                onPress: () => {
+                  if (Platform.OS === 'android') {
+                    Linking.openSettings();
+                  }
+                },
+              },
+              {
+                text: t('common.cancel'),
+                style: 'cancel',
+              },
+            ]
+          );
+          return;
         }
       }
+
+      // Simple image picker implementation
+      const pickImage = async () => {
+        try {
+          const { launchImageLibrary } = require('react-native-image-picker');
+          const result = await launchImageLibrary({
+            mediaType: 'photo',
+            quality: 0.8,
+          });
+
+          if (result.didCancel) {
+            return;
+          }
+
+          if (result.errorCode) {
+            throw new Error(result.errorMessage);
+          }
+
+          if (result.assets && result.assets[0] && user?.id) {
+            setIsLoading(true);
+            setUploadError(null);
+
+            const response = await FileUploadController.uploadProfileImage(
+              user.id,
+              result.assets[0]
+            );
+
+            if (response.success && response.data?.url) {
+              setProfileImage(response.data.url);
+              if (user) {
+                updateUser({ ...user, profile_image_url: response.data.url });
+              }
+            } else {
+              throw new Error(response.message || 'Failed to upload image');
+            }
+          }
+        } catch (error: any) {
+          console.error('Image picker error:', error);
+          throw error;
+        }
+      };
+
+      await pickImage();
+    } catch (error: any) {
+      console.error('Image upload error:', error);
+      setUploadError(error.message || 'Failed to upload image');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -90,23 +151,31 @@ const Profile = () => {
         <View style={styles.content}>
           {/* Profile Image Section */}
           <View style={styles.imageSection}>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={handleImagePicker}
-              style={styles.imageContainer}>
+              style={styles.imageContainer}
+              disabled={isLoading}>
               <Image
                 source={
                   profileImage
-                    ? {uri: profileImage}
+                    ? { uri: profileImage }
                     : require('../../../assets/images/person.png')
                 }
                 style={styles.profileImage}
               />
               <View style={styles.imageOverlay}>
-                <Text style={styles.changePhotoText}>
-                  {t('profile.changePhoto')}
-                </Text>
+                {isLoading ? (
+                  <ActivityIndicator color={Colors.white} />
+                ) : (
+                  <Text style={styles.changePhotoText}>
+                    {t('profile.changePhoto')}
+                  </Text>
+                )}
               </View>
             </TouchableOpacity>
+            {uploadError && (
+              <Text style={styles.errorText}>{uploadError}</Text>
+            )}
           </View>
 
           {/* Form Fields */}

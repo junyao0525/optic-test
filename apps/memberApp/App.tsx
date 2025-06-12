@@ -11,6 +11,8 @@ import { StatusBar } from 'react-native';
 import 'react-native-gesture-handler';
 import './gesture-handler';
 import i18n from './src/localization/i18n';
+import { AuthProvider } from './src/providers/AuthProvider';
+import { StoragePermissionProvider } from './src/providers/StoragePermissionProvider';
 import Routes from './src/Routes';
 import SplashScreen from './src/screens/SplashScreen';
 
@@ -19,16 +21,20 @@ console.log('Initial language:', i18n.language);
 
 function App(): React.JSX.Element {
   return (
-      <I18nextProvider i18n={i18n}>
-        <StatusBar
-          barStyle="dark-content"
-          translucent
-          backgroundColor="transparent"
-        />
-        <SplashScreen>
-          <Routes />
-        </SplashScreen>
-      </I18nextProvider>
+    <StoragePermissionProvider>
+      <AuthProvider>
+        <I18nextProvider i18n={i18n}>
+          <StatusBar
+            barStyle="dark-content"
+            translucent
+            backgroundColor="transparent"
+          />
+          <SplashScreen>
+            <Routes />
+          </SplashScreen>
+        </I18nextProvider>
+      </AuthProvider>
+    </StoragePermissionProvider>
   );
 }
 
