@@ -3,7 +3,6 @@ import React from 'react';
 import { AudioProvider } from '../providers/AudioProvider';
 import CameraProvider from '../providers/CameraProvider';
 import { DistanceMeasureProvider } from '../providers/DistanceProvider';
-import AudioTestScreen from '../screens/AudioTest/AudioTest';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
@@ -56,7 +55,6 @@ const StackNavigator = () => {
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
-      <Stack.Screen name="AudioTest" component={AudioTestScreen} />
     </Stack.Navigator>
   );
 };

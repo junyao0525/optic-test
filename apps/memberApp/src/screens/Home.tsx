@@ -2,12 +2,12 @@ import { useNavigation } from '@react-navigation/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    FlatList,
-    ImageSourcePropType,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  FlatList,
+  ImageSourcePropType,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useWindowDimension } from '../../hooks/useWindowDimension';
@@ -55,7 +55,6 @@ const HomeScreen = () => {
       image: EyeTirednessImage,
       route: 'EyeTiredness',
     },
-    {title: t('common.speakTest'), image: AudioTestImage, route: 'AudioTest'},
   ];
 
   const handleButtonPress = (route: string, param?: {screen: string}) => {
