@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DatePicker from 'react-native-date-picker';
+import { launchCamera } from 'react-native-image-picker';
 import { User } from '../../../types/app/user';
 import { AuthController } from '../../api/auth/controller';
 import { FileUploadController } from '../../api/fileUpload/controller';
+import BottomButton from '../../components/BottomButton';
 import Header from '../../components/Header';
 import InputField from '../../components/InputField';
 import { useAuth } from '../../providers/AuthProvider';
@@ -26,7 +28,6 @@ const Profile = () => {
   const [showDatePicker, setShowDatePicker] = React.useState(false);
   const [profileImage, setProfileImage] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const {
     control,
@@ -56,7 +57,6 @@ const Profile = () => {
     try {
       if (!hasStoragePermission) {
         const granted = await requestStoragePermission();
-        console.log(granted)
         if (!granted) {
           Alert.alert(
             t('common.error'),
@@ -80,67 +80,91 @@ const Profile = () => {
         }
       }
 
-      // Simple image picker implementation
-      const pickImage = async () => {
-        try {
-          const { launchImageLibrary } = require('react-native-image-picker');
-          const result = await launchImageLibrary({
-            mediaType: 'photo',
-            quality: 0.8,
-          });
+      setIsLoading(true);
 
-          if (result.didCancel) {
-            return;
+      const result = await launchCamera({
+        mediaType: 'photo',
+        quality: 0.8,
+        includeBase64: false,
+        maxWidth: 1024,
+        maxHeight: 1024,
+      });
+
+      if (result.didCancel) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (result.errorCode) {
+        throw new Error(result.errorMessage || 'Failed to pick image');
+      }
+
+      if (result.assets && result.assets[0] && user?.id) {
+        const uploadResponse = await FileUploadController.uploadProfileImage(
+          user.id,
+          result.assets[0]
+        );
+
+        if (uploadResponse.success && uploadResponse.data?.url) {
+          setProfileImage(uploadResponse.data.url);
+          if (user) {
+            updateUser({ ...user, profile_image_url: uploadResponse.data.url });
           }
-
-          if (result.errorCode) {
-            throw new Error(result.errorMessage);
-          }
-
-          if (result.assets && result.assets[0] && user?.id) {
-            setIsLoading(true);
-            setUploadError(null);
-
-            const response = await FileUploadController.uploadProfileImage(
-              user.id,
-              result.assets[0]
-            );
-
-            if (response.success && response.data?.url) {
-              setProfileImage(response.data.url);
-              if (user) {
-                updateUser({ ...user, profile_image_url: response.data.url });
-              }
-            } else {
-              throw new Error(response.message || 'Failed to upload image');
-            }
-          }
-        } catch (error: any) {
-          console.error('Image picker error:', error);
-          throw error;
+        } else {
+          throw new Error(uploadResponse.message || 'Failed to upload image');
         }
-      };
-
-      await pickImage();
+      }
     } catch (error: any) {
-      console.error('Image upload error:', error);
-      setUploadError(error.message || 'Failed to upload image');
+      console.error('Image picker error:', error);
+      let errorMessage = 'Failed to process image';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.code) {
+        switch (error.code) {
+          case 'camera_unavailable':
+            errorMessage = 'Camera is not available';
+            break;
+          case 'permission':
+            errorMessage = 'Permission not satisfied';
+            break;
+          default:
+            errorMessage = 'An unknown error occurred';
+        }
+      }
+      
+      Alert.alert(t('common.error'), errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   const onSubmit = async (data: ProfileFormData) => {
-    if (!user?.id) return;
+    try {
+      if (!user?.id) {
+        Alert.alert(t('common.error'), t('profile.user_not_found'));
+        return;
+      }
 
-    const response = await AuthController.updateProfile(user.id, {
-      name: data.name,
-      gender: data.gender,
-      dob: data.dob.toISOString(),
-    });
+      setIsLoading(true);
 
-    if (response.success && response.data) {
-      updateUser(response.data as User);
+      const response = await AuthController.updateProfile(user.id, {
+        name: data.name,
+        gender: data.gender,
+        dob: data.dob.toISOString(),
+      });
+
+      if (response.success && response.data) {
+        updateUser(response.data as User);
+        Alert.alert(t('common.success'), t('profile.update_success'));
+      } else {
+        Alert.alert(t('common.error'), response.message || t('profile.update_failed'));
+      }
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      Alert.alert(t('common.error'), error.message || t('profile.update_failed'));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -149,35 +173,6 @@ const Profile = () => {
       <Header title={t('settings.profile')} backButton />
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
-          {/* Profile Image Section */}
-          <View style={styles.imageSection}>
-            <TouchableOpacity
-              onPress={handleImagePicker}
-              style={styles.imageContainer}
-              disabled={isLoading}>
-              <Image
-                source={
-                  profileImage
-                    ? { uri: profileImage }
-                    : require('../../../assets/images/person.png')
-                }
-                style={styles.profileImage}
-              />
-              <View style={styles.imageOverlay}>
-                {isLoading ? (
-                  <ActivityIndicator color={Colors.white} />
-                ) : (
-                  <Text style={styles.changePhotoText}>
-                    {t('profile.changePhoto')}
-                  </Text>
-                )}
-              </View>
-            </TouchableOpacity>
-            {uploadError && (
-              <Text style={styles.errorText}>{uploadError}</Text>
-            )}
-          </View>
-
           {/* Form Fields */}
           <View style={styles.formSection}>
             <Controller
@@ -298,15 +293,14 @@ const Profile = () => {
                 </View>
               )}
             />
-
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={handleSubmit(onSubmit)}>
-              <Text style={styles.saveButtonText}>{t('common.save')}</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+      <BottomButton
+        title={t('common.save')}
+        onPress={handleSubmit(onSubmit)}
+        loading={isLoading}
+      />
     </View>
   );
 };
@@ -322,6 +316,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    paddingBottom: 80,
   },
   imageSection: {
     alignItems: 'center',
@@ -392,17 +387,7 @@ const styles = StyleSheet.create({
     color: Colors.red,
     marginTop: 4,
   },
-  saveButton: {
-    backgroundColor: Colors.primary,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  saveButtonText: {
-    ...TextStyle.P1B,
-    color: Colors.white,
-  },
 });
 
 export default Profile;
+

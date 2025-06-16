@@ -1,6 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
-import { DetectAudioApi, DetectFaceApi } from '../../types/api/python';
-import { BackendApiUrl } from '../config';
+import {useMutation} from '@tanstack/react-query';
+import {DetectAudioApi, DetectFaceApi} from '../../types/api/python';
+import {BackendApiUrl} from '../config';
 
 const API_BASE_URL = BackendApiUrl;
 // const API_BASE_URL = 'http://192.168.1.6:8000/';
@@ -39,13 +39,13 @@ export const useDetectAudioAPI = () => {
     FormData
   >({
     mutationFn: async (formData: FormData) => {
-      const url = API_BASE_URL + 'whisper-lora/audio-transcriber/';
+      const url = API_BASE_URL + 'whisper-small/audio-transcriber/';
       console.log('Sending request to:', url);
       console.log('FormData:', formData);
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         body: formData,
       });
