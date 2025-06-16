@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from 'react-native';
 import AudioRecorderPlayer, {
   AudioEncoderAndroidType,
@@ -64,6 +63,29 @@ export interface RecordingState {
   recordTime: string;
 }
 
+// Add useDebounce hook before the LandoltAudioCard component
+const useDebounce = (callback: () => void, delay: number) => {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      callback();
+    }, delay);
+  }, [callback, delay]);
+};
+
 const LandoltAudioCard: React.FC<LandoltCardProps> = ({
   step,
   eye,
@@ -88,6 +110,10 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
   });
   const [audioLevels, setAudioLevels] = useState<number[]>(Array(20).fill(0));
   const [filePath, setFilePath] = useState<string>('');
+  const [isProcessingAudio, setIsProcessingAudio] = useState(false);
+  const [showLimitMessage, setShowLimitMessage] = useState(false);
+  const [canRetry, setCanRetry] = useState(false);
+  const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Refs
   const audioRecorderPlayer = useRef(new AudioRecorderPlayer());
@@ -148,8 +174,23 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
     return `${dirPath}/${fileName}`;
   };
 
+  const deleteAudioFile = async (filePath: string) => {
+    try {
+      const exists = await RNFetchBlob.fs.exists(filePath);
+      if (exists) {
+        await RNFetchBlob.fs.unlink(filePath);
+        console.log('Audio file deleted successfully:', filePath);
+      }
+    } catch (error) {
+      console.error('Error deleting audio file:', error);
+    }
+  };
+
   const startRecording = async () => {
     try {
+      setIsProcessingAudio(false);
+      setShowLimitMessage(false);
+      setCanRetry(false);
       const path = getAudioFilePath();
       setFilePath(path);
 
@@ -161,26 +202,32 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
       console.log('Recording started:', result);
       
+      // Clear any existing timeout
+      if (maxDurationTimeout.current) {
+        clearTimeout(maxDurationTimeout.current);
+      }
+
       // Set maximum recording duration
       maxDurationTimeout.current = setTimeout(() => {
-        if (recordingState.isRecording) {
-          stopRecording();
-          Alert.alert(
-            t('landolt.max_recording_time.title'),
-            t('landolt.max_recording_time.message'),
-            [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
-          );
-        }
+        console.log('Max duration reached, stopping recording');
+        handleMaxDurationReached();
       }, maxDuration * 1000);
 
       audioRecorderPlayer.current.addRecordBackListener(e => {
+        const currentPosition = e.currentPosition / 1000;
         setRecordingState({
           isRecording: true,
-          currentDurationSec: e.currentPosition / 1000,
+          currentDurationSec: currentPosition,
           recordTime: audioRecorderPlayer.current.mmssss(
             Math.floor(e.currentPosition),
           ),
         });
+
+        // Check if we've reached max duration
+        if (currentPosition >= maxDuration) {
+          console.log('Duration limit reached in listener');
+          handleMaxDurationReached();
+        }
       });
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -213,74 +260,150 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
         isRecording: false,
       });
 
-      // Check if file exists
-      const fileExists = await RNFetchBlob.fs.exists(filePath);
-      if (!fileExists) {
-        throw new Error('Recording file not found');
-      }
-
-      const fileName = filePath.split('/').pop() || 'recording.m4a';
-      const fileUri = Platform.OS === 'ios' ? filePath : `file://${filePath}`;
-
-      // Prepare FormData for API
-      const formData = new FormData();
-      formData.append('file', {
-        uri: fileUri,
-        type: 'audio/mpeg',
-        name: fileName,
-      } as Partial<AudioFile>);
-      formData.append('language', currentLanguage.currentLanguage.toLowerCase());
-
-      console.log('Sending m4a file to API:', fileName);
-      console.log('Language:', currentLanguage.currentLanguage.toLowerCase());
-      console.log('File URI:', fileUri);
-
-      try {
-        const response = await detectAudioMutateAsync(formData);
-        console.log('Audio detection response:', response);
-
-        const fileStat = await RNFetchBlob.fs.stat(filePath);
-        console.log('Recorded file size:', fileStat.size);
-        if (fileStat.size === 0) {
-          throw new Error('Recording file is empty');
+      // Only process the recording if it wasn't stopped due to max duration
+      if (!canRetry) {
+        // Check if file exists
+        const fileExists = await RNFetchBlob.fs.exists(filePath);
+        if (!fileExists) {
+          throw new Error('Recording file not found');
         }
 
-        console.log(fileStat);
+        const fileName = filePath.split('/').pop() || 'recording.m4a';
+        const fileUri = Platform.OS === 'ios' ? filePath : `file://${filePath}`;
 
-        // Process the transcription and determine direction
-        const detectedDirection = processTranscription(response.transcription);
-        if (detectedDirection) {
-          onAudioProcessed?.(detectedDirection);
-        } else {
-          onRecordingError?.(new Error('Could not determine direction from audio'));
+        // Set processing state
+        setIsProcessingAudio(true);
+
+        try {
+          // Process the recording
+          const formData = new FormData();
+          formData.append('file', {
+            uri: fileUri,
+            type: 'audio/mpeg',
+            name: fileName,
+          } as Partial<AudioFile>);
+          formData.append('language', currentLanguage.currentLanguage.toLowerCase());
+
+          const response = await detectAudioMutateAsync(formData);
+          console.log('Audio detection response:', response);
+
+          const fileStat = await RNFetchBlob.fs.stat(filePath);
+          if (fileStat.size === 0) {
+            throw new Error('Recording file is empty');
+          }
+
+          // Process the transcription and determine direction
+          const detectedDirection = processTranscription(response.transcription);
+          if (detectedDirection) {
+            onAudioProcessed?.(detectedDirection);
+          } else {
+            onRecordingError?.(new Error('Could not determine direction from audio'));
+          }
+
+          // Call completion callback
+          onRecordingComplete?.({
+            uri: fileUri,
+            name: fileName,
+            type: 'audio/mpeg',
+            size: fileStat.size,
+          });
+
+          // Delete the audio file after successful processing
+          await deleteAudioFile(filePath);
+
+          // Add delay before allowing next recording and reset timer
+          processingTimeoutRef.current = setTimeout(() => {
+            setIsProcessingAudio(false);
+            // Reset recording state
+            setRecordingState({
+              isRecording: false,
+              currentDurationSec: 0,
+              recordTime: '00:00:00',
+            });
+          }, 1000);
+
+        } catch (apiError) {
+          console.error('API error:', apiError);
+          onRecordingError?.(new Error('Failed to process audio file'));
+          // Delete the audio file on error
+          await deleteAudioFile(filePath);
+          setIsProcessingAudio(false);
+          // Reset recording state on error
+          setRecordingState({
+            isRecording: false,
+            currentDurationSec: 0,
+            recordTime: '00:00:00',
+          });
         }
-
-        // Call completion callback
-        onRecordingComplete?.({
-          uri: fileUri,
-          name: fileName,
-          type: 'audio/mpeg',
-          size: fileStat.size,
-        });
-      } catch (apiError) {
-        console.error('API error:', apiError);
-        onRecordingError?.(new Error('Failed to process audio file'));
+      } else {
+        // If canRetry is true, delete the audio file
+        await deleteAudioFile(filePath);
       }
     } catch (error) {
       console.error('Error stopping recording:', error);
       onRecordingError?.(
         error instanceof Error ? error : new Error('Error stopping recording'),
       );
+      // Delete the audio file on error
+      await deleteAudioFile(filePath);
+      setIsProcessingAudio(false);
+      // Reset recording state on error
+      setRecordingState({
+        isRecording: false,
+        currentDurationSec: 0,
+        recordTime: '00:00:00',
+      });
     }
   };
 
-  const toggleRecording = () => {
+  const handleMaxDurationReached = async () => {
+    console.log('Handling max duration reached');
     if (recordingState.isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
+      try {
+        // Clear the timeout
+        if (maxDurationTimeout.current) {
+          clearTimeout(maxDurationTimeout.current);
+          maxDurationTimeout.current = null;
+        }
+
+        // Stop the recorder
+        await audioRecorderPlayer.current.stopRecorder();
+        audioRecorderPlayer.current.removeRecordBackListener();
+
+        setShowLimitMessage(true);
+        setCanRetry(true);
+
+        // Delete the audio file
+        await deleteAudioFile(filePath);
+
+        // Reset recording state
+        setRecordingState({
+          isRecording: false,
+          currentDurationSec: 0,
+          recordTime: '00:00:00',
+        });
+
+        // Hide message after 3 seconds
+        setTimeout(() => {
+          setShowLimitMessage(false);
+        }, 3000);
+      } catch (error) {
+        console.error('Error in handleMaxDurationReached:', error);
+      }
     }
   };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup timeouts
+      if (maxDurationTimeout.current) {
+        clearTimeout(maxDurationTimeout.current);
+      }
+      if (processingTimeoutRef.current) {
+        clearTimeout(processingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -378,24 +501,34 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
             style={[
               styles.recordButton,
               recordingState.isRecording
-                ? styles.stopButton
+                ? styles.recordingButton
+                : isProcessingAudio
+                ? styles.processingButton
                 : styles.startButton,
             ]}
-            onPress={toggleRecording}
-            disabled={isProcessing}>
-            {isProcessing ? (
+            onPressIn={startRecording}
+            onPressOut={stopRecording}
+            disabled={isProcessingAudio}>
+            {isProcessingAudio ? (
               <ActivityIndicator color="#FFF" size="small" />
+            ) : recordingState.isRecording ? (
+              <View style={styles.recordingIcon} />
             ) : (
-              <View
-                style={
-                  recordingState.isRecording
-                    ? styles.stopIcon
-                    : styles.startIcon
-                }
-              />
+              <View style={styles.startIcon} />
             )}
           </TouchableOpacity>
         </View>
+
+        {showLimitMessage && (
+          <View style={styles.limitMessageContainer}>
+            <Text style={styles.limitMessageText}>
+              {t('landolt.max_recording_time.message')}
+            </Text>
+            <Text style={styles.retryMessageText}>
+              {t('landolt.retry_recording')}
+            </Text>
+          </View>
+        )}
 
         {feedback?.show && (
           <View style={[
@@ -491,9 +624,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   recordButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -508,8 +641,12 @@ const styles = StyleSheet.create({
   startButton: {
     backgroundColor: '#FF4136',
   },
-  stopButton: {
-    backgroundColor: '#888',
+  recordingButton: {
+    backgroundColor: '#e74c3c',
+    transform: [{ scale: 1.1 }],
+  },
+  processingButton: {
+    backgroundColor: '#95a5a6',
   },
   startIcon: {
     width: 24,
@@ -517,10 +654,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#FFF',
   },
-  stopIcon: {
+  recordingIcon: {
     width: 20,
     height: 20,
     backgroundColor: '#FFF',
+    borderRadius: 2,
   },
   statusText: {
     marginTop: 16,
@@ -601,6 +739,28 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#2196F3',
     borderRadius: 5,
+  },
+  limitMessageContainer: {
+    position: 'absolute',
+    bottom: 120,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  limitMessageText: {
+    color: '#FFF',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  retryMessageText: {
+    color: '#FFF',
+    fontSize: 14,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
 
