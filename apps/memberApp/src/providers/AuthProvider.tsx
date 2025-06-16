@@ -1,22 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState
+  createContext,
+  useContext,
+  useEffect,
+  useState
 } from 'react';
 import { User } from '../../types/app/user';
+import { AuthController } from '../api/auth/controller';
 
 type AuthContextType = {
   user: User | null;
   updateUser: (user: User) => void;
-  signOut: () => Promise<void>;
+  logout: () => Promise<void>;
+  login: (data: { email: string; password: string }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   updateUser: () => {},
-  signOut: async () => {},
+  logout: async () => {},
+  login: async () => {},
 });
 
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
@@ -41,7 +44,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     setUser(updatedUser);
   };
 
-  const signOut = async () => {
+  const logout = async () => {
     try {
       await AsyncStorage.removeItem('user');
       setUser(null);
@@ -50,8 +53,22 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     }
   };
 
+  const login = async (data: { email: string; password: string }) => {
+    try {
+      const result = await AuthController.login(data.email, data.password);
+      if (result.success) {
+        await AsyncStorage.setItem('user', JSON.stringify(result.user));
+        setUser(result.user);
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{user, updateUser, signOut}}>
+    <AuthContext.Provider value={{user, updateUser, logout, login}}>
       {children}
     </AuthContext.Provider>
   );
