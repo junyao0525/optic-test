@@ -6,6 +6,7 @@ import { DistanceMeasureProvider } from '../providers/DistanceProvider';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
+import LandoltCDetail from '../screens/Historys/LandoltCDetail';
 import LandoltC from '../screens/LandoltC/LandoltC';
 import LandoltCTest from '../screens/LandoltC/LandoltCtest';
 import About from '../screens/Settings/About';
@@ -49,6 +50,7 @@ const StackNavigator = () => {
       <Stack.Screen name="CameraScreen" component={CameraScreen} />
       <Stack.Screen name="AudioScreen" component={AudioScreen} />
       <Stack.Screen name="EyeTiredness" component={EyeTiredness} />
+      <Stack.Screen name="LandoltCDetail" component={LandoltCDetail} />
       <Stack.Screen name="About" component={About} />
       <Stack.Screen name="Help" component={Help} />
       <Stack.Screen name="Language" component={Language} />

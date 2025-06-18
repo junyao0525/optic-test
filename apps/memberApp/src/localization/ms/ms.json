@@ -154,6 +154,34 @@
     "incorrect_answer": "Jawapan Salah",
     "expected_direction": "Arah Dijangka",
     "previous_level": "Tahap Sebelumnya",
+    "detail": {
+      "title": "Butiran Keputusan Ujian",
+      "loading": "Memuatkan keputusan ujian...",
+      "error": "Keputusan ujian tidak dijumpai",
+      "go_back": "Kembali",
+      "test_summary": "Ringkasan Ujian",
+      "average_score": "Skor Purata",
+      "average_logmar": "LogMAR Purata",
+      "left_eye_results": "Keputusan Mata Kiri",
+      "right_eye_results": "Keputusan Mata Kanan",
+      "score": "Skor",
+      "logmar": "LogMAR",
+      "snellen": "Snellen",
+      "vision_status": "Status Penglihatan:",
+      "eye_comparison": "Perbandingan Mata",
+      "left": "Kiri",
+      "right": "Kanan",
+      "recommendations": "Cadangan",
+      "recommendation_exam": "• Pertimbangkan untuk menjadualkan pemeriksaan mata",
+      "recommendation_monitor": "• Pantau perubahan penglihatan secara berkala",
+      "recommendation_breaks": "• Ambil rehat berkala semasa menggunakan skrin",
+      "recommendation_continue": "• Teruskan pemantauan penglihatan berkala",
+      "recommendation_practices": "• Mengekalkan amalan kesihatan mata yang baik",
+      "recommendation_checkups": "• Jadualkan pemeriksaan mata tahunan",
+      "take_new_test": "Ambil Ujian Baharu",
+      "back_to_history": "Kembali ke Sejarah",
+      "user_id": "ID Pengguna:"
+    },
     "info": {
       "title": "Mengenai Ujian Landolt C",
       "subtitle": "Kaedah saintifik untuk mengukur ketajaman penglihatan",
@@ -235,5 +263,22 @@
       "too_far": "Terlalu jauh! Sila dekatkan.",
       "perfect": "Jarak sempurna!"
     }
+  },
+  "history": {
+    "title": "Sejarah",
+    "landolt_test_results": "Keputusan Ujian Landolt",
+    "eye_tiredness_results": "Keputusan Keletihan Mata",
+    "recent_test_results": "Keputusan ujian terkini",
+    "no_test_results": "Tiada keputusan ujian dijumpai",
+    "loading": "Memuat...",
+    "left_eye": "Mata Kiri",
+    "right_eye": "Mata Kanan",
+    "logmar": "LogMAR:",
+    "snellen": "Snellen:",
+    "view_details": "Lihat Butiran",
+    "view_all_results": "Lihat Semua Keputusan",
+    "fatigue_level": "Tahap Keletihan",
+    "duration": "Tempoh",
+    "blink_rate": "Kadar Kelipan"
   }
 } 

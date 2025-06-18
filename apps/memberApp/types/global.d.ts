@@ -7,6 +7,7 @@ declare global {
     CameraScreen: undefined;
     AudioScreen: undefined;
     EyeTiredness: undefined;
+    LandoltCDetail: { resultId: number };
     About: undefined;
     Help: undefined;
     Language: undefined;
