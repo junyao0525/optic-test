@@ -116,4 +116,34 @@ export const AuthController = {
       };
     }
   },
+
+  getUserInfo: async (userId: number): Promise<{success: true; user: any} | {success: false; message: string}> => {
+    try {
+      const { data, error } = await supabase
+        .from('Users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error || !data) {
+        return { success: false, message: 'User not found' };
+      }
+
+      return {
+        success: true,
+        user: {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          gender: data.gender,
+          dob: data.dob,
+        },
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err.message || 'Failed to get user info',
+      };
+    }
+  },
 };

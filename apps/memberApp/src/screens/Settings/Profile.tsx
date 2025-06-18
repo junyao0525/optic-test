@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import DatePicker from 'react-native-date-picker';
-import { launchCamera } from 'react-native-image-picker';
 import { User } from '../../../types/app/user';
 import { AuthController } from '../../api/auth/controller';
-import { FileUploadController } from '../../api/fileUpload/controller';
 import BottomButton from '../../components/BottomButton';
 import Header from '../../components/Header';
 import InputField from '../../components/InputField';
 import { useAuth } from '../../providers/AuthProvider';
-import { useStoragePermission } from '../../providers/StoragePermissionProvider';
 import { Colors, TextStyle } from '../../themes';
 
 type ProfileFormData = {
@@ -24,9 +21,7 @@ type ProfileFormData = {
 const Profile = () => {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
-  const { hasStoragePermission, requestStoragePermission } = useStoragePermission();
   const [showDatePicker, setShowDatePicker] = React.useState(false);
-  const [profileImage, setProfileImage] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -43,101 +38,31 @@ const Profile = () => {
     },
   });
 
+  const getUserInfo = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await AuthController.getUserInfo(user.id);
+      if (response.success && response.user) {
+        updateUser(response.user as User);
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+    }
+  };
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
+
   useEffect(() => {
     if (user) {
       setValue('name', user.name || '');
       setValue('email', user.email || '');
       setValue('dob', user.dob ? new Date(user.dob) : new Date());
       setValue('gender', user.gender || 'male');
-      setProfileImage(user.profile_image_url || null);
     }
   }, [user, setValue]);
-
-  const handleImagePicker = async () => {
-    try {
-      if (!hasStoragePermission) {
-        const granted = await requestStoragePermission();
-        if (!granted) {
-          Alert.alert(
-            t('common.error'),
-            t('profile.storage_permission_required'),
-            [
-              {
-                text: t('common.settings'),
-                onPress: () => {
-                  if (Platform.OS === 'android') {
-                    Linking.openSettings();
-                  }
-                },
-              },
-              {
-                text: t('common.cancel'),
-                style: 'cancel',
-              },
-            ]
-          );
-          return;
-        }
-      }
-
-      setIsLoading(true);
-
-      const result = await launchCamera({
-        mediaType: 'photo',
-        quality: 0.8,
-        includeBase64: false,
-        maxWidth: 1024,
-        maxHeight: 1024,
-      });
-
-      if (result.didCancel) {
-        setIsLoading(false);
-        return;
-      }
-
-      if (result.errorCode) {
-        throw new Error(result.errorMessage || 'Failed to pick image');
-      }
-
-      if (result.assets && result.assets[0] && user?.id) {
-        const uploadResponse = await FileUploadController.uploadProfileImage(
-          user.id,
-          result.assets[0]
-        );
-
-        if (uploadResponse.success && uploadResponse.data?.url) {
-          setProfileImage(uploadResponse.data.url);
-          if (user) {
-            updateUser({ ...user, profile_image_url: uploadResponse.data.url });
-          }
-        } else {
-          throw new Error(uploadResponse.message || 'Failed to upload image');
-        }
-      }
-    } catch (error: any) {
-      console.error('Image picker error:', error);
-      let errorMessage = 'Failed to process image';
-      
-      if (error.message) {
-        errorMessage = error.message;
-      } else if (error.code) {
-        switch (error.code) {
-          case 'camera_unavailable':
-            errorMessage = 'Camera is not available';
-            break;
-          case 'permission':
-            errorMessage = 'Permission not satisfied';
-            break;
-          default:
-            errorMessage = 'An unknown error occurred';
-        }
-      }
-      
-      Alert.alert(t('common.error'), errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -244,6 +169,7 @@ const Profile = () => {
               onCancel={() => {
                 setShowDatePicker(false);
               }}
+              maximumDate={new Date()}
             />
 
             <Controller
@@ -299,7 +225,6 @@ const Profile = () => {
       <BottomButton
         title={t('common.save')}
         onPress={handleSubmit(onSubmit)}
-        loading={isLoading}
       />
     </View>
   );
