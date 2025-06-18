@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -63,29 +63,6 @@ export interface RecordingState {
   recordTime: string;
 }
 
-// Add useDebounce hook before the LandoltAudioCard component
-const useDebounce = (callback: () => void, delay: number) => {
-  const timeoutRef = useRef<NodeJS.Timeout>();
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  return useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      callback();
-    }, delay);
-  }, [callback, delay]);
-};
-
 const LandoltAudioCard: React.FC<LandoltCardProps> = ({
   step,
   eye,
@@ -108,7 +85,6 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
     currentDurationSec: 0,
     recordTime: '00:00:00',
   });
-  const [audioLevels, setAudioLevels] = useState<number[]>(Array(20).fill(0));
   const [filePath, setFilePath] = useState<string>('');
   const [isProcessingAudio, setIsProcessingAudio] = useState(false);
   const [showLimitMessage, setShowLimitMessage] = useState(false);
@@ -129,25 +105,20 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
   // Add function to process transcription
   const processTranscription = (transcription: string): Direction | null => {
-    // Convert to lowercase for case-insensitive matching
     const text = transcription.toLowerCase().trim();
     
-    // Check for direction keywords in both English and Chinese
-    if (text.includes('up') || text.includes('above') || 
-        text.includes('上') || text.includes('向上') || text.includes('上面')) {
-      return 'up';
-    } else if (text.includes('right') || 
-               text.includes('右') || text.includes('向右') || text.includes('右边')) {
-      return 'right';
-    } else if (text.includes('down') || text.includes('below') || 
-               text.includes('下') || text.includes('向下') || text.includes('下面')) {
-      return 'down';
-    } else if (text.includes('left') || 
-               text.includes('左') || text.includes('向左') || text.includes('左边')) {
-      return 'left';
+    switch (true) {
+      case text.includes('up'):
+        return 'up';
+      case text.includes('right'):
+        return 'right';
+      case text.includes('down'):
+        return 'down';
+      case text.includes('left'):
+        return 'left';
+      default:
+        return null;
     }
-    
-    return null;
   };
 
   useEffect(() => {
@@ -223,7 +194,6 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
           ),
         });
 
-        // Check if we've reached max duration
         if (currentPosition >= maxDuration) {
           console.log('Duration limit reached in listener');
           handleMaxDurationReached();
@@ -248,9 +218,6 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
         clearTimeout(maxDurationTimeout.current);
         maxDurationTimeout.current = null;
       }
-
-      // Reset audio levels
-      setAudioLevels(Array(20).fill(0));
 
       const result = await audioRecorderPlayer.current.stopRecorder();
       audioRecorderPlayer.current.removeRecordBackListener();
@@ -395,7 +362,6 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
   useEffect(() => {
     return () => {
-      // Cleanup timeouts
       if (maxDurationTimeout.current) {
         clearTimeout(maxDurationTimeout.current);
       }

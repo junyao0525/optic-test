@@ -1,9 +1,10 @@
-import {useMutation} from '@tanstack/react-query';
-import {DetectAudioApi, DetectFaceApi} from '../../types/api/python';
-import {BackendApiUrl} from '../config';
+import { useMutation } from '@tanstack/react-query';
+import { DetectAudioApi, DetectFaceApi } from '../../types/api/python';
+import { BackendApiUrl } from '../config';
+
 
 const API_BASE_URL = BackendApiUrl;
-// const API_BASE_URL = 'http://192.168.1.6:8000/';
+// const API_BASE_URL = 'http://104.214.171.210/';
 // api/python.ts
 
 export const useDetectFaceAPI = () => {
