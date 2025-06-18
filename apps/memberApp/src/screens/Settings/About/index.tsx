@@ -2,9 +2,9 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Header from '../../components/Header';
-import LandoltInfoCard from '../../components/LandoltInfoCard';
-import { Colors } from '../../themes';
+import Header from '../../../components/Header';
+import LandoltInfoCard from '../../../components/LandoltInfoCard';
+import { Colors } from '../../../themes';
 
 const PlaceholderScreen: React.FC<{title: string}> = ({title}) => (
   <View style={styles.scene}>

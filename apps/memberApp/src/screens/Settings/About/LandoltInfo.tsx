@@ -1,8 +1,8 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import Header from '../../components/Header';
-import LandoltInfoCard from '../../components/LandoltInfoCard';
+import Header from '../../../components/Header';
+import LandoltInfoCard from '../../../components/LandoltInfoCard';
 
 const LandoltInfo: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
