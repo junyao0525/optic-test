@@ -1,5 +1,5 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { useWindowDimension } from '../../../hooks/useWindowDimension';
@@ -10,11 +10,13 @@ import LandoltCard from '../../components/landoltCard';
 import LandoltInstruction from '../../components/LandoltCInstruction';
 import TestCard from '../../components/TestCard';
 import { useLandoltTest } from '../../hooks/useLandoltTest';
+import { useAuth } from '../../providers/AuthProvider';
 import { Colors } from '../../themes';
 import {
   calculateSizeFromLogMAR,
   logMarValues
 } from '../../utils/logMar';
+import { useUserId } from '../../utils/userUtils';
 
 const swipeTestImage = require('../../../assets/images/LandoltCtestType/swipe-test.png');
 const speakTestImage = require('../../../assets/images/LandoltCtestType/speak-test.png');
@@ -23,6 +25,11 @@ const LandoltCtest = () => {
   const {width} = useWindowDimension();
   const navigation = useNavigation<NavigationProp<TabParamList>>();
   const {t} = useTranslation();
+  const { user } = useAuth();
+  const userId = useUserId();
+  const { saveTestResults } = useLandoltTest();
+  const [isSaving, setIsSaving] = useState(false);
+  const hasSavedRef = useRef(false);
 
   const {
     step,
@@ -67,6 +74,59 @@ const LandoltCtest = () => {
         return baseStyle;
     }
   };
+
+  useEffect(() => {
+    const saveResults = async () => {
+      if (step === 'done' && !hasSavedRef.current && !isSaving) {
+        if (!userId) {
+          console.error('No user logged in or user ID not available');
+          return;
+        }
+
+        setIsSaving(true);
+        hasSavedRef.current = true;
+        
+        try {
+          const result = await saveTestResults(
+            userId,
+            {
+              score: leftEyeResults.score,
+              logMAR: leftEyeResults.logMAR,
+              snellen: leftEyeResults.snellen,
+            },
+            {
+              score: rightEyeResults.score,
+              logMAR: rightEyeResults.logMAR,
+              snellen: rightEyeResults.snellen,
+            }
+          );
+
+          if (result.success) {
+            console.log('Test results saved successfully:', result.data);
+            // Optionally show a success message
+            // Alert.alert('Success', 'Test results have been saved successfully!');
+          } else {
+            console.error('Failed to save test results:', result.message);
+            // Optionally show an error message
+            // Alert.alert('Error', 'Failed to save test results. Please try again.');
+          }
+        } catch (error) {
+          console.error('Exception saving test results:', error);
+          // Alert.alert('Error', 'An unexpected error occurred while saving results.');
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    };
+
+    saveResults();
+  }, [step, leftEyeResults, rightEyeResults, saveTestResults, userId]);
+
+  useEffect(() => {
+    if (step === 'type') {
+      hasSavedRef.current = false;
+    }
+  }, [step]);
 
   return (
     <>

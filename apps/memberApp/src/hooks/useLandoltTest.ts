@@ -1,27 +1,10 @@
 import { useCallback, useState } from 'react';
+import { EyeResults, FeedbackState, LandoltTestResult, TestState, TestStep } from '../../types/app/landolt';
+import { LandoltController } from '../api/LandoltC/controller';
 import { Direction, logMARToSnellen, logMarValues } from '../utils/logMar';
 import { useDebounce } from './useDebounce';
 
-interface EyeResults {
-  score: number;
-  finalLevel: number;
-  logMAR: number;
-  snellen: string;
-}
 
-type TestStep = 'type' | 'left' | 'leftTest' | 'right' | 'rightTest' | 'done' | 'leftSpeakTest' | 'rightSpeakTest';
-
-interface TestState {
-  level: number;
-  attempts: number;
-  isPreviousLevel: boolean;
-}
-
-interface FeedbackState {
-  show: boolean;
-  isCorrect: boolean;
-  expectedDirection: Direction | null;
-}
 
 export const useLandoltTest = () => {
   const [step, setStep] = useState<TestStep>('type');
@@ -206,6 +189,50 @@ export const useLandoltTest = () => {
     };
   }, [testState]);
 
+
+  //  Supabase function
+
+
+  const saveTestResults = useCallback(async (
+    userId: number,
+    leftEyeResults: {
+      score: number;
+      logMAR: number;
+      snellen: string;
+    },
+    rightEyeResults: {
+      score: number;
+      logMAR: number;
+      snellen: string;
+    }
+  ) => {
+    console.log(testType)
+    const testResult: LandoltTestResult = {
+      user_id: userId,
+      L_score: leftEyeResults.score,
+      L_logMar: leftEyeResults.logMAR,
+      L_snellen: leftEyeResults.snellen,
+      R_score: rightEyeResults.score,
+      R_logMar: rightEyeResults.logMAR,
+      R_snellen: rightEyeResults.snellen,
+      test_type: testType
+    };
+
+    return await LandoltController.insertTestResult(testResult);
+  }, []);
+
+
+  const getUserTestResults = useCallback(async (userId: number) => {
+    return await LandoltController.getUserTestResults(userId);
+  }, []);
+
+
+  const getTestResultById = useCallback(async (resultId: number) => {
+    return await LandoltController.getTestResultById(resultId);
+  }, []);
+
+
+
   return {
     step,
     setStep,
@@ -219,5 +246,8 @@ export const useLandoltTest = () => {
     getTestInfo,
     feedback,
     isProcessing,
+    saveTestResults,
+    getUserTestResults,
+    getTestResultById,
   };
 }; 
