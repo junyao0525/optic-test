@@ -35,7 +35,19 @@
     "title": "Home",
     "greeting": "Hello, {{name}}!",
     "dashboard": "Dashboard",
-    "testTypes": "Test Types"
+    "testTypes": "Test Types",
+    "welcome_subtitle": "Track your vision health progress",
+    "total_tests": "Total Tests",
+    "last_test": "Last Test",
+    "best_score": "Best Score",
+    "view_all": "View All",
+    "latest_result": "Latest Result",
+    "choose_test": "Choose your vision test",
+    "landolt_description": "Test your visual acuity with the Landolt C method",
+    "eye_tiredness_description": "Monitor eye fatigue and strain levels",
+    "quick_actions": "Quick Actions",
+    "view_history": "View History",
+    "settings": "Settings"
   },
   "settings": {
     "title": "Settings",
@@ -86,6 +98,7 @@
     "change_info": "Changing the language will update the app interface. Some content may require an app restart."
   },
   "common": {
+    "ok" : "Ok",
     "yes": "Yes",
     "no": "No",
     "cancel": "Cancel",

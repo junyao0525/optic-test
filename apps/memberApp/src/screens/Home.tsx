@@ -1,20 +1,20 @@
 import { useNavigation } from '@react-navigation/core';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  FlatList,
   ImageSourcePropType,
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useWindowDimension } from '../../hooks/useWindowDimension';
-import Card from '../components/Card';
+import { LandoltController, LandoltTestResultResponse } from '../api/LandoltC/controller';
 import Header from '../components/Header';
-import TypeButton from '../components/TypeButton';
-import { Colors, TextStyle } from '../themes';
+import { Colors } from '../themes';
+import { useUserId } from '../utils/userUtils';
 
 // const {t} = useTranslation();
 
@@ -23,25 +23,94 @@ type ButtonDetail = {
   image: ImageSourcePropType;
   route: string;
   param?: {screen: string};
+  description: string;
+  color: string;
 };
 
 const LandoltImage = require('../../assets/images/home/landolt.png');
 const EyeTirednessImage = require('../../assets/images/home/eye-tiredness.png');
-const AudioTestImage = require('../../assets/images/home/voice-detection.png');
-
-const historyData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-  datasets: [
-    {
-      data: [Math.random(), Math.random(), Math.random(), Math.random()],
-    },
-  ],
-};
 
 const HomeScreen = () => {
   const {navigate} = useNavigation();
   const {t} = useTranslation();
   const {width} = useWindowDimension();
+  const userId = useUserId();
+  
+  const [testResults, setTestResults] = useState<LandoltTestResultResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTestResults();
+  }, [userId]);
+
+  const fetchTestResults = async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const result = await LandoltController.getUserTestResults(userId);
+      if (result.success) {
+        setTestResults(result.data);
+      } else {
+        console.error('Failed to fetch test results:', result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching test results:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const getChartData = () => {
+    if (testResults.length === 0) {
+      return {
+        labels: ['No Data'],
+        datasets: [{ data: [0] }],
+      };
+    }
+
+    const sortedResults = [...testResults]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 6)
+      .reverse();
+
+    const labels = sortedResults.map(result => formatDate(result.created_at));
+    const leftEyeData = sortedResults.map(result => result.L_logMar);
+    const rightEyeData = sortedResults.map(result => result.R_logMar);
+
+    return {
+      labels,
+      datasets: [
+        {
+          data: leftEyeData,
+          color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+          strokeWidth: 2,
+        },
+        {
+          data: rightEyeData,
+          color: (opacity = 1) => `rgba(255, 152, 0, ${opacity})`,
+          strokeWidth: 2,
+        },
+      ],
+    };
+  };
+
+  const getLatestResult = () => {
+    if (testResults.length === 0) return null;
+    return testResults.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )[0];
+  };
+
+  const chartData = getChartData();
+  const latestResult = getLatestResult();
 
   const buttonDetails: ButtonDetail[] = [
     {
@@ -49,11 +118,15 @@ const HomeScreen = () => {
       image: LandoltImage,
       route: 'CameraScreen',
       param: {screen: 'LandoltC'},
+      description: t('home.landolt_description'),
+      color: '#4CAF50',
     },
     {
       title: t('common.eyeTiredness'),
       image: EyeTirednessImage,
       route: 'EyeTiredness',
+      description: t('home.eye_tiredness_description'),
+      color: '#FF9800',
     },
   ];
 
@@ -67,58 +140,172 @@ const HomeScreen = () => {
   };
 
   return (
-    <>
+    <View style={styles.container}>
       <Header title={t('home.title')} menuButton />
-      <ScrollView style={styles.container}>
-        <Card title={t('common.overview')}>
-          <LineChart
-            data={historyData}
-            width={width - 90}
-            height={180}
-            yAxisLabel=""
-            yAxisSuffix=""
-            yAxisInterval={1}
-            chartConfig={{
-              backgroundColor: Colors.white,
-              backgroundGradientFrom: Colors.white,
-              backgroundGradientTo: Colors.white,
-              decimalPlaces: 2,
-              color: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-              propsForDots: {
-                r: '6',
-                strokeWidth: '2',
-                stroke: Colors.white,
-              },
-            }}
-            bezier
-            style={{
-              borderRadius: 16,
-            }}
-          />
-        </Card>
-        <Text style={[TextStyle.H1B, styles.textTypes]}>
-          {t('home.testTypes')}
-        </Text>
-        <View>
-          <FlatList
-            data={buttonDetails}
-            keyExtractor={item => item.title}
-            renderItem={({item}) => (
-              <TypeButton
-                title={item.title}
-                onPress={() => handleButtonPress(item.route)}
-                image={item.image}
-              />
-            )}
-            scrollEnabled={false}
-          />
+      
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Welcome Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeTitle}>{t('home.greeting', { name: 'User' })}</Text>
+          <Text style={styles.welcomeSubtitle}>{t('home.welcome_subtitle')}</Text>
         </View>
+
+        {/* Quick Stats */}
+        {/* <View style={styles.quickStatsContainer}>
+          
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{testResults.length}</Text>
+            <Text style={styles.statLabel}>{t('home.total_tests')}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {latestResult ? formatDate(latestResult.created_at) : 'N/A'}
+            </Text>
+            <Text style={styles.statLabel}>{t('home.last_test')}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {testResults.length > 0 
+                ? Math.max(...testResults.map(r => Math.max(r.L_score, r.R_score)))
+                : 0
+              }/12
+            </Text>
+            <Text style={styles.statLabel}>{t('home.best_score')}</Text>
+          </View>
+        </View> */}
+
+        {/* Progress Chart */}
+        <View style={styles.chartSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('common.overview')}</Text>
+            <TouchableOpacity 
+              style={styles.viewAllButton}
+              onPress={() => navigate('History' as any)}
+            >
+              <Text style={styles.viewAllText}>{t('home.view_all')}</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.chartCard}>
+            <View style={styles.chartContainer}>
+              <LineChart
+                data={chartData}
+                width={width - 100}
+                height={200}
+                yAxisLabel=""
+                yAxisSuffix=""
+                yAxisInterval={1}
+                chartConfig={{
+                  backgroundColor: 'transparent',
+                  backgroundGradientFrom: 'transparent',
+                  backgroundGradientTo: 'transparent',
+                  decimalPlaces: 2,
+                  color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
+                  style: {
+                    borderRadius: 16,
+                  },
+                  propsForDots: {
+                    r: '6',
+                    strokeWidth: '3',
+                    stroke: Colors.white,
+                  },
+                  propsForBackgroundLines: {
+                    strokeDasharray: '',
+                    stroke: 'rgba(200, 200, 200, 0.3)',
+                  },
+                }}
+                bezier
+                style={styles.chart}
+              />
+            </View>
+            
+            {/* Chart Legend */}
+            <View style={styles.chartLegend}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
+                <Text style={styles.legendText}>{t('history.left_eye')}</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
+                <Text style={styles.legendText}>{t('history.right_eye')}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Latest Result Summary */}
+        {/* {latestResult && (
+          <View style={styles.latestResultSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('home.latest_result')}</Text>
+              <Text style={styles.resultDate}>{formatDate(latestResult.created_at)}</Text>
+            </View>
+            
+            <View style={styles.resultCard}>
+              <View style={styles.resultRow}>
+                <View style={styles.eyeResult}>
+                  <Text style={styles.eyeLabel}>{t('history.left_eye')}</Text>
+                  <Text style={styles.scoreValue}>{latestResult.L_score}/12</Text>
+                  <Text style={styles.logMARValue}>LogMAR {latestResult.L_logMar}</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={styles.eyeResult}>
+                  <Text style={styles.eyeLabel}>{t('history.right_eye')}</Text>
+                  <Text style={styles.scoreValue}>{latestResult.R_score}/12</Text>
+                  <Text style={styles.logMARValue}>LogMAR {latestResult.R_logMar}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )} */}
+
+        {/* Test Types Section */}
+        <View style={styles.testTypesSection}>
+          <Text style={styles.sectionTitle}>{t('home.testTypes')}</Text>
+          <Text style={styles.sectionSubtitle}>{t('home.choose_test')}</Text>
+          
+          <View style={styles.testButtonsContainer}>
+            {buttonDetails.map((item, index) => (
+              <TouchableOpacity
+                key={item.title}
+                style={[styles.testButton, { backgroundColor: item.color }]}
+                onPress={() => handleButtonPress(item.route, item.param)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.testButtonContent}>
+                  <Text style={styles.testButtonTitle}>{item.title}</Text>
+                  <Text style={styles.testButtonDescription}>{item.description}</Text>
+                </View>
+                <View style={styles.testButtonIcon}>
+                  <Text style={styles.testButtonArrow}>→</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Quick Actions */}
+        {/* <View style={styles.quickActionsSection}>
+          <Text style={styles.sectionTitle}>{t('home.quick_actions')}</Text>
+          <View style={styles.quickActionsContainer}>
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={() => navigate('History' as any)}
+            >
+              <Text style={styles.quickActionText}>{t('home.view_history')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.quickActionButton}
+              onPress={() => navigate('Settings' as any)}
+            >
+              <Text style={styles.quickActionText}>{t('home.settings')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View> */}
+        <View style={{marginBottom: 20}}></View>
       </ScrollView>
-    </>
+    </View>
   );
 };
 
@@ -127,15 +314,251 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundColor,
   },
-  textTypes: {
-    alignContent: 'center',
+  scrollContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  welcomeSection: {
+    marginBottom: 30,
+    // paddingTop: 10,
+    marginHorizontal: 5,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.darkGreen,
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 22,
+  },
+  quickStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 30,
+    gap: 12,
+    marginHorizontal: 5,
+  },
+  statCard: {
+    marginHorizontal:5,
+    flex: 1,
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.darkGreen,
+    marginBottom: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '600',
     textAlign: 'center',
-    paddingVertical: 5,
+  },
+  chartSection: {
+    marginHorizontal:5,
+    marginBottom: 30,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    marginBottom:10,
+    fontSize: 20,
+    fontWeight: 'bold',
     color: Colors.darkGreen,
   },
-  image: {
-    borderColor: Colors.black,
-    right: 14,
+  viewAllButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: Colors.darkGreen,
+    borderRadius: 20,
+  },
+  viewAllText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.white,
+  },
+  chartCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  chartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+    marginBottom: 5,
+  },
+  chart: {
+    borderRadius: 16,
+  },
+  chartLegend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+    gap: 24,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  legendText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  latestResultSection: {
+    marginBottom: 30,
+    marginHorizontal: 5,
+  },
+  resultDate: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  resultCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  resultRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  eyeResult: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  eyeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.darkGreen,
+    marginBottom: 8,
+  },
+  scoreValue: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.darkGreen,
+    marginBottom: 4,
+  },
+  logMARValue: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  divider: {
+    width: 1,
+    height: 60,
+    backgroundColor: '#eee',
+    marginHorizontal: 20,
+  },
+  testTypesSection: {
+    marginBottom: 30,
+    marginHorizontal: 5,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  testButtonsContainer: {
+    gap: 16,
+  },
+  testButton: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  testButtonContent: {
+    flex: 1,
+  },
+  testButtonTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.white,
+    marginBottom: 6,
+  },
+  testButtonDescription: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 20,
+  },
+  testButtonIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  testButtonArrow: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  quickActionsSection: {
+    marginBottom: 20,
+    marginHorizontal: 5,
+  },
+  quickActionsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  quickActionButton: {
+    flex: 1,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  quickActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.darkGreen,
   },
 });
 

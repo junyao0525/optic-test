@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
@@ -204,10 +204,11 @@ const HistoryScreen = () => {
   const layout = useWindowDimensions();
   const { t } = useTranslation();
   const [index, setIndex] = useState(0);
-  const [routes] = useState([
+  
+  const routes = useMemo(() => [
     {key: 'landoltsTest', title: t('common.landoltTest')},
     {key: 'eyeTiredness', title: t('common.eyeTiredness')},
-  ]);
+  ], [t]);
 
   return (
     <View style={styles.container}>

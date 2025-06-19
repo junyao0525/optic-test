@@ -35,7 +35,19 @@
     "title": "首页",
     "greeting": "你好，{{name}}！",
     "dashboard": "仪表板",
-    "testTypes": "测试类型"
+    "testTypes": "测试类型",
+    "welcome_subtitle": "跟踪您的视力健康进展",
+    "total_tests": "总测试次数",
+    "last_test": "最近测试",
+    "best_score": "最佳成绩",
+    "view_all": "查看全部",
+    "latest_result": "最新结果",
+    "choose_test": "选择您的视力测试",
+    "landolt_description": "使用兰氏环方法测试您的视力敏锐度",
+    "eye_tiredness_description": "监测眼睛疲劳和疲劳程度",
+    "quick_actions": "快速操作",
+    "view_history": "查看历史",
+    "settings": "设置"
   },
   "settings": {
     "title": "设置",
@@ -86,6 +98,7 @@
     "change_info": "更改语言将更新应用界面。某些内容可能需要重启应用。"
   },
   "common": {
+    "ok" : "Ok",
     "yes": "是",
     "no": "否",
     "cancel": "取消",

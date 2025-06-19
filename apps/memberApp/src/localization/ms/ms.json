@@ -35,7 +35,19 @@
     "title": "Utama",
     "greeting": "Hai, {{name}}!",
     "dashboard": "Papan Pemuka",
-    "testTypes": "Jenis Ujian"
+    "testTypes": "Jenis Ujian",
+    "welcome_subtitle": "Jejaki kemajuan kesihatan penglihatan anda",
+    "total_tests": "Jumlah Ujian",
+    "last_test": "Ujian Terakhir",
+    "best_score": "Skor Terbaik",
+    "view_all": "Lihat Semua",
+    "latest_result": "Keputusan Terkini",
+    "choose_test": "Pilih ujian penglihatan anda",
+    "landolt_description": "Uji ketajaman penglihatan anda dengan kaedah Landolt C",
+    "eye_tiredness_description": "Pantau tahap keletihan dan tekanan mata",
+    "quick_actions": "Tindakan Pantas",
+    "view_history": "Lihat Sejarah",
+    "settings": "Tetapan"
   },
   "settings": {
     "title": "Tetapan",
@@ -87,6 +99,7 @@
     "change_info": "Menukar bahasa akan mengemas kini antara muka aplikasi. Sesetengah kandungan mungkin memerlukan aplikasi dimulakan semula."
   },
   "common": {
+    "ok" : "Ok",
     "yes": "Ya",
     "no": "Tidak",
     "cancel": "Batal",
