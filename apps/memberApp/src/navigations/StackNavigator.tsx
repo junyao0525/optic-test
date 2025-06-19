@@ -1,8 +1,8 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
-import { AudioProvider } from '../providers/AudioProvider';
+import {AudioProvider} from '../providers/AudioProvider';
 import CameraProvider from '../providers/CameraProvider';
-import { DistanceMeasureProvider } from '../providers/DistanceProvider';
+import {DistanceMeasureProvider} from '../providers/DistanceProvider';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
@@ -14,6 +14,7 @@ import Help from '../screens/Settings/Help';
 import Language from '../screens/Settings/Language';
 import Profile from '../screens/Settings/Profile';
 import TabNavigator from './TabNavigator';
+import DotTracking from '../screens/EyeTiredness/DotTracking';
 
 const Stack = createNativeStackNavigator();
 const CameraStack = createNativeStackNavigator();
@@ -25,6 +26,8 @@ const CameraScreen = () => {
       <DistanceMeasureProvider>
         <CameraStack.Navigator screenOptions={{headerShown: false}}>
           <CameraStack.Screen name="LandoltC" component={LandoltC} />
+          <CameraStack.Screen name="EyeTiredness" component={EyeTiredness} />
+          <CameraStack.Screen name="DotTracking" component={DotTracking} />
         </CameraStack.Navigator>
       </DistanceMeasureProvider>
     </CameraProvider>

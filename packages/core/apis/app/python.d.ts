@@ -29,3 +29,23 @@ export type DetectAudioApi = {
   };
   Error: ERRORS["notFound"];
 };
+
+export type FatigueDetectionApi = {
+  Endpoint: "/fatigue/analyze/";
+  Method: "POST";
+  Body: {
+    file: FormData;
+  };
+  Response: {
+    Timestamp: string;
+    PERCLOS: string;
+    "Avg Blink Duration": string;
+    "EAR Mean": string;
+    "EAR Std": string;
+    "Blink Rate": string;
+    "Predicted Fatigue Class": string;
+  };
+  Error: {
+    message: string;
+  };
+};

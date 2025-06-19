@@ -1,7 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
-import { DetectAudioApi, DetectFaceApi } from '../../types/api/python';
-import { BackendApiUrl } from '../config';
-
+import {useMutation} from '@tanstack/react-query';
+import {DetectAudioApi, DetectFaceApi} from '../../types/api/python';
+import {BackendApiUrl} from '../config';
+import {FatigueDetectionApi} from '@vt/core/apis/app/python';
 
 const API_BASE_URL = BackendApiUrl;
 // const API_BASE_URL = 'http://104.214.171.210/';
@@ -57,6 +57,27 @@ export const useDetectAudioAPI = () => {
       }
 
       return (await response.json()) as DetectAudioApi['Response'];
+    },
+  });
+};
+
+export const useFatigueDetectionAPI = () => {
+  return useMutation<
+    FatigueDetectionApi['Response'],
+    FatigueDetectionApi['Error'],
+    FormData
+  >({
+    mutationFn: async (formData: FormData) => {
+      const response = await fetch(API_BASE_URL + 'fatigue/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Fatigue detection failed');
+      }
+
+      return (await response.json()) as FatigueDetectionApi['Response'];
     },
   });
 };

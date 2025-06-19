@@ -1,7 +1,7 @@
-import { useNavigation } from '@react-navigation/core';
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {useNavigation} from '@react-navigation/core';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   ImageSourcePropType,
   ScrollView,
@@ -10,16 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import {LineChart} from 'react-native-chart-kit';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   LandoltController,
   LandoltTestResultResponse,
 } from '../api/LandoltC/controller';
 import Header from '../components/Header';
-import { useWindowDimension } from '../hooks/useWindowDimension';
-import { Colors } from '../themes';
-import { useUserId, useUserName } from '../utils/userUtils';
+import {useWindowDimension} from '../hooks/useWindowDimension';
+import {Colors} from '../themes';
+import {useUserId, useUserName} from '../utils/userUtils';
 
 // const {t} = useTranslation();
 
@@ -46,11 +46,10 @@ const HomeScreen = () => {
     [],
   );
 
-
   useFocusEffect(
     useCallback(() => {
       fetchTestResults();
-    }, [userId])
+    }, [userId]),
   );
 
   const fetchTestResults = async () => {
@@ -125,8 +124,9 @@ const HomeScreen = () => {
     },
     {
       title: t('common.eyeTiredness'),
+      route: 'CameraScreen',
       image: EyeTirednessImage,
-      route: 'EyeTiredness',
+      param: {screen: 'EyeTiredness'},
       description: t('home.eye_tiredness_description'),
       color: '#FF9800',
     },
@@ -138,6 +138,7 @@ const HomeScreen = () => {
     } else {
       navigate(route as any);
     }
+    console.log(param);
     console.log(`${route} button pressed`);
   };
 
@@ -160,8 +161,8 @@ const HomeScreen = () => {
 
         {/* Progress Chart */}
         <View style={styles.chartSection}>
-          <View style={styles.sectionHeader}>        
-              <Text style={styles.sectionTitle}>{t('common.overview')}</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('common.overview')}</Text>
             <TouchableOpacity
               style={styles.viewAllButton}
               onPress={() => navigate('History' as any)}>
@@ -221,12 +222,22 @@ const HomeScreen = () => {
                 <Text style={styles.legendText}>{t('history.right_eye')}</Text>
               </View>
             </View>
-             <View style={{flexDirection: 'row', alignItems: 'center', paddingTop: 14}}>
-                <Ionicons name="help-circle-outline" size={16} color="#666" style={{marginRight: 4}} />
-                <Text style={{fontSize: 12, color: '#666', lineHeight: 22}}>
-                  {t('common.lower_score')}
-                </Text>
-              </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingTop: 14,
+              }}>
+              <Ionicons
+                name="help-circle-outline"
+                size={16}
+                color="#666"
+                style={{marginRight: 4}}
+              />
+              <Text style={{fontSize: 12, color: '#666', lineHeight: 22}}>
+                {t('common.lower_score')}
+              </Text>
+            </View>
           </View>
         </View>
 
