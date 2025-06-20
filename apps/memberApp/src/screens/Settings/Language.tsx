@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../../components/Header';
@@ -116,7 +116,6 @@ const Language = () => {
   };
 
   const popularLanguages = languages.filter(lang => lang.isPopular);
-  const otherLanguages = languages.filter(lang => !lang.isPopular);
 
   return (
     <View style={styles.container}>
@@ -179,6 +178,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.backgroundColor,
     flex: 1,
+    
   },
   scrollView: {
     flex: 1,
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   sectionTitle: {
+    marginHorizontal:5,
     fontSize: 18,
     fontWeight: '600',
     color: '#1A1A1A',
@@ -199,6 +200,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   currentLanguageCard: {
+    marginHorizontal:5,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
@@ -233,6 +235,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   languageList: {
+    marginHorizontal:5,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
