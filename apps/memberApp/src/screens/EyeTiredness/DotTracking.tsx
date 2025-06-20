@@ -1,5 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {View, Text, StyleSheet, Platform, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import {Camera} from 'react-native-vision-camera';
 import {useFatigueDetectionAPI} from '../../api/python';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -7,6 +14,12 @@ import {Colors} from '../../themes';
 import SuccessPage from '../../components/SuccessScreen';
 import {useCameraContext} from '../../providers/CameraProvider';
 import Video, {VideoRef} from 'react-native-video';
+import {
+  FatigueController,
+  FatigueResult,
+} from '../../api/EyeFatigue/controller';
+import {useUserId} from '../../utils/userUtils';
+import {FatigueDetectionApi} from '@vt/core/apis/app/python';
 const DURATION_SECONDS = 30;
 const FPS = 60;
 
@@ -19,19 +32,20 @@ const DotTracking = () => {
   const [countdown, setCountdown] = useState(3);
   const [showRedDot, setShowRedDot] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
-  const [isUploadSuccess, setIsUploadSuccess] = useState(false); // Track upload success
+  const [isUploadSuccess, setIsUploadSuccess] = useState(false);
   const {loaded, cameraPermission, activeDevice} = useCameraContext();
   const fatigueUpload = useFatigueDetectionAPI();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [fatigueMessage, setFatigueMessage] = useState('');
-
+  const [fatigueMessage, setFatigueMessage] =
+    useState<FatigueDetectionApi['Response']>();
+  const userId = useUserId();
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
       return () => clearTimeout(timer);
     } else if (countdown === 0 && isCameraReady) {
       setShowRedDot(true);
-      startRecording(); // Automatically start recording after countdown
+      startRecording();
     }
   }, [countdown, isCameraReady]);
 
@@ -98,17 +112,18 @@ const DotTracking = () => {
     });
 
     const response = await fatigueUpload.mutateAsync(formData, {
-      onSuccess: data => {
-        const message = `
-"Timestamp": ${data['Timestamp']},
-"PERCLOS": ${data['PERCLOS']},
-"Avg Blink Duration": ${data['Avg Blink Duration']},
-"EAR Mean": ${data['EAR Mean']},
-"EAR Std": ${data['EAR Std']},
-"Blink Rate": ${data['Blink Rate']},
-"Predicted Fatigue Class": ${data['Predicted Fatigue Class']}
-      `;
-        setFatigueMessage(message.trim());
+      onSuccess: async data => {
+        const payload: FatigueResult = {
+          user_id: userId ? userId : 0,
+          perclos: data['PERCLOS'],
+          avg_blink: data['Avg Blink Duration'],
+          ear_mean: data['EAR Mean'],
+          ear_std: data['EAR Std'],
+          blink_rate: data['Blink Rate'],
+          class: data['Predicted Fatigue Class'],
+        };
+        const result = await FatigueController.insertTestResult(payload);
+        setFatigueMessage(data);
         setIsUploadSuccess(true);
         setIsProcessing(false);
       },
@@ -139,22 +154,28 @@ const DotTracking = () => {
   }
   if (isProcessing) {
     return (
-      <View style={[styles.container, {justifyContent: 'center'}]}>
-        <Text style={{color: Colors.black, fontSize: 18, marginBottom: 10}}>
-          Processing fatigue status...
-        </Text>
-        <Text style={{color: Colors.black, fontSize: 14}}>Please wait</Text>
+      <View style={[styles.container, styles.processingContainer]}>
+        <View style={styles.processingContent}>
+          <ActivityIndicator
+            size="large"
+            color={Colors.primary || Colors.blue}
+            style={styles.spinner}
+          />
+          <Text style={styles.processingTitle}>Analyzing Fatigue Status</Text>
+          <Text style={styles.processingSubtitle}>
+            This may take a few moments...
+          </Text>
+        </View>
       </View>
     );
   }
 
-  // Render SuccessPage after upload success
   if (isUploadSuccess) {
     return (
       <SuccessPage
         successMessage="Video uploaded successfully! Your fatigue status has been analyzed."
-        targetScreen="HomeScreen" // Redirect to HomeScreen after success
-        extraData={fatigueMessage} // Pass the fatigue message
+        targetScreen="Home"
+        extraData={fatigueMessage}
       />
     );
   }
@@ -190,7 +211,7 @@ const DotTracking = () => {
                 source={require('../../../assets/nature_ocean_30s.mp4')}
                 style={styles.video}
                 resizeMode="cover"
-                repeat={false}
+                repeat={true}
               />
               <Video />
             </View>
@@ -271,5 +292,44 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     resizeMode: 'contain',
     marginBottom: 20,
+  },
+  processingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.backgroundColor || '#f8f9fa',
+    padding: 32,
+  },
+  processingContent: {
+    alignItems: 'center',
+    backgroundColor: Colors.white || '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    minWidth: 280,
+  },
+  spinner: {
+    marginBottom: 16,
+  },
+  processingTitle: {
+    color: Colors.black || '#1a1a1a',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  processingSubtitle: {
+    color: Colors.secondary || '#666666',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
   },
 });

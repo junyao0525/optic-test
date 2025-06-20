@@ -18,6 +18,11 @@ import Header from '../../components/Header';
 import {useWindowDimension} from '../../hooks/useWindowDimension';
 import {Colors} from '../../themes';
 import {useUserId} from '../../utils/userUtils';
+import {
+  FatigueController,
+  FatigueResultResponse,
+} from '../../api/EyeFatigue/controller';
+import {formatDateTime} from '../../utils/formatDateTime';
 
 // Mock data for demonstration
 const mockEyeTirednessResults = [
@@ -175,17 +180,43 @@ const LandoltResultsScreen = () => {
 };
 
 const EyeTirednessResultsScreen = () => {
+  const [landoltResults, setLandoltResults] = useState<FatigueResultResponse[]>(
+    [],
+  );
+  const userId = useUserId();
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const {t} = useTranslation();
-
-  const handleViewDetails = (resultId: number) => {
-    // Navigate to detailed result view - using existing routes for now
-    navigation.navigate('Tab', {screen: 'Home'});
+  useEffect(() => {
+    fetchFatigueResults();
+  }, [userId]);
+  const fetchFatigueResults = async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const result = await FatigueController.getUserTestResults(userId);
+      if (result.success) {
+        setLandoltResults(result.data);
+      } else {
+        console.error('Failed to fetch Landolt results:', result.message);
+        Alert.alert('Error', 'Failed to load test results');
+      }
+    } catch (error) {
+      console.error('Error fetching Landolt results:', error);
+      Alert.alert('Error', 'Failed to load test results');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleViewFDetails = (resultId: number) => {
+    navigation.navigate('FatigueDetail', {resultId});
   };
 
   const getFatigueColor = (level: string) => {
     switch (level.toLowerCase()) {
-      case 'low':
+      case 'normal':
         return '#4CAF50';
       case 'medium':
         return '#FF9800';
@@ -207,13 +238,15 @@ const EyeTirednessResultsScreen = () => {
         </Text>
       </View>
 
-      {mockEyeTirednessResults.map(result => (
+      {landoltResults.map(result => (
         <TouchableOpacity
           key={result.id}
           style={styles.resultCard}
-          onPress={() => handleViewDetails(result.id)}>
+          onPress={() => handleViewFDetails(result.id)}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardDate}>{result.date}</Text>
+            <Text style={styles.cardDate}>
+              {formatDateTime(result.created_at)}
+            </Text>
             <Text style={styles.cardId}>#{result.id}</Text>
           </View>
 
@@ -226,20 +259,20 @@ const EyeTirednessResultsScreen = () => {
                 <Text
                   style={[
                     styles.fatigueLevel,
-                    {color: getFatigueColor(result.fatigueLevel)},
+                    {color: getFatigueColor(result.class)},
                   ]}>
-                  {result.fatigueLevel}
+                  {result.class}
                 </Text>
               </View>
               <View style={styles.fatigueItem}>
-                <Text style={styles.fatigueLabel}>{t('history.duration')}</Text>
-                <Text style={styles.fatigueValue}>{result.duration}</Text>
+                <Text style={styles.fatigueLabel}>{t('history.perclos')}</Text>
+                <Text style={styles.fatigueValue}>{result.perclos}</Text>
               </View>
               <View style={styles.fatigueItem}>
                 <Text style={styles.fatigueLabel}>
                   {t('history.blink_rate')}
                 </Text>
-                <Text style={styles.fatigueValue}>{result.blinkRate}</Text>
+                <Text style={styles.fatigueValue}>{result.blink_rate}</Text>
               </View>
             </View>
           </View>

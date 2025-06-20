@@ -15,6 +15,7 @@ import Language from '../screens/Settings/Language';
 import Profile from '../screens/Settings/Profile';
 import TabNavigator from './TabNavigator';
 import DotTracking from '../screens/EyeTiredness/DotTracking';
+import FatigueDetailPage from '../screens/Historys/FatigueDetail';
 
 const Stack = createNativeStackNavigator();
 const CameraStack = createNativeStackNavigator();
@@ -54,6 +55,7 @@ const StackNavigator = () => {
       <Stack.Screen name="AudioScreen" component={AudioScreen} />
       <Stack.Screen name="EyeTiredness" component={EyeTiredness} />
       <Stack.Screen name="LandoltCDetail" component={LandoltCDetail} />
+      <Stack.Screen name="FatigueDetail" component={FatigueDetailPage} />
       <Stack.Screen name="About" component={About} />
       <Stack.Screen name="Help" component={Help} />
       <Stack.Screen name="Language" component={Language} />

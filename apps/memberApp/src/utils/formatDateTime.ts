@@ -1,0 +1,21 @@
+import dayjs from 'dayjs';
+const TIMEZONE = 'Asia/Kuala_Lumpur';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(timezone);
+dayjs.extend(utc);
+const customDayjs = dayjs;
+export const formatDateTime = (c: dayjs.ConfigType) =>
+  customDayjs(c).tz(TIMEZONE).format('YYYY-MM-DD HH:mm');
+
+export const formatFullDateTime = (c: dayjs.ConfigType) =>
+  customDayjs(c).tz(TIMEZONE).format('DD MMM YYYY, HH:mm A');
+
+export const formatDate = (c: dayjs.ConfigType) =>
+  customDayjs(c).tz(TIMEZONE).format('YYYY-MM-DD');
+
+export const formatFullDate = (c: dayjs.ConfigType) =>
+  customDayjs(c).tz(TIMEZONE).format('DD MMM YYYY');
+
+export const formatMonthYear = (c: dayjs.ConfigType) =>
+  customDayjs(c).tz(TIMEZONE).format('MMMM YYYY');
