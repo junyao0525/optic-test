@@ -29,3 +29,8 @@ export const useUserInfo = () => {
     isLoggedIn: !!user,
   };
 }; 
+
+export const useUserName = () => {
+  const { user } = useAuth();
+  return user?.name || ''
+}; 
