@@ -1,22 +1,19 @@
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
-import { useWindowDimension } from '../../../hooks/useWindowDimension';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import React, {useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {StyleSheet, Text, View} from 'react-native';
 import BottomButton from '../../components/BottomButton';
 import Header from '../../components/Header';
 import LandoltAudioCard from '../../components/LandoltAudioCard';
 import LandoltCard from '../../components/landoltCard';
 import LandoltInstruction from '../../components/LandoltCInstruction';
 import TestCard from '../../components/TestCard';
-import { useLandoltTest } from '../../hooks/useLandoltTest';
-import { useAuth } from '../../providers/AuthProvider';
-import { Colors } from '../../themes';
-import {
-  calculateSizeFromLogMAR,
-  logMarValues
-} from '../../utils/logMar';
-import { useUserId } from '../../utils/userUtils';
+import {useLandoltTest} from '../../hooks/useLandoltTest';
+import {useWindowDimension} from '../../hooks/useWindowDimension';
+import {useAuth} from '../../providers/AuthProvider';
+import {Colors} from '../../themes';
+import {calculateSizeFromLogMAR, logMarValues} from '../../utils/logMar';
+import {useUserId} from '../../utils/userUtils';
 
 const swipeTestImage = require('../../../assets/images/LandoltCtestType/swipe-test.png');
 const speakTestImage = require('../../../assets/images/LandoltCtestType/speak-test.png');
@@ -25,9 +22,9 @@ const LandoltCtest = () => {
   const {width} = useWindowDimension();
   const navigation = useNavigation<NavigationProp<TabParamList>>();
   const {t} = useTranslation();
-  const { user } = useAuth();
+  const {user} = useAuth();
   const userId = useUserId();
-  const { saveTestResults } = useLandoltTest();
+  const {saveTestResults} = useLandoltTest();
   const [isSaving, setIsSaving] = useState(false);
   const hasSavedRef = useRef(false);
 
@@ -85,7 +82,7 @@ const LandoltCtest = () => {
 
         setIsSaving(true);
         hasSavedRef.current = true;
-        
+
         try {
           const result = await saveTestResults(
             userId,
@@ -98,7 +95,7 @@ const LandoltCtest = () => {
               score: rightEyeResults.score,
               logMAR: rightEyeResults.logMAR,
               snellen: rightEyeResults.snellen,
-            }
+            },
           );
 
           if (result.success) {
@@ -133,7 +130,9 @@ const LandoltCtest = () => {
       {step === 'type' && (
         <>
           <View style={styles.container}>
-            <Text style={styles.resultTitle}>{t('landolt.select_test_type')}</Text>
+            <Text style={styles.resultTitle}>
+              {t('landolt.select_test_type')}
+            </Text>
             <View
               style={{
                 flexDirection: 'row',
@@ -187,7 +186,9 @@ const LandoltCtest = () => {
           <Header backHomeButton title={t('landolt.test_complete')} />
           <View style={styles.container}>
             <View style={styles.resultContainer}>
-              <Text style={styles.resultTitle}>{t('landolt.visual_acuity_results')}</Text>
+              <Text style={styles.resultTitle}>
+                {t('landolt.visual_acuity_results')}
+              </Text>
 
               <View style={styles.eyeResultContainer}>
                 <Text style={styles.eyeTitle}>{t('landolt.left_eye')}</Text>
@@ -241,9 +242,7 @@ const LandoltCtest = () => {
                 </Text>
               </View>
 
-              <Text style={styles.disclaimer}>
-                {t('landolt.disclaimer')}
-              </Text>
+              <Text style={styles.disclaimer}>{t('landolt.disclaimer')}</Text>
             </View>
           </View>
           <BottomButton

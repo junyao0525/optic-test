@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Image, ImageProps, StyleSheet, Text, View } from 'react-native';
-import { useWindowDimension } from '../../hooks/useWindowDimension';
-import { Colors, TextStyle } from '../themes';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Image, ImageProps, StyleSheet, Text, View} from 'react-native';
+import {useWindowDimension} from '../hooks/useWindowDimension';
+import {Colors, TextStyle} from '../themes';
 import BottomButton from './BottomButton';
 
 const coverRightImage = require('../../assets/images/cover-left.png');
@@ -65,7 +65,9 @@ const LandoltInstruction = ({
           }}
         />
       )}
-      <BottomButton title={t('common.continue')} onPress={onContinue}></BottomButton>
+      <BottomButton
+        title={t('common.continue')}
+        onPress={onContinue}></BottomButton>
     </>
   );
 };

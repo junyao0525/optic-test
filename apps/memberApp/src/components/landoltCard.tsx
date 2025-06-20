@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Animated, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
-import { Colors } from '../themes';
-import { Direction } from '../utils/logMar';
+import React, {useMemo} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Animated, StyleSheet, Text, View} from 'react-native';
+import {Gesture, GestureDetector} from 'react-native-gesture-handler';
+import {runOnJS} from 'react-native-reanimated';
+import {useWindowDimension} from '../hooks/useWindowDimension';
+import {Colors} from '../themes';
+import {Direction} from '../utils/logMar';
 import Header from './Header';
 
 type LandoltCardProps = {
@@ -63,7 +64,7 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
       });
   }, [onSwipe]);
 
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const getDirectionEmoji = (direction: Direction) => {
     switch (direction) {
@@ -80,11 +81,11 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
     }
   };
 
-  const {height} = useWindowDimensions();
+  const {height} = useWindowDimension();
 
   return (
     <>
-      <Header backHomeButton title={t("landolt.header")} />
+      <Header backHomeButton title={t('landolt.header')} />
       <View style={styles.container}>
         {/* <Text style={styles.title}>{title}</Text> */}
         {subTitle && <Text style={styles.title}>{subTitle}</Text>}
@@ -92,45 +93,71 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
         <View style={styles.testInfo}>
           <Text style={styles.eyeIndicator}>
             {t('landolt.testing_eye', {
-              eye: eye === 'LEFT' ? t('landolt.left_eye').replace('：', '') : t('landolt.right_eye').replace('：', ''),
-              cover_instruction: eye === 'LEFT' ? t('landolt.cover_right_eye') : t('landolt.cover_left_eye')
+              eye:
+                eye === 'LEFT'
+                  ? t('landolt.left_eye').replace('：', '')
+                  : t('landolt.right_eye').replace('：', ''),
+              cover_instruction:
+                eye === 'LEFT'
+                  ? t('landolt.cover_right_eye')
+                  : t('landolt.cover_left_eye'),
             })}
           </Text>
-          
-          {testInfo &&(
-            <View style={{ width: '100%', height: height*0.16, backgroundColor: '#fff', borderRadius: 10, elevation: 5, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 4 }}>
-            <Text style={styles.levelText}>
-              {t('landolt.level')} {testInfo?.currentLevel}/{testInfo?.totalLevels}
-            </Text>
-            <View style={styles.progressBarContainer}>
-              <View 
-                style={[
-                  styles.progressBar,
-                  { width: `${(testInfo?.currentLevel / testInfo?.totalLevels) * 100}%` }
-                ]} 
-              />
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' ,paddingHorizontal: 20,paddingTop: 10}}>
+
+          {testInfo && (
+            <View
+              style={{
+                width: '100%',
+                height: height * 0.16,
+                backgroundColor: '#fff',
+                borderRadius: 10,
+                elevation: 5,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+              }}>
+              <Text style={styles.levelText}>
+                {t('landolt.level')} {testInfo?.currentLevel}/
+                {testInfo?.totalLevels}
+              </Text>
+              <View style={styles.progressBarContainer}>
+                <View
+                  style={[
+                    styles.progressBar,
+                    {
+                      width: `${
+                        (testInfo?.currentLevel / testInfo?.totalLevels) * 100
+                      }%`,
+                    },
+                  ]}
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                  paddingTop: 10,
+                }}>
                 <View>
-                  <Text style={styles.snellenText}>
-                    {t('landolt.snellen')}
-                  </Text>
+                  <Text style={styles.snellenText}>{t('landolt.snellen')}</Text>
                   <Text style={styles.attemptsText}>
-                  {testInfo.currentSnellen}
-                    
+                    {testInfo.currentSnellen}
                   </Text>
                 </View>
                 <View>
-                <Text style={styles.snellenText}>
-                {t('landolt.remaining_attempts')}
+                  <Text style={styles.snellenText}>
+                    {t('landolt.remaining_attempts')}
                   </Text>
                   <Text style={styles.attemptsText}>
-                  {testInfo.remainingAttempts}
+                    {testInfo.remainingAttempts}
                   </Text>
                 </View>
               </View>
-          </View>
-        )}
+            </View>
+          )}
         </View>
 
         <View style={styles.instructionContainer}>
@@ -138,29 +165,36 @@ const LandoltCard: React.FC<LandoltCardProps> = ({
         </View>
 
         <GestureDetector gesture={swipeGesture}>
-          <Animated.View style={[
-            styles.testArea,
-            isProcessing && styles.testAreaProcessing
-          ]}>
+          <Animated.View
+            style={[
+              styles.testArea,
+              isProcessing && styles.testAreaProcessing,
+            ]}>
             <View style={getLandoltCStyle()} />
             {children}
           </Animated.View>
         </GestureDetector>
 
         {feedback?.show && (
-          <View style={[
-            styles.feedbackContainer,
-            { backgroundColor: feedback.isCorrect ? Colors.darkGreen : '#e74c3c' }
-          ]}>
+          <View
+            style={[
+              styles.feedbackContainer,
+              {
+                backgroundColor: feedback.isCorrect
+                  ? Colors.darkGreen
+                  : '#e74c3c',
+              },
+            ]}>
             <Text style={styles.feedbackText}>
               {feedback.isCorrect ? '✅ ' : '❌ '}
-              {feedback.isCorrect 
+              {feedback.isCorrect
                 ? t('landolt.correct_answer')
                 : t('landolt.incorrect_answer')}
             </Text>
             {!feedback.isCorrect && feedback.expectedDirection && (
               <Text style={styles.expectedDirection}>
-                {t('landolt.expected_direction')}: {getDirectionEmoji(feedback.expectedDirection)}
+                {t('landolt.expected_direction')}:{' '}
+                {getDirectionEmoji(feedback.expectedDirection)}
               </Text>
             )}
           </View>

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import {useWindowDimension} from '../../hooks/useWindowDimension';
+import {useWindowDimension} from '../hooks/useWindowDimension';
 import {Colors, TextStyle} from '../themes';
 
 // Type the navigation prop to use the correct type

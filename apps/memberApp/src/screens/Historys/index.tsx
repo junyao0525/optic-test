@@ -1,25 +1,56 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
-import { LandoltController, LandoltTestResultResponse } from '../../api/LandoltC/controller';
+import {useNavigation} from '@react-navigation/native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
+import {
+  LandoltController,
+  LandoltTestResultResponse,
+} from '../../api/LandoltC/controller';
 import Header from '../../components/Header';
-import { Colors } from '../../themes';
-import { useUserId } from '../../utils/userUtils';
+import {useWindowDimension} from '../../hooks/useWindowDimension';
+import {Colors} from '../../themes';
+import {useUserId} from '../../utils/userUtils';
 
 // Mock data for demonstration
 const mockEyeTirednessResults = [
-  { id: 1, date: '2024-01-15', fatigueLevel: 'Low', duration: '5 min', blinkRate: '15/min' },
-  { id: 2, date: '2024-01-10', fatigueLevel: 'Medium', duration: '8 min', blinkRate: '12/min' },
-  { id: 3, date: '2024-01-05', fatigueLevel: 'High', duration: '12 min', blinkRate: '8/min' },
+  {
+    id: 1,
+    date: '2024-01-15',
+    fatigueLevel: 'Low',
+    duration: '5 min',
+    blinkRate: '15/min',
+  },
+  {
+    id: 2,
+    date: '2024-01-10',
+    fatigueLevel: 'Medium',
+    duration: '8 min',
+    blinkRate: '12/min',
+  },
+  {
+    id: 3,
+    date: '2024-01-05',
+    fatigueLevel: 'High',
+    duration: '12 min',
+    blinkRate: '8/min',
+  },
 ];
 
 const LandoltResultsScreen = () => {
   const navigation = useNavigation();
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const userId = useUserId();
-  const [landoltResults, setLandoltResults] = useState<LandoltTestResultResponse[]>([]);
+  const [landoltResults, setLandoltResults] = useState<
+    LandoltTestResultResponse[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,7 +80,7 @@ const LandoltResultsScreen = () => {
   };
 
   const handleViewDetails = (resultId: number) => {
-    navigation.navigate('LandoltCDetail', { resultId });
+    navigation.navigate('LandoltCDetail', {resultId});
   };
 
   const formatDate = (dateString: string) => {
@@ -70,8 +101,12 @@ const LandoltResultsScreen = () => {
     return (
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.headerSection}>
-          <Text style={styles.sectionTitle}>{t('history.landolt_test_results')}</Text>
-          <Text style={styles.sectionSubtitle}>{t('history.no_test_results')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('history.landolt_test_results')}
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            {t('history.no_test_results')}
+          </Text>
         </View>
       </ScrollView>
     );
@@ -80,45 +115,58 @@ const LandoltResultsScreen = () => {
   return (
     <ScrollView style={styles.scrollContainer}>
       <View style={styles.headerSection}>
-        <Text style={styles.sectionTitle}>{t('history.landolt_test_results')}</Text>
-        <Text style={styles.sectionSubtitle}>{t('history.recent_test_results')}</Text>
+        <Text style={styles.sectionTitle}>
+          {t('history.landolt_test_results')}
+        </Text>
+        <Text style={styles.sectionSubtitle}>
+          {t('history.recent_test_results')}
+        </Text>
       </View>
-      
-      {landoltResults.map((result) => (
-        <TouchableOpacity 
-          key={result.id} 
+
+      {landoltResults.map(result => (
+        <TouchableOpacity
+          key={result.id}
           style={styles.resultCard}
-          onPress={() => handleViewDetails(result.id)}
-        >
+          onPress={() => handleViewDetails(result.id)}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardDate}>{formatDate(result.created_at)}</Text>
             <Text style={styles.cardId}>#{result.id}</Text>
           </View>
-          
+
           <View style={styles.cardContent}>
             <View style={styles.scoreRow}>
               <View style={styles.eyeScore}>
                 <Text style={styles.eyeLabel}>{t('history.left_eye')}</Text>
                 <Text style={styles.scoreText}>{result.L_score}/12</Text>
-                <Text style={styles.logMARText}>{t('history.logmar')} {result.L_logMar}</Text>
-                <Text style={styles.snellenText}>{t('history.snellen')} {result.L_snellen}</Text>
+                <Text style={styles.logMARText}>
+                  {t('history.logmar')} {result.L_logMar}
+                </Text>
+                <Text style={styles.snellenText}>
+                  {t('history.snellen')} {result.L_snellen}
+                </Text>
               </View>
               <View style={styles.eyeScore}>
                 <Text style={styles.eyeLabel}>{t('history.right_eye')}</Text>
                 <Text style={styles.scoreText}>{result.R_score}/12</Text>
-                <Text style={styles.logMARText}>{t('history.logmar')} {result.R_logMar}</Text>
-                <Text style={styles.snellenText}>{t('history.snellen')} {result.R_snellen}</Text>
+                <Text style={styles.logMARText}>
+                  {t('history.logmar')} {result.R_logMar}
+                </Text>
+                <Text style={styles.snellenText}>
+                  {t('history.snellen')} {result.R_snellen}
+                </Text>
               </View>
             </View>
           </View>
-          
+
           <View style={styles.cardFooter}>
-            <Text style={styles.viewDetailsText}>{t('history.view_details')}</Text>
+            <Text style={styles.viewDetailsText}>
+              {t('history.view_details')}
+            </Text>
             <Text style={styles.arrowText}>→</Text>
           </View>
         </TouchableOpacity>
       ))}
-      
+
       <TouchableOpacity style={styles.viewAllButton}>
         <Text style={styles.viewAllText}>{t('history.view_all_results')}</Text>
       </TouchableOpacity>
@@ -128,45 +176,58 @@ const LandoltResultsScreen = () => {
 
 const EyeTirednessResultsScreen = () => {
   const navigation = useNavigation();
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const handleViewDetails = (resultId: number) => {
     // Navigate to detailed result view - using existing routes for now
-    navigation.navigate('Tab', { screen: 'Home' });
+    navigation.navigate('Tab', {screen: 'Home'});
   };
 
   const getFatigueColor = (level: string) => {
     switch (level.toLowerCase()) {
-      case 'low': return '#4CAF50';
-      case 'medium': return '#FF9800';
-      case 'high': return '#F44336';
-      default: return '#666';
+      case 'low':
+        return '#4CAF50';
+      case 'medium':
+        return '#FF9800';
+      case 'high':
+        return '#F44336';
+      default:
+        return '#666';
     }
   };
 
   return (
     <ScrollView style={styles.scrollContainer}>
       <View style={styles.headerSection}>
-        <Text style={styles.sectionTitle}>{t('history.eye_tiredness_results')}</Text>
-        <Text style={styles.sectionSubtitle}>{t('history.recent_test_results')}</Text>
+        <Text style={styles.sectionTitle}>
+          {t('history.eye_tiredness_results')}
+        </Text>
+        <Text style={styles.sectionSubtitle}>
+          {t('history.recent_test_results')}
+        </Text>
       </View>
-      
-      {mockEyeTirednessResults.map((result) => (
-        <TouchableOpacity 
-          key={result.id} 
+
+      {mockEyeTirednessResults.map(result => (
+        <TouchableOpacity
+          key={result.id}
           style={styles.resultCard}
-          onPress={() => handleViewDetails(result.id)}
-        >
+          onPress={() => handleViewDetails(result.id)}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardDate}>{result.date}</Text>
             <Text style={styles.cardId}>#{result.id}</Text>
           </View>
-          
+
           <View style={styles.cardContent}>
             <View style={styles.fatigueRow}>
               <View style={styles.fatigueItem}>
-                <Text style={styles.fatigueLabel}>{t('history.fatigue_level')}</Text>
-                <Text style={[styles.fatigueLevel, { color: getFatigueColor(result.fatigueLevel) }]}>
+                <Text style={styles.fatigueLabel}>
+                  {t('history.fatigue_level')}
+                </Text>
+                <Text
+                  style={[
+                    styles.fatigueLevel,
+                    {color: getFatigueColor(result.fatigueLevel)},
+                  ]}>
                   {result.fatigueLevel}
                 </Text>
               </View>
@@ -175,19 +236,23 @@ const EyeTirednessResultsScreen = () => {
                 <Text style={styles.fatigueValue}>{result.duration}</Text>
               </View>
               <View style={styles.fatigueItem}>
-                <Text style={styles.fatigueLabel}>{t('history.blink_rate')}</Text>
+                <Text style={styles.fatigueLabel}>
+                  {t('history.blink_rate')}
+                </Text>
                 <Text style={styles.fatigueValue}>{result.blinkRate}</Text>
               </View>
             </View>
           </View>
-          
+
           <View style={styles.cardFooter}>
-            <Text style={styles.viewDetailsText}>{t('history.view_details')}</Text>
+            <Text style={styles.viewDetailsText}>
+              {t('history.view_details')}
+            </Text>
             <Text style={styles.arrowText}>→</Text>
           </View>
         </TouchableOpacity>
       ))}
-      
+
       <TouchableOpacity style={styles.viewAllButton}>
         <Text style={styles.viewAllText}>{t('history.view_all_results')}</Text>
       </TouchableOpacity>
@@ -201,14 +266,17 @@ const renderScene = SceneMap({
 });
 
 const HistoryScreen = () => {
-  const layout = useWindowDimensions();
-  const { t } = useTranslation();
+  const layout = useWindowDimension();
+  const {t} = useTranslation();
   const [index, setIndex] = useState(0);
-  
-  const routes = useMemo(() => [
-    {key: 'landoltsTest', title: t('common.landoltTest')},
-    {key: 'eyeTiredness', title: t('common.eyeTiredness')},
-  ], [t]);
+
+  const routes = useMemo(
+    () => [
+      {key: 'landoltsTest', title: t('common.landoltTest')},
+      {key: 'eyeTiredness', title: t('common.eyeTiredness')},
+    ],
+    [t],
+  );
 
   return (
     <View style={styles.container}>

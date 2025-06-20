@@ -1,11 +1,12 @@
-import React, { ReactNode, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { Colors, TextStyle } from '../themes';
+import React, {ReactNode, useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {StyleSheet, Text, View} from 'react-native';
+import {useWindowDimension} from '../hooks/useWindowDimension';
+import {Colors, TextStyle} from '../themes';
 
 const SplashScreen = ({children}: {children: ReactNode}) => {
   const [show, setShow] = useState(true);
-  const {width, height} = useWindowDimensions();
+  const {width, height} = useWindowDimension();
   const {t} = useTranslation();
 
   useEffect(() => {

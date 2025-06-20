@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, {useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   ActivityIndicator,
   Animated,
@@ -7,8 +7,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useWindowDimensions,
-  View
+  View,
 } from 'react-native';
 import AudioRecorderPlayer, {
   AudioEncoderAndroidType,
@@ -16,10 +15,11 @@ import AudioRecorderPlayer, {
   OutputFormatAndroidType,
 } from 'react-native-audio-recorder-player';
 import RNFetchBlob from 'rn-fetch-blob';
-import { useDetectAudioAPI } from '../api/python';
-import { useLanguage } from '../hooks/useLanguage';
-import { Colors } from '../themes';
-import { Direction } from '../utils/logMar';
+import {useDetectAudioAPI} from '../api/python';
+import {useLanguage} from '../hooks/useLanguage';
+import {useWindowDimension} from '../hooks/useWindowDimension';
+import {Colors} from '../themes';
+import {Direction} from '../utils/logMar';
 import Header from './Header';
 
 type LandoltCardProps = {
@@ -98,15 +98,15 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
   const {mutateAsync: detectAudioMutateAsync} = useDetectAudioAPI();
 
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const currentLanguage = useLanguage();
-  const {height} = useWindowDimensions();
+  const {height} = useWindowDimension();
 
   // Add function to process transcription
   const processTranscription = (transcription: string): Direction | null => {
     const text = transcription.toLowerCase().trim();
-    
+
     switch (true) {
       case text.includes('up'):
         return 'up';
@@ -172,7 +172,7 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
       });
 
       console.log('Recording started:', result);
-      
+
       // Clear any existing timeout
       if (maxDurationTimeout.current) {
         clearTimeout(maxDurationTimeout.current);
@@ -249,7 +249,10 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
             type: 'audio/mpeg',
             name: fileName,
           } as Partial<AudioFile>);
-          formData.append('language', currentLanguage.currentLanguage.toLowerCase());
+          formData.append(
+            'language',
+            currentLanguage.currentLanguage.toLowerCase(),
+          );
 
           const response = await detectAudioMutateAsync(formData);
           console.log('Audio detection response:', response);
@@ -260,11 +263,15 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
           }
 
           // Process the transcription and determine direction
-          const detectedDirection = processTranscription(response.transcription);
+          const detectedDirection = processTranscription(
+            response.transcription,
+          );
           if (detectedDirection) {
             onAudioProcessed?.(detectedDirection);
           } else {
-            onRecordingError?.(new Error('Could not determine direction from audio'));
+            onRecordingError?.(
+              new Error('Could not determine direction from audio'),
+            );
           }
 
           // Call completion callback
@@ -288,7 +295,6 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
               recordTime: '00:00:00',
             });
           }, 1000);
-
         } catch (apiError) {
           console.error('API error:', apiError);
           onRecordingError?.(new Error('Failed to process audio file'));
@@ -396,7 +402,7 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
   return (
     <>
-      <Header backHomeButton title={t("landolt.header")} />
+      <Header backHomeButton title={t('landolt.header')} />
       <View style={styles.container}>
         {/* <Text style={styles.title}>{title}</Text> */}
         {subTitle && <Text style={styles.title}>{subTitle}</Text>}
@@ -404,56 +410,77 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
         <View style={styles.testInfo}>
           <Text style={styles.eyeIndicator}>
             {t('landolt.testing_eye', {
-              eye: eye === 'LEFT' ? t('landolt.left_eye') : t('landolt.right_eye'),
-              cover_instruction: eye === 'LEFT' ? t('landolt.cover_right_eye') : t('landolt.cover_left_eye')
+              eye:
+                eye === 'LEFT' ? t('landolt.left_eye') : t('landolt.right_eye'),
+              cover_instruction:
+                eye === 'LEFT'
+                  ? t('landolt.cover_right_eye')
+                  : t('landolt.cover_left_eye'),
             })}
           </Text>
-      
 
-          {testInfo &&(
-            <View style={{ width: '100%', height: height*0.16, backgroundColor: '#fff', borderRadius: 10, elevation: 5, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.2, shadowRadius: 4 }}>
-            <Text style={styles.levelText}>
-              {t('landolt.level')} {testInfo?.currentLevel}/{testInfo?.totalLevels}
-            </Text>
-            <View style={styles.progressBarContainer}>
-              <View 
-                style={[
-                  styles.progressBar,
-                  { width: `${(testInfo?.currentLevel / testInfo?.totalLevels) * 100}%` }
-                ]} 
-              />
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' ,paddingHorizontal: 20,paddingTop: 10}}>
+          {testInfo && (
+            <View
+              style={{
+                width: '100%',
+                height: height * 0.16,
+                backgroundColor: '#fff',
+                borderRadius: 10,
+                elevation: 5,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+              }}>
+              <Text style={styles.levelText}>
+                {t('landolt.level')} {testInfo?.currentLevel}/
+                {testInfo?.totalLevels}
+              </Text>
+              <View style={styles.progressBarContainer}>
+                <View
+                  style={[
+                    styles.progressBar,
+                    {
+                      width: `${
+                        (testInfo?.currentLevel / testInfo?.totalLevels) * 100
+                      }%`,
+                    },
+                  ]}
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                  paddingTop: 10,
+                }}>
                 <View>
-                  <Text style={styles.snellenText}>
-                    {t('landolt.snellen')}
-                  </Text>
+                  <Text style={styles.snellenText}>{t('landolt.snellen')}</Text>
                   <Text style={styles.attemptsText}>
-                  {testInfo.currentSnellen}
-                    
+                    {testInfo.currentSnellen}
                   </Text>
                 </View>
                 <View>
-                <Text style={styles.snellenText}>
-                {t('landolt.remaining_attempts')}
+                  <Text style={styles.snellenText}>
+                    {t('landolt.remaining_attempts')}
                   </Text>
                   <Text style={styles.attemptsText}>
-                  {testInfo.remainingAttempts}
+                    {testInfo.remainingAttempts}
                   </Text>
                 </View>
               </View>
-          </View>
-        )}
+            </View>
+          )}
         </View>
 
         <View style={styles.instructionContainer}>
           <Text style={styles.instruction}>{instruction}</Text>
         </View>
 
-        <Animated.View style={[
-          styles.testArea,
-          isProcessing && styles.testAreaProcessing
-        ]}>
+        <Animated.View
+          style={[styles.testArea, isProcessing && styles.testAreaProcessing]}>
           <View style={getLandoltCStyle()} />
           {children}
         </Animated.View>
@@ -497,19 +524,25 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
         )}
 
         {feedback?.show && (
-          <View style={[
-            styles.feedbackContainer,
-            { backgroundColor: feedback.isCorrect ? Colors.darkGreen : '#e74c3c' }
-          ]}>
+          <View
+            style={[
+              styles.feedbackContainer,
+              {
+                backgroundColor: feedback.isCorrect
+                  ? Colors.darkGreen
+                  : '#e74c3c',
+              },
+            ]}>
             <Text style={styles.feedbackText}>
               {feedback.isCorrect ? '✅ ' : '❌ '}
-              {feedback.isCorrect 
+              {feedback.isCorrect
                 ? t('landolt.correct_answer')
                 : t('landolt.incorrect_answer')}
             </Text>
             {!feedback.isCorrect && feedback.expectedDirection && (
               <Text style={styles.expectedDirection}>
-                {t('landolt.expected_direction')}: {getDirectionEmoji(feedback.expectedDirection)}
+                {t('landolt.expected_direction')}:{' '}
+                {getDirectionEmoji(feedback.expectedDirection)}
               </Text>
             )}
           </View>
@@ -609,7 +642,7 @@ const styles = StyleSheet.create({
   },
   recordingButton: {
     backgroundColor: '#e74c3c',
-    transform: [{ scale: 1.1 }],
+    transform: [{scale: 1.1}],
   },
   processingButton: {
     backgroundColor: '#95a5a6',

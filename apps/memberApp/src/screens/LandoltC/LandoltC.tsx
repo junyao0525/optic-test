@@ -1,14 +1,15 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import React, {useCallback, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {StyleSheet, Text, View} from 'react-native';
 import Button from '../../components/Button';
 import DistanceMeasurement from '../../components/DistanceMeasurement';
-import { Colors, TextStyle } from '../../themes';
+import {useWindowDimension} from '../../hooks/useWindowDimension';
+import {Colors, TextStyle} from '../../themes';
 
 const LandoltC = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
-  const {width, height} = useWindowDimensions();
+  const {width, height} = useWindowDimension();
 
   const [showDistanceMeasurement, setShowDistanceMeasurement] = useState(false);
 

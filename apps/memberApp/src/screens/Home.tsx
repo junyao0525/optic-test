@@ -1,20 +1,23 @@
-import { useNavigation } from '@react-navigation/core';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {useNavigation} from '@react-navigation/core';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   ImageSourcePropType,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { useWindowDimension } from '../../hooks/useWindowDimension';
-import { LandoltController, LandoltTestResultResponse } from '../api/LandoltC/controller';
+import {LineChart} from 'react-native-chart-kit';
+import {
+  LandoltController,
+  LandoltTestResultResponse,
+} from '../api/LandoltC/controller';
 import Header from '../components/Header';
-import { Colors } from '../themes';
-import { useUserId } from '../utils/userUtils';
+import {useWindowDimension} from '../hooks/useWindowDimension';
+import {Colors} from '../themes';
+import {useUserId} from '../utils/userUtils';
 
 // const {t} = useTranslation();
 
@@ -35,8 +38,10 @@ const HomeScreen = () => {
   const {t} = useTranslation();
   const {width} = useWindowDimension();
   const userId = useUserId();
-  
-  const [testResults, setTestResults] = useState<LandoltTestResultResponse[]>([]);
+
+  const [testResults, setTestResults] = useState<LandoltTestResultResponse[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,19 +70,22 @@ const HomeScreen = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
   };
 
   const getChartData = () => {
     if (testResults.length === 0) {
       return {
         labels: ['No Data'],
-        datasets: [{ data: [0] }],
+        datasets: [{data: [0]}],
       };
     }
 
     const sortedResults = [...testResults]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )
       .slice(0, 6)
       .reverse();
 
@@ -104,8 +112,9 @@ const HomeScreen = () => {
 
   const getLatestResult = () => {
     if (testResults.length === 0) return null;
-    return testResults.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    return testResults.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     )[0];
   };
 
@@ -142,12 +151,18 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Header title={t('home.title')} menuButton />
-      
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}>
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>{t('home.greeting', { name: 'User' })}</Text>
-          <Text style={styles.welcomeSubtitle}>{t('home.welcome_subtitle')}</Text>
+          <Text style={styles.welcomeTitle}>
+            {t('home.greeting', {name: 'User'})}
+          </Text>
+          <Text style={styles.welcomeSubtitle}>
+            {t('home.welcome_subtitle')}
+          </Text>
         </View>
 
         {/* Quick Stats */}
@@ -178,14 +193,13 @@ const HomeScreen = () => {
         <View style={styles.chartSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('common.overview')}</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.viewAllButton}
-              onPress={() => navigate('History' as any)}
-            >
+              onPress={() => navigate('History' as any)}>
               <Text style={styles.viewAllText}>{t('home.view_all')}</Text>
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.chartCard}>
             <View style={styles.chartContainer}>
               <LineChart
@@ -201,7 +215,8 @@ const HomeScreen = () => {
                   backgroundGradientTo: 'transparent',
                   decimalPlaces: 2,
                   color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
+                  labelColor: (opacity = 1) =>
+                    `rgba(100, 100, 100, ${opacity})`,
                   style: {
                     borderRadius: 16,
                   },
@@ -219,15 +234,19 @@ const HomeScreen = () => {
                 style={styles.chart}
               />
             </View>
-            
+
             {/* Chart Legend */}
             <View style={styles.chartLegend}>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
+                <View
+                  style={[styles.legendDot, {backgroundColor: '#4CAF50'}]}
+                />
                 <Text style={styles.legendText}>{t('history.left_eye')}</Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
+                <View
+                  style={[styles.legendDot, {backgroundColor: '#FF9800'}]}
+                />
                 <Text style={styles.legendText}>{t('history.right_eye')}</Text>
               </View>
             </View>
@@ -264,18 +283,19 @@ const HomeScreen = () => {
         <View style={styles.testTypesSection}>
           <Text style={styles.sectionTitle}>{t('home.testTypes')}</Text>
           <Text style={styles.sectionSubtitle}>{t('home.choose_test')}</Text>
-          
+
           <View style={styles.testButtonsContainer}>
             {buttonDetails.map((item, index) => (
               <TouchableOpacity
                 key={item.title}
-                style={[styles.testButton, { backgroundColor: item.color }]}
+                style={[styles.testButton, {backgroundColor: item.color}]}
                 onPress={() => handleButtonPress(item.route, item.param)}
-                activeOpacity={0.8}
-              >
+                activeOpacity={0.8}>
                 <View style={styles.testButtonContent}>
                   <Text style={styles.testButtonTitle}>{item.title}</Text>
-                  <Text style={styles.testButtonDescription}>{item.description}</Text>
+                  <Text style={styles.testButtonDescription}>
+                    {item.description}
+                  </Text>
                 </View>
                 <View style={styles.testButtonIcon}>
                   <Text style={styles.testButtonArrow}>→</Text>
@@ -342,14 +362,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   statCard: {
-    marginHorizontal:5,
+    marginHorizontal: 5,
     flex: 1,
     backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
@@ -367,7 +387,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   chartSection: {
-    marginHorizontal:5,
+    marginHorizontal: 5,
     marginBottom: 30,
   },
   sectionHeader: {
@@ -377,7 +397,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    marginBottom:10,
+    marginBottom: 10,
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.darkGreen,
@@ -398,7 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
@@ -447,7 +467,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
@@ -503,7 +523,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
@@ -550,7 +570,7 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
