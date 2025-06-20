@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ImageSourcePropType,
@@ -18,7 +19,7 @@ import {
 import Header from '../components/Header';
 import { useWindowDimension } from '../hooks/useWindowDimension';
 import { Colors } from '../themes';
-import { useUserId } from '../utils/userUtils';
+import { useUserId, useUserName } from '../utils/userUtils';
 
 // const {t} = useTranslation();
 
@@ -39,19 +40,21 @@ const HomeScreen = () => {
   const {t} = useTranslation();
   const {width} = useWindowDimension();
   const userId = useUserId();
+  const userName = useUserName();
 
   const [testResults, setTestResults] = useState<LandoltTestResultResponse[]>(
     [],
   );
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchTestResults();
-  }, [userId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTestResults();
+    }, [userId])
+  );
 
   const fetchTestResults = async () => {
     if (!userId) {
-      setLoading(false);
       return;
     }
 
@@ -64,8 +67,6 @@ const HomeScreen = () => {
       }
     } catch (error) {
       console.error('Error fetching test results:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -87,7 +88,7 @@ const HomeScreen = () => {
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       )
-      .slice(0, 6)
+      .slice(0, 5)
       .reverse();
 
     const labels = sortedResults.map(result => formatDate(result.created_at));
@@ -111,32 +112,7 @@ const HomeScreen = () => {
     };
   };
 
-  const fakeData = {
-    labels: ['5/16', '5/23', '5/30', '6/6', '6/13', '6/20'],
-    datasets: [
-      {
-        data: [0.5, 0.4, 0.2, 0.3, 0.1, 0.2], // Left eye
-        color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
-        strokeWidth: 2,
-      },
-      {
-        data: [-0.1, 0.5, 0.4, 0.3, 0.2, 0.3], // Right eye
-        color: (opacity = 1) => `rgba(255, 152, 0, ${opacity})`,
-        strokeWidth: 2,
-      },
-    ],
-  };
-
-  const getLatestResult = () => {
-    if (testResults.length === 0) return null;
-    return testResults.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    )[0];
-  };
-
   const chartData = getChartData();
-  const latestResult = getLatestResult();
 
   const buttonDetails: ButtonDetail[] = [
     {
@@ -175,7 +151,7 @@ const HomeScreen = () => {
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>
-            {t('home.greeting', {name: 'User'})}
+            {t('home.greeting', {name: userName})}
           </Text>
           <Text style={styles.welcomeSubtitle}>
             {t('home.welcome_subtitle')}
@@ -196,12 +172,12 @@ const HomeScreen = () => {
           <View style={styles.chartCard}>
             <View style={styles.chartContainer}>
               <LineChart
-                data={fakeData}
-                width={width - 100}
-                height={200}
+                data={chartData}
+                width={width - 60}
+                height={220}
                 yAxisLabel=""
                 yAxisSuffix=""
-                yAxisInterval={5}
+                yAxisInterval={1}
                 chartConfig={{
                   backgroundColor: '#F9FAFB',
                   backgroundGradientFrom: '#F9FAFB',
@@ -210,11 +186,11 @@ const HomeScreen = () => {
                   color: (opacity = 1) => Colors.lightGreen,
                   labelColor: (opacity = 1) => Colors.black,
                   style: {
-                    borderRadius: 16,
+                    borderRadius: 20,
                   },
                   propsForDots: {
                     r: '6',
-                    strokeWidth: '3',
+                    strokeWidth: '2',
                     stroke: Colors.white,
                   },
                   propsForBackgroundLines: {
@@ -223,7 +199,10 @@ const HomeScreen = () => {
                   },
                 }}
                 bezier
-                style={styles.chart}
+                style={{
+                  borderRadius: 20,
+                  marginVertical: 8,
+                }}
               />
             </View>
 
