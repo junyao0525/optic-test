@@ -1,6 +1,6 @@
-import {useNavigation} from '@react-navigation/core';
-import React, {useEffect, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import { useNavigation } from '@react-navigation/core';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ImageSourcePropType,
   ScrollView,
@@ -9,15 +9,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {LineChart} from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   LandoltController,
   LandoltTestResultResponse,
 } from '../api/LandoltC/controller';
 import Header from '../components/Header';
-import {useWindowDimension} from '../hooks/useWindowDimension';
-import {Colors} from '../themes';
-import {useUserId} from '../utils/userUtils';
+import { useWindowDimension } from '../hooks/useWindowDimension';
+import { Colors } from '../themes';
+import { useUserId } from '../utils/userUtils';
 
 // const {t} = useTranslation();
 
@@ -110,6 +111,22 @@ const HomeScreen = () => {
     };
   };
 
+  const fakeData = {
+    labels: ['5/16', '5/23', '5/30', '6/6', '6/13', '6/20'],
+    datasets: [
+      {
+        data: [0.5, 0.4, 0.2, 0.3, 0.1, 0.2], // Left eye
+        color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+        strokeWidth: 2,
+      },
+      {
+        data: [-0.1, 0.5, 0.4, 0.3, 0.2, 0.3], // Right eye
+        color: (opacity = 1) => `rgba(255, 152, 0, ${opacity})`,
+        strokeWidth: 2,
+      },
+    ],
+  };
+
   const getLatestResult = () => {
     if (testResults.length === 0) return null;
     return testResults.sort(
@@ -165,34 +182,10 @@ const HomeScreen = () => {
           </Text>
         </View>
 
-        {/* Quick Stats */}
-        {/* <View style={styles.quickStatsContainer}>
-          
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{testResults.length}</Text>
-            <Text style={styles.statLabel}>{t('home.total_tests')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>
-              {latestResult ? formatDate(latestResult.created_at) : 'N/A'}
-            </Text>
-            <Text style={styles.statLabel}>{t('home.last_test')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>
-              {testResults.length > 0 
-                ? Math.max(...testResults.map(r => Math.max(r.L_score, r.R_score)))
-                : 0
-              }/12
-            </Text>
-            <Text style={styles.statLabel}>{t('home.best_score')}</Text>
-          </View>
-        </View> */}
-
         {/* Progress Chart */}
         <View style={styles.chartSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('common.overview')}</Text>
+          <View style={styles.sectionHeader}>        
+              <Text style={styles.sectionTitle}>{t('common.overview')}</Text>
             <TouchableOpacity
               style={styles.viewAllButton}
               onPress={() => navigate('History' as any)}>
@@ -203,20 +196,19 @@ const HomeScreen = () => {
           <View style={styles.chartCard}>
             <View style={styles.chartContainer}>
               <LineChart
-                data={chartData}
+                data={fakeData}
                 width={width - 100}
                 height={200}
                 yAxisLabel=""
                 yAxisSuffix=""
-                yAxisInterval={1}
+                yAxisInterval={5}
                 chartConfig={{
-                  backgroundColor: 'transparent',
-                  backgroundGradientFrom: 'transparent',
-                  backgroundGradientTo: 'transparent',
+                  backgroundColor: '#F9FAFB',
+                  backgroundGradientFrom: '#F9FAFB',
+                  backgroundGradientTo: '#F9FAFB',
                   decimalPlaces: 2,
-                  color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
-                  labelColor: (opacity = 1) =>
-                    `rgba(100, 100, 100, ${opacity})`,
+                  color: (opacity = 1) => Colors.lightGreen,
+                  labelColor: (opacity = 1) => Colors.black,
                   style: {
                     borderRadius: 16,
                   },
@@ -250,34 +242,14 @@ const HomeScreen = () => {
                 <Text style={styles.legendText}>{t('history.right_eye')}</Text>
               </View>
             </View>
+             <View style={{flexDirection: 'row', alignItems: 'center', paddingTop: 14}}>
+                <Ionicons name="help-circle-outline" size={16} color="#666" style={{marginRight: 4}} />
+                <Text style={{fontSize: 12, color: '#666', lineHeight: 22}}>
+                  {t('common.lower_score')}
+                </Text>
+              </View>
           </View>
         </View>
-
-        {/* Latest Result Summary */}
-        {/* {latestResult && (
-          <View style={styles.latestResultSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{t('home.latest_result')}</Text>
-              <Text style={styles.resultDate}>{formatDate(latestResult.created_at)}</Text>
-            </View>
-            
-            <View style={styles.resultCard}>
-              <View style={styles.resultRow}>
-                <View style={styles.eyeResult}>
-                  <Text style={styles.eyeLabel}>{t('history.left_eye')}</Text>
-                  <Text style={styles.scoreValue}>{latestResult.L_score}/12</Text>
-                  <Text style={styles.logMARValue}>LogMAR {latestResult.L_logMar}</Text>
-                </View>
-                <View style={styles.divider} />
-                <View style={styles.eyeResult}>
-                  <Text style={styles.eyeLabel}>{t('history.right_eye')}</Text>
-                  <Text style={styles.scoreValue}>{latestResult.R_score}/12</Text>
-                  <Text style={styles.logMARValue}>LogMAR {latestResult.R_logMar}</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        )} */}
 
         {/* Test Types Section */}
         <View style={styles.testTypesSection}>
@@ -305,24 +277,6 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {/* Quick Actions */}
-        {/* <View style={styles.quickActionsSection}>
-          <Text style={styles.sectionTitle}>{t('home.quick_actions')}</Text>
-          <View style={styles.quickActionsContainer}>
-            <TouchableOpacity 
-              style={styles.quickActionButton}
-              onPress={() => navigate('History' as any)}
-            >
-              <Text style={styles.quickActionText}>{t('home.view_history')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.quickActionButton}
-              onPress={() => navigate('Settings' as any)}
-            >
-              <Text style={styles.quickActionText}>{t('home.settings')}</Text>
-            </TouchableOpacity>
-          </View>
-        </View> */}
         <View style={{marginBottom: 20}}></View>
       </ScrollView>
     </View>
@@ -340,7 +294,6 @@ const styles = StyleSheet.create({
   },
   welcomeSection: {
     marginBottom: 30,
-    // paddingTop: 10,
     marginHorizontal: 5,
   },
   welcomeTitle: {
@@ -397,7 +350,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    marginBottom: 10,
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.darkGreen,

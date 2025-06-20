@@ -4,18 +4,18 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
-import { LandoltController, LandoltTestResultResponse } from '../../api/LandoltC/controller';
+import {
+  LandoltController,
+  LandoltTestResultResponse,
+} from '../../api/LandoltC/controller';
 import Header from '../../components/Header';
 import { Colors } from '../../themes';
-
-const { width } = Dimensions.get('window');
 
 interface RouteParams {
   resultId: number;
@@ -24,10 +24,11 @@ interface RouteParams {
 const LandoltCDetail = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { t } = useTranslation();
-  const { resultId } = route.params as RouteParams;
-  
-  const [testResult, setTestResult] = useState<LandoltTestResultResponse | null>(null);
+  const {t} = useTranslation();
+  const {resultId} = route.params as RouteParams;
+
+  const [testResult, setTestResult] =
+    useState<LandoltTestResultResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const LandoltCDetail = () => {
   const fetchTestResult = async () => {
     try {
       const result = await LandoltController.getTestResultById(resultId);
-      console.log(result)
+      console.log(result);
       if (result.success) {
         setTestResult(result.data);
       } else {
@@ -59,16 +60,16 @@ const LandoltCDetail = () => {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   const getVisionStatus = (logMAR: number) => {
-    if (logMAR <= 0.0) return { status: 'Excellent', color: '#4CAF50' };
-    if (logMAR <= 0.3) return { status: 'Good', color: '#8BC34A' };
-    if (logMAR <= 0.5) return { status: 'Fair', color: '#FF9800' };
-    if (logMAR <= 1.0) return { status: 'Poor', color: '#F44336' };
-    return { status: 'Very Poor', color: '#D32F2F' };
+    if (logMAR <= 0.0) return {status: 'Excellent', color: '#4CAF50'};
+    if (logMAR <= 0.3) return {status: 'Good', color: '#8BC34A'};
+    if (logMAR <= 0.5) return {status: 'Fair', color: '#FF9800'};
+    if (logMAR <= 1.0) return {status: 'Poor', color: '#F44336'};
+    return {status: 'Very Poor', color: '#D32F2F'};
   };
 
   const getSnellenEquivalent = (logMAR: number) => {
@@ -83,15 +84,15 @@ const LandoltCDetail = () => {
       0.7: '20/100',
       0.8: '20/125',
       0.9: '20/160',
-      1.0: '20/200'
+      1.0: '20/200',
     };
-    
+
     // Find closest match
     const keys = Object.keys(snellenValues).map(Number);
-    const closest = keys.reduce((prev, curr) => 
-      Math.abs(curr - logMAR) < Math.abs(prev - logMAR) ? curr : prev
+    const closest = keys.reduce((prev, curr) =>
+      Math.abs(curr - logMAR) < Math.abs(prev - logMAR) ? curr : prev,
     );
-    
+
     return snellenValues[closest as keyof typeof snellenValues];
   };
 
@@ -108,8 +109,12 @@ const LandoltCDetail = () => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{t('landolt.detail.error')}</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>{t('landolt.detail.go_back')}</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}>
+          <Text style={styles.backButtonText}>
+            {t('landolt.detail.go_back')}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -123,29 +128,41 @@ const LandoltCDetail = () => {
   return (
     <View style={styles.container}>
       <Header title={t('landolt.detail.title')} backButton />
-      
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}>
         {/* Test Information Header */}
         <View style={styles.headerCard}>
           <Text style={styles.testId}>Test #{testResult.id}</Text>
-          <Text style={styles.testDate}>{formatDate(testResult.created_at)}</Text>
+          <Text style={styles.testDate}>
+            {formatDate(testResult.created_at)}
+          </Text>
           <View style={styles.userInfo}>
-            <Text style={styles.userId}>{t('landolt.detail.user_id')} {testResult.user_id}</Text>
+            <Text style={styles.userId}>
+              {t('landolt.detail.user_id')} {testResult.user_id}
+            </Text>
           </View>
         </View>
 
         {/* Overall Summary */}
         <View style={styles.summaryCard}>
-          <Text style={styles.sectionTitle}>{t('landolt.detail.test_summary')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('landolt.detail.test_summary')}
+          </Text>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>{t('landolt.detail.average_score')}</Text>
+              <Text style={styles.summaryLabel}>
+                {t('landolt.detail.average_score')}
+              </Text>
               <Text style={styles.summaryValue}>
-                {((testResult.L_score + testResult.R_score) / 2).toFixed(1)}/10
+                {((testResult.L_score + testResult.R_score) / 2).toFixed(1)}/12
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>{t('landolt.detail.average_logmar')}</Text>
+              <Text style={styles.summaryLabel}>
+                {t('landolt.detail.average_logmar')}
+              </Text>
               <Text style={styles.summaryValue}>
                 {((testResult.L_logMar + testResult.R_logMar) / 2).toFixed(2)}
               </Text>
@@ -155,26 +172,40 @@ const LandoltCDetail = () => {
 
         {/* Left Eye Results */}
         <View style={styles.eyeCard}>
-          <Text style={styles.eyeTitle}>{t('landolt.detail.left_eye_results')}</Text>
+          <Text style={styles.eyeTitle}>
+            {t('landolt.detail.left_eye_results')}
+          </Text>
           <View style={styles.eyeContent}>
             <View style={styles.metricRow}>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>{t('landolt.detail.score')}</Text>
-                <Text style={styles.metricValue}>{testResult.L_score}/10</Text>
+                <Text style={styles.metricLabel}>
+                  {t('landolt.detail.score')}
+                </Text>
+                <Text style={styles.metricValue}>{testResult.L_score}/12</Text>
               </View>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>{t('landolt.detail.logmar')}</Text>
+                <Text style={styles.metricLabel}>
+                  {t('landolt.detail.logmar')}
+                </Text>
                 <Text style={styles.metricValue}>{testResult.L_logMar}</Text>
               </View>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>{t('landolt.detail.snellen')}</Text>
+                <Text style={styles.metricLabel}>
+                  {t('landolt.detail.snellen')}
+                </Text>
                 <Text style={styles.metricValue}>{leftSnellen}</Text>
               </View>
             </View>
-            
+
             <View style={styles.statusContainer}>
-              <Text style={styles.statusLabel}>{t('landolt.detail.vision_status')}</Text>
-              <View style={[styles.statusBadge, { backgroundColor: leftEyeStatus.color }]}>
+              <Text style={styles.statusLabel}>
+                {t('landolt.detail.vision_status')}
+              </Text>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {backgroundColor: leftEyeStatus.color},
+                ]}>
                 <Text style={styles.statusText}>{leftEyeStatus.status}</Text>
               </View>
             </View>
@@ -183,26 +214,40 @@ const LandoltCDetail = () => {
 
         {/* Right Eye Results */}
         <View style={styles.eyeCard}>
-          <Text style={styles.eyeTitle}>{t('landolt.detail.right_eye_results')}</Text>
+          <Text style={styles.eyeTitle}>
+            {t('landolt.detail.right_eye_results')}
+          </Text>
           <View style={styles.eyeContent}>
             <View style={styles.metricRow}>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>{t('landolt.detail.score')}</Text>
-                <Text style={styles.metricValue}>{testResult.R_score}/10</Text>
+                <Text style={styles.metricLabel}>
+                  {t('landolt.detail.score')}
+                </Text>
+                <Text style={styles.metricValue}>{testResult.R_score}/12</Text>
               </View>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>{t('landolt.detail.logmar')}</Text>
+                <Text style={styles.metricLabel}>
+                  {t('landolt.detail.logmar')}
+                </Text>
                 <Text style={styles.metricValue}>{testResult.R_logMar}</Text>
               </View>
               <View style={styles.metric}>
-                <Text style={styles.metricLabel}>{t('landolt.detail.snellen')}</Text>
+                <Text style={styles.metricLabel}>
+                  {t('landolt.detail.snellen')}
+                </Text>
                 <Text style={styles.metricValue}>{rightSnellen}</Text>
               </View>
             </View>
-            
+
             <View style={styles.statusContainer}>
-              <Text style={styles.statusLabel}>{t('landolt.detail.vision_status')}</Text>
-              <View style={[styles.statusBadge, { backgroundColor: rightEyeStatus.color }]}>
+              <Text style={styles.statusLabel}>
+                {t('landolt.detail.vision_status')}
+              </Text>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {backgroundColor: rightEyeStatus.color},
+                ]}>
                 <Text style={styles.statusText}>{rightEyeStatus.status}</Text>
               </View>
             </View>
@@ -211,57 +256,73 @@ const LandoltCDetail = () => {
 
         {/* Visual Comparison */}
         <View style={styles.comparisonCard}>
-          <Text style={styles.sectionTitle}>{t('landolt.detail.eye_comparison')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('landolt.detail.eye_comparison')}
+          </Text>
           <View style={styles.comparisonChart}>
             <View style={styles.chartBar}>
               <Text style={styles.chartLabel}>{t('landolt.detail.left')}</Text>
               <View style={styles.barContainer}>
-                <View 
+                <View
                   style={[
-                    styles.bar, 
-                    { 
+                    styles.bar,
+                    {
                       width: `${(testResult.L_score / 10) * 100}%`,
-                      backgroundColor: leftEyeStatus.color 
-                    }
-                  ]} 
+                      backgroundColor: leftEyeStatus.color,
+                    },
+                  ]}
                 />
               </View>
-              <Text style={styles.chartValue}>{testResult.L_score}/10</Text>
+              <Text style={styles.chartValue}>{testResult.L_score}/12</Text>
             </View>
-            
+
             <View style={styles.chartBar}>
               <Text style={styles.chartLabel}>{t('landolt.detail.right')}</Text>
               <View style={styles.barContainer}>
-                <View 
+                <View
                   style={[
-                    styles.bar, 
-                    { 
+                    styles.bar,
+                    {
                       width: `${(testResult.R_score / 10) * 100}%`,
-                      backgroundColor: rightEyeStatus.color 
-                    }
-                  ]} 
+                      backgroundColor: rightEyeStatus.color,
+                    },
+                  ]}
                 />
               </View>
-              <Text style={styles.chartValue}>{testResult.R_score}/10</Text>
+              <Text style={styles.chartValue}>{testResult.R_score}/12</Text>
             </View>
           </View>
         </View>
 
         {/* Recommendations */}
         <View style={styles.recommendationsCard}>
-          <Text style={styles.sectionTitle}>{t('landolt.detail.recommendations')}</Text>
+          <Text style={styles.sectionTitle}>
+            {t('landolt.detail.recommendations')}
+          </Text>
           <View style={styles.recommendationsList}>
             {testResult.L_logMar > 0.3 || testResult.R_logMar > 0.3 ? (
               <>
-                <Text style={styles.recommendationItem}>{t('landolt.detail.recommendation_exam')}</Text>
-                <Text style={styles.recommendationItem}>{t('landolt.detail.recommendation_monitor')}</Text>
-                <Text style={styles.recommendationItem}>{t('landolt.detail.recommendation_breaks')}</Text>
+                <Text style={styles.recommendationItem}>
+                  {t('landolt.detail.recommendation_exam')}
+                </Text>
+                <Text style={styles.recommendationItem}>
+                  {t('landolt.detail.recommendation_monitor')}
+                </Text>
+                <Text style={styles.recommendationItem}>
+                  {t('landolt.detail.recommendation_breaks')}
+                </Text>
               </>
             ) : (
               <>
-                <Text style={styles.recommendationItem}>{t('landolt.detail.recommendation_continue')}</Text>
-                <Text style={styles.recommendationItem}>{t('landolt.detail.recommendation_practices')}</Text>
-                <Text style={styles.recommendationItem}>{t('landolt.detail.recommendation_checkups')}</Text>
+                <Text style={styles.recommendationItem}>
+                  {t('landolt.detail.recommendation_continue')}
+                </Text>
+                <Text style={styles.recommendationItem}>
+                  {t('landolt.detail.recommendation_practices')}
+                </Text>
+                <Text style={styles.recommendationItem}>
+                  {t('landolt.detail.recommendation_checkups')}
+                </Text>
               </>
             )}
           </View>
@@ -269,21 +330,23 @@ const LandoltCDetail = () => {
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate('CameraScreen')}
-          >
-            <Text style={styles.actionButtonText}>{t('landolt.detail.take_new_test')}</Text>
+            onPress={() => navigation.navigate('CameraScreen')}>
+            <Text style={styles.actionButtonText}>
+              {t('landolt.detail.take_new_test')}
+            </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>{t('landolt.detail.back_to_history')}</Text>
+            onPress={() => navigation.goBack()}>
+            <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>
+              {t('landolt.detail.back_to_history')}
+            </Text>
           </TouchableOpacity>
         </View>
-        
+        <View style={{marginBottom: 20}}></View>
       </ScrollView>
     </View>
   );
@@ -329,16 +392,18 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 5,
   },
   headerCard: {
-    marginHorizontal:5,
+    marginHorizontal: 5,
     backgroundColor: Colors.white,
     borderRadius: 12,
     padding: 20,
+    marginTop: 16,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -363,13 +428,13 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   summaryCard: {
-    marginHorizontal:5,
+    marginHorizontal: 5,
     backgroundColor: Colors.white,
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -400,12 +465,12 @@ const styles = StyleSheet.create({
   },
   eyeCard: {
     backgroundColor: Colors.white,
-    marginHorizontal:5,
+    marginHorizontal: 5,
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -459,12 +524,12 @@ const styles = StyleSheet.create({
   },
   comparisonCard: {
     backgroundColor: Colors.white,
-    marginHorizontal:5,
+    marginHorizontal: 5,
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -502,13 +567,13 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   recommendationsCard: {
-    marginHorizontal:5,
+    marginHorizontal: 5,
     backgroundColor: Colors.white,
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -526,7 +591,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   actionButton: {
-    marginHorizontal:5,
+    marginHorizontal: 5,
     backgroundColor: Colors.darkGreen,
     paddingVertical: 16,
     borderRadius: 12,
@@ -547,4 +612,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LandoltCDetail; 
+export default LandoltCDetail;

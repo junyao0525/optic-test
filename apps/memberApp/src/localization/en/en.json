@@ -118,7 +118,8 @@
     "history": "History",
     "setting": "Setting",
     "continue": "Continue",
-    "overview": "Overview"
+    "overview": "Overview",
+    "lower_score": "Lower LogMAR scores indicate better vision."
   },
   "history": {
     "title": "History",

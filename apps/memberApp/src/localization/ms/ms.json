@@ -119,7 +119,8 @@
     "history": "Sejarah",
     "setting": "Tetapan",
     "continue": "Teruskan",
-    "overview": "Gambaran Keseluruhan"
+    "overview": "Gambaran Keseluruhan",
+    "lower_score": "Nilai LogMAR yang lebih rendah menunjukkan penglihatan yang lebih baik."
   },
   "landolt": {
     "header": "Ujian Landolt C",
