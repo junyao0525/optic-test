@@ -11,7 +11,12 @@ import {
   View,
 } from 'react-native';
 import {LineChart} from 'react-native-chart-kit';
+import PagerView from 'react-native-pager-view';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  FatigueController,
+  FatigueResultResponse,
+} from '../api/EyeFatigue/controller';
 import {
   LandoltController,
   LandoltTestResultResponse,
@@ -41,14 +46,19 @@ const HomeScreen = () => {
   const {width} = useWindowDimension();
   const userId = useUserId();
   const userName = useUserName();
+  const [activePage, setActivePage] = useState(0);
 
   const [testResults, setTestResults] = useState<LandoltTestResultResponse[]>(
+    [],
+  );
+  const [fatigueResults, setFatigueResults] = useState<FatigueResultResponse[]>(
     [],
   );
 
   useFocusEffect(
     useCallback(() => {
       fetchTestResults();
+      fetchFatigueResults();
     }, [userId]),
   );
 
@@ -66,6 +76,22 @@ const HomeScreen = () => {
       }
     } catch (error) {
       console.error('Error fetching test results:', error);
+    }
+  };
+
+  const fetchFatigueResults = async () => {
+    if (!userId) {
+      return;
+    }
+    try {
+      const result = await FatigueController.getUserTestResults(userId);
+      if (result.success) {
+        setFatigueResults(result.data);
+      } else {
+        console.error('Failed to fetch fatigue results:', result.message);
+      }
+    } catch (error) {
+      console.error('Error fetching fatigue results:', error);
     }
   };
 
@@ -111,7 +137,39 @@ const HomeScreen = () => {
     };
   };
 
+  const getFatigueChartData = () => {
+    if (fatigueResults.length === 0) {
+      return {
+        labels: ['No Data'],
+        datasets: [{data: [0]}],
+      };
+    }
+
+    const sortedResults = [...fatigueResults]
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )
+      .slice(0, 5)
+      .reverse();
+
+    const labels = sortedResults.map(result => formatDate(result.created_at));
+    const perclosData = sortedResults.map(result => parseFloat(result.perclos));
+
+    return {
+      labels,
+      datasets: [
+        {
+          data: perclosData,
+          color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`, // Example color
+          strokeWidth: 2,
+        },
+      ],
+    };
+  };
+
   const chartData = getChartData();
+  const fatigueChartData = getFatigueChartData();
 
   const buttonDetails: ButtonDetail[] = [
     {
@@ -142,6 +200,41 @@ const HomeScreen = () => {
     console.log(`${route} button pressed`);
   };
 
+  const chartConfig = {
+    backgroundColor: '#F9FAFB',
+    backgroundGradientFrom: '#F9FAFB',
+    backgroundGradientTo: '#F9FAFB',
+    decimalPlaces: 2,
+    color: (opacity = 1) => Colors.lightGreen,
+    labelColor: (opacity = 1) => Colors.black,
+    style: {
+      borderRadius: 20,
+    },
+    propsForDots: {
+      r: '6',
+      strokeWidth: '2',
+      stroke: Colors.white,
+    },
+    propsForBackgroundLines: {
+      strokeDasharray: '',
+      stroke: 'rgba(200, 200, 200, 0.3)',
+    },
+  };
+
+  const renderPagination = () => (
+    <View style={styles.paginationContainer}>
+      {[...Array(2).keys()].map(i => (
+        <View
+          key={i}
+          style={[
+            styles.paginationDot,
+            {backgroundColor: activePage === i ? Colors.darkGreen : '#ccc'},
+          ]}
+        />
+      ))}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <Header title={t('home.title')} menuButton />
@@ -171,57 +264,65 @@ const HomeScreen = () => {
           </View>
 
           <View style={styles.chartCard}>
-            <View style={styles.chartContainer}>
-              <LineChart
-                data={chartData}
-                width={width - 60}
-                height={220}
-                yAxisLabel=""
-                yAxisSuffix=""
-                yAxisInterval={1}
-                chartConfig={{
-                  backgroundColor: '#F9FAFB',
-                  backgroundGradientFrom: '#F9FAFB',
-                  backgroundGradientTo: '#F9FAFB',
-                  decimalPlaces: 2,
-                  color: (opacity = 1) => Colors.lightGreen,
-                  labelColor: (opacity = 1) => Colors.black,
-                  style: {
-                    borderRadius: 20,
-                  },
-                  propsForDots: {
-                    r: '6',
-                    strokeWidth: '2',
-                    stroke: Colors.white,
-                  },
-                  propsForBackgroundLines: {
-                    strokeDasharray: '',
-                    stroke: 'rgba(200, 200, 200, 0.3)',
-                  },
-                }}
-                bezier
-                style={{
-                  borderRadius: 20,
-                  marginVertical: 8,
-                }}
-              />
-            </View>
+            <PagerView
+              style={styles.pagerView}
+              initialPage={0}
+              onPageSelected={e => setActivePage(e.nativeEvent.position)}>
+              <View key="1" style={styles.chartPage}>
+                <LineChart
+                  data={chartData}
+                  width={width - 60}
+                  height={220}
+                  chartConfig={chartConfig}
+                  bezier
+                  style={styles.chart}
+                />
+                <View style={styles.chartLegend}>
+                  <View style={styles.legendItem}>
+                    <View
+                      style={[styles.legendDot, {backgroundColor: '#4CAF50'}]}
+                    />
+                    <Text style={styles.legendText}>
+                      {t('history.left_eye')}
+                    </Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View
+                      style={[styles.legendDot, {backgroundColor: '#FF9800'}]}
+                    />
+                    <Text style={styles.legendText}>
+                      {t('history.right_eye')}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View key="2" style={styles.chartPage}>
+                <LineChart
+                  data={fatigueChartData}
+                  width={width - 60}
+                  height={220}
+                  chartConfig={{
+                    ...chartConfig,
+                    color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`,
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+                <View style={styles.chartLegend}>
+                  <View style={styles.legendItem}>
+                    <View
+                      style={[
+                        styles.legendDot,
+                        {backgroundColor: 'rgba(255, 99, 132, 1)'},
+                      ]}
+                    />
+                    <Text style={styles.legendText}>{}Fatigue level</Text>
+                  </View>
+                </View>
+              </View>
+            </PagerView>
+            {renderPagination()}
 
-            {/* Chart Legend */}
-            <View style={styles.chartLegend}>
-              <View style={styles.legendItem}>
-                <View
-                  style={[styles.legendDot, {backgroundColor: '#4CAF50'}]}
-                />
-                <Text style={styles.legendText}>{t('history.left_eye')}</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View
-                  style={[styles.legendDot, {backgroundColor: '#FF9800'}]}
-                />
-                <Text style={styles.legendText}>{t('history.right_eye')}</Text>
-              </View>
-            </View>
             <View
               style={{
                 flexDirection: 'row',
@@ -365,6 +466,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  pagerView: {
+    height: 280, // Adjust height to fit chart and legend
+  },
+  chartPage: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   chartContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -373,6 +481,7 @@ const styles = StyleSheet.create({
   },
   chart: {
     borderRadius: 16,
+    marginVertical: 8,
   },
   chartLegend: {
     flexDirection: 'row',
@@ -394,6 +503,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     fontWeight: '500',
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 8,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
   },
   latestResultSection: {
     marginBottom: 30,
