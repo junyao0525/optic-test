@@ -1,11 +1,9 @@
-import {useMutation} from '@tanstack/react-query';
-import {DetectAudioApi, DetectFaceApi} from '../../types/api/python';
-import {BackendApiUrl} from '../config';
-import {FatigueDetectionApi} from '@vt/core/apis/app/python';
+import { useMutation } from '@tanstack/react-query';
+import { FatigueDetectionApi } from '@vt/core/apis/app/python';
+import { DetectAudioApi, DetectFaceApi } from '../../types/api/python';
+import { BackendApiUrl } from '../config';
 
 const API_BASE_URL = BackendApiUrl;
-// const API_BASE_URL = 'http://104.214.171.210/';
-// api/python.ts
 
 export const useDetectFaceAPI = () => {
   return useMutation<
