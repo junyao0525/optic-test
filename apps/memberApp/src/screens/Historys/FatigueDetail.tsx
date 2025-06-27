@@ -71,7 +71,7 @@ const FatigueDetailPage = () => {
 
   const getRecommendations = () => {
     const level = fatigueInfo.level.toLowerCase();
-    if (level === 'severe') {
+    if (level === 'high') {
       return t('eye_tiredness.recommendations.severe', {
         returnObjects: true,
       }) as string[];
@@ -273,20 +273,6 @@ const FatigueDetailPage = () => {
           <Text style={styles.recommendationText}>{recommendation}</Text>
         </View>
       ))}
-
-      <View style={styles.emergencyCard}>
-        <Text style={styles.emergencyTitle}>
-          {t('eye_tiredness.emergency_contacts')}
-        </Text>
-        <Text style={styles.emergencyText}>
-          {t('eye_tiredness.emergency_message')}
-        </Text>
-        <TouchableOpacity style={styles.emergencyButton}>
-          <Text style={styles.emergencyButtonText}>
-            {t('eye_tiredness.emergency_services')}
-          </Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 

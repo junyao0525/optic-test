@@ -268,32 +268,32 @@
     "normal": "NORMAL",
     "recommendations_for": "Recommendations for {{level}} Fatigue Level",
     "emergency_contacts": "⚠️ Emergency Contacts",
-    "emergency_message": "If you feel severely fatigued or not well, immediately and contact:",
+    "emergency_message": "If you feel severely fatigued, experiencing eye strain, or not well, please contact:",
     "emergency_services": "Emergency Services",
     "recommendations": {
       "severe": [
-        "Stop driving immediately and rest",
-        "Take a 20-30 minute nap if possible",
-        "Consider asking someone else to drive",
-        "Avoid caffeine as a temporary fix"
+        "Stop all screen activities immediately and rest your eyes",
+        "Take a 20-30 minute nap in a dark, quiet room",
+        "Consider consulting an eye care professional",
+        "Avoid caffeine and focus on natural rest"
       ],
       "moderate": [
-        "Take a 15-minute break",
-        "Get some fresh air and light exercise",
-        "Stay hydrated with water",
-        "Consider switching drivers if available"
+        "Take a 15-minute break from screens",
+        "Get some fresh air and do light eye exercises",
+        "Stay hydrated and maintain good posture",
+        "Consider using blue light filters on devices"
       ],
       "mild": [
-        "Take a short 5-10 minute break",
-        "Do some light stretching",
-        "Ensure good ventilation",
-        "Monitor your alertness closely"
+        "Take a short 5-10 minute break from screens",
+        "Do eye relaxation exercises and blinking",
+        "Ensure proper lighting and ventilation",
+        "Monitor your eye comfort regularly"
       ],
       "normal": [
-        "Continue monitoring your alertness",
-        "Maintain good driving posture",
+        "Continue monitoring your eye health",
+        "Maintain good screen ergonomics",
         "Take regular breaks every 2 hours",
-        "Stay hydrated during your journey"
+        "Stay hydrated and maintain healthy habits"
       ]
     },
     "metric_descriptions": {

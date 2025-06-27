@@ -251,32 +251,32 @@
     "normal": "NORMAL",
     "recommendations_for": "Cadangan untuk Tahap Keletihan {{level}}",
     "emergency_contacts": "⚠️ Kenalan Kecemasan",
-    "emergency_message": "Jika anda berasa sangat letih atau tidak sihat, segera dan hubungi:",
+    "emergency_message": "Jika anda berasa sangat letih, mengalami ketegangan mata, atau tidak sihat, sila hubungi:",
     "emergency_services": "Perkhidmatan Kecemasan",
     "recommendations": {
       "severe": [
-        "Hentikan memandu dengan segera dan berehat",
-        "Ambil tidur sebentar 20-30 minit jika boleh",
-        "Pertimbangkan untuk meminta orang lain memandu",
-        "Elakkan kafein sebagai penyelesaian sementara"
+        "Hentikan semua aktiviti skrin dengan segera dan rehatkan mata anda",
+        "Ambil tidur sebentar 20-30 minit di bilik gelap dan senyap",
+        "Pertimbangkan untuk berunding dengan profesional penjagaan mata",
+        "Elakkan kafein dan fokus pada rehat semula jadi"
       ],
       "moderate": [
-        "Ambil rehat 15 minit",
-        "Dapatkan udara segar dan senaman ringan",
-        "Kekalkan penghidratan dengan air",
-        "Pertimbangkan untuk menukar pemandu jika ada"
+        "Ambil rehat 15 minit dari skrin",
+        "Dapatkan udara segar dan lakukan senaman mata ringan",
+        "Kekalkan penghidratan dan postur yang baik",
+        "Pertimbangkan menggunakan penapis cahaya biru pada peranti"
       ],
       "mild": [
-        "Ambil rehat pendek 5-10 minit",
-        "Lakukan regangan ringan",
-        "Pastikan pengudaraan yang baik",
-        "Pantau kewaspadaan anda dengan teliti"
+        "Ambil rehat pendek 5-10 minit dari skrin",
+        "Lakukan senaman relaksasi mata dan berkelip",
+        "Pastikan pencahayaan dan pengudaraan yang betul",
+        "Pantau keselesaan mata anda secara berkala"
       ],
       "normal": [
-        "Teruskan memantau kewaspadaan anda",
-        "Kekalkan postur memandu yang baik",
+        "Teruskan memantau kesihatan mata anda",
+        "Kekalkan ergonomik skrin yang baik",
         "Ambil rehat berkala setiap 2 jam",
-        "Kekalkan penghidratan semasa perjalanan"
+        "Kekalkan penghidratan dan amalan sihat"
       ]
     },
     "metric_descriptions": {
