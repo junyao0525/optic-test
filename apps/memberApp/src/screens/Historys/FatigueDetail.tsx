@@ -72,33 +72,21 @@ const FatigueDetailPage = () => {
   const getRecommendations = () => {
     const level = fatigueInfo.level.toLowerCase();
     if (level === 'severe') {
-      return [
-        'Stop driving immediately and rest',
-        'Take a 20-30 minute nap if possible',
-        'Consider asking someone else to drive',
-        'Avoid caffeine as a temporary fix',
-      ];
+      return t('eye_tiredness.recommendations.severe', {
+        returnObjects: true,
+      }) as string[];
     } else if (level === 'moderate') {
-      return [
-        'Take a 15-minute break',
-        'Get some fresh air and light exercise',
-        'Stay hydrated with water',
-        'Consider switching drivers if available',
-      ];
+      return t('eye_tiredness.recommendations.moderate', {
+        returnObjects: true,
+      }) as string[];
     } else if (level === 'mild') {
-      return [
-        'Take a short 5-10 minute break',
-        'Do some light stretching',
-        'Ensure good ventilation',
-        'Monitor your alertness closely',
-      ];
+      return t('eye_tiredness.recommendations.mild', {
+        returnObjects: true,
+      }) as string[];
     }
-    return [
-      'Continue monitoring your alertness',
-      'Maintain good driving posture',
-      'Take regular breaks every 2 hours',
-      'Stay hydrated during your journey',
-    ];
+    return t('eye_tiredness.recommendations.normal', {
+      returnObjects: true,
+    }) as string[];
   };
   useEffect(() => {
     const fetchData = async () => {
@@ -122,7 +110,7 @@ const FatigueDetailPage = () => {
     return (
       <View style={styles.container}>
         <Text style={{textAlign: 'center', marginTop: 50}}>
-          Loading fatigue analysis...
+          {t('eye_tiredness.loading_analysis')}
         </Text>
       </View>
     );
@@ -132,7 +120,7 @@ const FatigueDetailPage = () => {
     return (
       <View style={styles.container}>
         <Text style={{textAlign: 'center', marginTop: 50}}>
-          Failed to load fatigue data.
+          {t('eye_tiredness.failed_load_data')}
         </Text>
       </View>
     );
@@ -142,7 +130,9 @@ const FatigueDetailPage = () => {
       {/* Fatigue Level Card */}
       <View style={[styles.statusCard, {borderLeftColor: fatigueInfo.color}]}>
         <View style={styles.statusHeader}>
-          <Text style={styles.statusTitle}>Current Fatigue Level</Text>
+          <Text style={styles.statusTitle}>
+            {t('eye_tiredness.current_fatigue_level')}
+          </Text>
           <Text style={[styles.statusLevel, {color: fatigueInfo.color}]}>
             {fatigueInfo.level}
           </Text>
@@ -151,7 +141,9 @@ const FatigueDetailPage = () => {
 
       {/* Quick Stats */}
       <View style={styles.quickStatsContainer}>
-        <Text style={styles.sectionTitle}>Key Indicators</Text>
+        <Text style={styles.sectionTitle}>
+          {t('eye_tiredness.key_indicators')}
+        </Text>
         <View style={styles.quickStatsGrid}>
           <View style={styles.quickStatCard}>
             <Text style={styles.quickStatValue}>{data.perclos}</Text>
@@ -203,18 +195,24 @@ const FatigueDetailPage = () => {
 
       {/* Analysis Time */}
       <View style={styles.infoCard}>
-        <Text style={styles.infoTitle}>📅 Analysis Details</Text>
-        <Text style={styles.infoText}>
-          Timestamp: {formatDateTime(data.created_at)}
+        <Text style={styles.infoTitle}>
+          {t('eye_tiredness.analysis_details')}
         </Text>
-        <Text style={styles.infoText}>Analysis ID: #{resultId}</Text>
+        <Text style={styles.infoText}>
+          {t('eye_tiredness.timestamp')} {formatDateTime(data.created_at)}
+        </Text>
+        <Text style={styles.infoText}>
+          {t('eye_tiredness.analysis_id')} #{resultId}
+        </Text>
       </View>
     </View>
   );
 
   const renderMetricsTab = () => (
     <View style={styles.tabContent}>
-      <Text style={styles.sectionTitle}>Detailed Metrics</Text>
+      <Text style={styles.sectionTitle}>
+        {t('eye_tiredness.detailed_metrics')}
+      </Text>
       {Object.entries(data).map(([key, value], index) => {
         const status = getMetricStatus(key, value);
         if (
@@ -237,7 +235,9 @@ const FatigueDetailPage = () => {
                   },
                 ]}>
                 <Text style={styles.metricStatusText}>
-                  {status === 'warning' ? 'CAUTION' : 'NORMAL'}
+                  {status === 'warning'
+                    ? t('eye_tiredness.caution')
+                    : t('eye_tiredness.normal')}
                 </Text>
               </View>
             </View>
@@ -261,7 +261,7 @@ const FatigueDetailPage = () => {
           {backgroundColor: fatigueInfo.color + '15'},
         ]}>
         <Text style={styles.recommendationTitle}>
-          Recommendations for {fatigueInfo.level} Fatigue Level
+          {t('eye_tiredness.recommendations_for', {level: fatigueInfo.level})}
         </Text>
       </View>
 
@@ -275,31 +275,26 @@ const FatigueDetailPage = () => {
       ))}
 
       <View style={styles.emergencyCard}>
-        <Text style={styles.emergencyTitle}>⚠️ Emergency Contacts</Text>
+        <Text style={styles.emergencyTitle}>
+          {t('eye_tiredness.emergency_contacts')}
+        </Text>
         <Text style={styles.emergencyText}>
-          If you feel severely fatigued or not well, immediately and contact:
+          {t('eye_tiredness.emergency_message')}
         </Text>
         <TouchableOpacity style={styles.emergencyButton}>
-          <Text style={styles.emergencyButtonText}>Emergency Services</Text>
+          <Text style={styles.emergencyButtonText}>
+            {t('eye_tiredness.emergency_services')}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   const getMetricDescription = (key: string) => {
-    const descriptions = {
-      id: 'Unique identifier for the fatigue analysis result',
-      user_id: 'ID of the user for whom the fatigue analysis was performed',
-      perclos:
-        'Percentage of eyelid closure over time - higher values indicate drowsiness',
-      avg_blink: 'Average time eyes stay closed during blinking',
-      ear_mean: 'Eye Aspect Ratio - measures eye openness',
-      ear_std: 'Standard deviation of eye aspect ratio',
-      blink_rate: 'Number of blinks per minute',
-      class: 'AI-predicted fatigue classification',
-      created_at: 'When this analysis was performed',
-    };
-    return descriptions[key as never] || 'Metric description not available';
+    return (
+      t(`eye_tiredness.metric_descriptions.${key}`) ||
+      'Metric description not available'
+    );
   };
 
   return (

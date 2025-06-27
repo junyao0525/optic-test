@@ -99,7 +99,7 @@
     "change_info": "Menukar bahasa akan mengemas kini antara muka aplikasi. Sesetengah kandungan mungkin memerlukan aplikasi dimulakan semula."
   },
   "common": {
-    "ok" : "Ok",
+    "ok": "Ok",
     "yes": "Ya",
     "no": "Tidak",
     "cancel": "Batal",
@@ -233,7 +233,63 @@
       "message": "Akses kamera diperlukan untuk menggunakan ciri ini. Sila berikan kebenaran kamera dalam tetapan peranti anda."
     },
     "loading_camera": "Memuatkan kamera hadapan...",
-    "capture": "Tangkap"
+    "capture": "Tangkap",
+    "front_camera_unavailable": "Kamera hadapan tidak tersedia",
+    "analyzing_fatigue": "Menganalisis Status Keletihan",
+    "analyzing_subtitle": "Ini mungkin mengambil masa beberapa minit...",
+    "video_upload_success": "Video berjaya dimuat naik! Status keletihan anda telah dianalisis.",
+    "relax_watch_video": "Berehat dan tonton video 30 saat.",
+    "loading_analysis": "Memuatkan analisis keletihan...",
+    "failed_load_data": "Gagal memuatkan data keletihan.",
+    "current_fatigue_level": "Tahap Keletihan Semasa",
+    "key_indicators": "Petunjuk Utama",
+    "analysis_details": "📅 Butiran Analisis",
+    "timestamp": "Cap Masa:",
+    "analysis_id": "ID Analisis:",
+    "detailed_metrics": "Metrik Terperinci",
+    "caution": "AMARAN",
+    "normal": "NORMAL",
+    "recommendations_for": "Cadangan untuk Tahap Keletihan {{level}}",
+    "emergency_contacts": "⚠️ Kenalan Kecemasan",
+    "emergency_message": "Jika anda berasa sangat letih atau tidak sihat, segera dan hubungi:",
+    "emergency_services": "Perkhidmatan Kecemasan",
+    "recommendations": {
+      "severe": [
+        "Hentikan memandu dengan segera dan berehat",
+        "Ambil tidur sebentar 20-30 minit jika boleh",
+        "Pertimbangkan untuk meminta orang lain memandu",
+        "Elakkan kafein sebagai penyelesaian sementara"
+      ],
+      "moderate": [
+        "Ambil rehat 15 minit",
+        "Dapatkan udara segar dan senaman ringan",
+        "Kekalkan penghidratan dengan air",
+        "Pertimbangkan untuk menukar pemandu jika ada"
+      ],
+      "mild": [
+        "Ambil rehat pendek 5-10 minit",
+        "Lakukan regangan ringan",
+        "Pastikan pengudaraan yang baik",
+        "Pantau kewaspadaan anda dengan teliti"
+      ],
+      "normal": [
+        "Teruskan memantau kewaspadaan anda",
+        "Kekalkan postur memandu yang baik",
+        "Ambil rehat berkala setiap 2 jam",
+        "Kekalkan penghidratan semasa perjalanan"
+      ]
+    },
+    "metric_descriptions": {
+      "id": "Pengecam unik untuk keputusan analisis keletihan",
+      "user_id": "ID pengguna yang analisis keletihan dilakukan",
+      "perclos": "Peratusan penutupan kelopak mata dari masa ke masa - nilai yang lebih tinggi menunjukkan mengantuk",
+      "avg_blink": "Masa purata mata kekal tertutup semasa berkelip",
+      "ear_mean": "Nisbah Aspek Mata - mengukur keterbukaan mata",
+      "ear_std": "Sisihan piawai nisbah aspek mata",
+      "blink_rate": "Bilangan kelipan per minit",
+      "class": "Klasifikasi keletihan yang diramalkan AI",
+      "created_at": "Bila analisis ini dilakukan"
+    }
   },
   "splash": {
     "app_name": "OptiTest"
@@ -293,6 +349,7 @@
     "view_all_results": "Lihat Semua Keputusan",
     "fatigue_level": "Tahap Keletihan",
     "duration": "Tempoh",
-    "blink_rate": "Kadar Kelipan"
+    "blink_rate": "Kadar Kelipan",
+    "perclos": "PERCLOS:"
   }
-} 
+}

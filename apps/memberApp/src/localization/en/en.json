@@ -98,7 +98,7 @@
     "change_info": "Changing the language will update the app interface. Some content may require an app restart."
   },
   "common": {
-    "ok" : "Ok",
+    "ok": "Ok",
     "yes": "Yes",
     "no": "No",
     "cancel": "Cancel",
@@ -136,10 +136,11 @@
     "view_all_results": "View All Results",
     "fatigue_level": "Fatigue Level",
     "duration": "Duration",
-    "blink_rate": "Blink Rate"
+    "blink_rate": "Blink Rate",
+    "perclos": "PERCLOS:"
   },
-  "landolt":{
-    "header":"Landolt C Test",
+  "landolt": {
+    "header": "Landolt C Test",
     "title": "Landolt C Visual Acuity Test",
     "swipe_instruction": "Swipe in the direction of the C gap",
     "speak_instruction": "Hold the button and speak the direction of the gap",
@@ -178,12 +179,12 @@
       "title": "Maximum recording time reached",
       "message": "The recording has reached its maximum duration."
     },
-    "level" : "Level",
-    "remaining_attempts" : "Remaining Attempts",
-    "correct_answer":"Correct Answer",
-    "incorrect_answer":"Incorrect Answer",
-    "expected_direction" : "Expected Direction",
-    "previous_level" : "Previous Level",
+    "level": "Level",
+    "remaining_attempts": "Remaining Attempts",
+    "correct_answer": "Correct Answer",
+    "incorrect_answer": "Incorrect Answer",
+    "expected_direction": "Expected Direction",
+    "previous_level": "Previous Level",
     "detail": {
       "title": "Test Result Details",
       "loading": "Loading test result...",
@@ -249,7 +250,63 @@
       "message": "Camera access is needed to use this feature. Please grant camera permissions in your device settings."
     },
     "loading_camera": "Loading front camera...",
-    "capture": "Capture"
+    "capture": "Capture",
+    "front_camera_unavailable": "Front camera not available",
+    "analyzing_fatigue": "Analyzing Fatigue Status",
+    "analyzing_subtitle": "This may take a few moments...",
+    "video_upload_success": "Video uploaded successfully! Your fatigue status has been analyzed.",
+    "relax_watch_video": "Relax and watch the 30-second video.",
+    "loading_analysis": "Loading fatigue analysis...",
+    "failed_load_data": "Failed to load fatigue data.",
+    "current_fatigue_level": "Current Fatigue Level",
+    "key_indicators": "Key Indicators",
+    "analysis_details": "📅 Analysis Details",
+    "timestamp": "Timestamp:",
+    "analysis_id": "Analysis ID:",
+    "detailed_metrics": "Detailed Metrics",
+    "caution": "CAUTION",
+    "normal": "NORMAL",
+    "recommendations_for": "Recommendations for {{level}} Fatigue Level",
+    "emergency_contacts": "⚠️ Emergency Contacts",
+    "emergency_message": "If you feel severely fatigued or not well, immediately and contact:",
+    "emergency_services": "Emergency Services",
+    "recommendations": {
+      "severe": [
+        "Stop driving immediately and rest",
+        "Take a 20-30 minute nap if possible",
+        "Consider asking someone else to drive",
+        "Avoid caffeine as a temporary fix"
+      ],
+      "moderate": [
+        "Take a 15-minute break",
+        "Get some fresh air and light exercise",
+        "Stay hydrated with water",
+        "Consider switching drivers if available"
+      ],
+      "mild": [
+        "Take a short 5-10 minute break",
+        "Do some light stretching",
+        "Ensure good ventilation",
+        "Monitor your alertness closely"
+      ],
+      "normal": [
+        "Continue monitoring your alertness",
+        "Maintain good driving posture",
+        "Take regular breaks every 2 hours",
+        "Stay hydrated during your journey"
+      ]
+    },
+    "metric_descriptions": {
+      "id": "Unique identifier for the fatigue analysis result",
+      "user_id": "ID of the user for whom the fatigue analysis was performed",
+      "perclos": "Percentage of eyelid closure over time - higher values indicate drowsiness",
+      "avg_blink": "Average time eyes stay closed during blinking",
+      "ear_mean": "Eye Aspect Ratio - measures eye openness",
+      "ear_std": "Standard deviation of eye aspect ratio",
+      "blink_rate": "Number of blinks per minute",
+      "class": "AI-predicted fatigue classification",
+      "created_at": "When this analysis was performed"
+    }
   },
   "splash": {
     "app_name": "OptiTest"

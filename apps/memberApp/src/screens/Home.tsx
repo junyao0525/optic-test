@@ -316,7 +316,9 @@ const HomeScreen = () => {
                         {backgroundColor: 'rgba(255, 99, 132, 1)'},
                       ]}
                     />
-                    <Text style={styles.legendText}>{}Fatigue level</Text>
+                    <Text style={styles.legendText}>
+                      {t('history.fatigue_level')}
+                    </Text>
                   </View>
                 </View>
               </View>

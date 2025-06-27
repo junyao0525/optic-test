@@ -20,6 +20,7 @@ import {
 } from '../../api/EyeFatigue/controller';
 import {useUserId} from '../../utils/userUtils';
 import {FatigueDetectionApi} from '@vt/core/apis/app/python';
+import {useTranslation} from 'react-i18next';
 const DURATION_SECONDS = 30;
 const FPS = 60;
 
@@ -39,6 +40,7 @@ const DotTracking = () => {
   const [fatigueMessage, setFatigueMessage] =
     useState<FatigueDetectionApi['Response']>();
   const userId = useUserId();
+  const {t} = useTranslation();
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
@@ -146,8 +148,8 @@ const DotTracking = () => {
       <SafeAreaView style={styles.container}>
         <Text style={styles.errorText}>
           {cameraPermission !== 'granted'
-            ? 'Camera permission is required.'
-            : 'Front camera not available'}
+            ? t('eye_tiredness.camera_permission_required')
+            : t('eye_tiredness.front_camera_unavailable')}
         </Text>
       </SafeAreaView>
     );
@@ -161,9 +163,11 @@ const DotTracking = () => {
             color={Colors.primary || Colors.blue}
             style={styles.spinner}
           />
-          <Text style={styles.processingTitle}>Analyzing Fatigue Status</Text>
+          <Text style={styles.processingTitle}>
+            {t('eye_tiredness.analyzing_fatigue')}
+          </Text>
           <Text style={styles.processingSubtitle}>
-            This may take a few moments...
+            {t('eye_tiredness.analyzing_subtitle')}
           </Text>
         </View>
       </View>
@@ -173,7 +177,7 @@ const DotTracking = () => {
   if (isUploadSuccess) {
     return (
       <SuccessPage
-        successMessage="Video uploaded successfully! Your fatigue status has been analyzed."
+        successMessage={t('eye_tiredness.video_upload_success')}
         targetScreen="Home"
         extraData={fatigueMessage}
       />
@@ -204,7 +208,7 @@ const DotTracking = () => {
           {showRedDot && (
             <View style={styles.redDotContainer}>
               <Text style={styles.hintText}>
-                Relax and watch the 30-second video.
+                {t('eye_tiredness.relax_watch_video')}
               </Text>
               <Video
                 ref={videoRef}
