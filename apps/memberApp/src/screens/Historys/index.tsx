@@ -1,8 +1,9 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useMemo, useState} from 'react';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
   Alert,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -57,10 +58,18 @@ const LandoltResultsScreen = () => {
     LandoltTestResultResponse[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchLandoltResults();
-  }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchLandoltResults();
+    }, [userId]),
+  );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchLandoltResults().finally(() => setRefreshing(false));
+  }, []);
 
   const fetchLandoltResults = async () => {
     if (!userId) {
@@ -118,7 +127,11 @@ const LandoltResultsScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.scrollContainer}>
+    <ScrollView
+      style={styles.scrollContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
       <View style={styles.headerSection}>
         <Text style={styles.sectionTitle}>
           {t('history.landolt_test_results')}
@@ -185,11 +198,19 @@ const EyeTirednessResultsScreen = () => {
   );
   const userId = useUserId();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
   const {t} = useTranslation();
-  useEffect(() => {
-    fetchFatigueResults();
-  }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchFatigueResults();
+    }, [userId]),
+  );
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchFatigueResults().finally(() => setRefreshing(false));
+  }, []);
+
   const fetchFatigueResults = async () => {
     if (!userId) {
       setLoading(false);
@@ -228,7 +249,11 @@ const EyeTirednessResultsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.scrollContainer}>
+    <ScrollView
+      style={styles.scrollContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
       <View style={styles.headerSection}>
         <Text style={styles.sectionTitle}>
           {t('history.eye_tiredness_results')}
