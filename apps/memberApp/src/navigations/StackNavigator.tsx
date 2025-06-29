@@ -1,21 +1,20 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {AudioProvider} from '../providers/AudioProvider';
+import { AudioProvider } from '../providers/AudioProvider';
 import CameraProvider from '../providers/CameraProvider';
-import {DistanceMeasureProvider} from '../providers/DistanceProvider';
+import { DistanceMeasureProvider } from '../providers/DistanceProvider';
 import Login from '../screens/Auth/Login';
 import Register from '../screens/Auth/Register';
+import DotTracking from '../screens/EyeTiredness/DotTracking';
 import EyeTiredness from '../screens/EyeTiredness/EyeTiredness';
+import FatigueDetailPage from '../screens/Historys/FatigueDetail';
 import LandoltCDetail from '../screens/Historys/LandoltCDetail';
 import LandoltC from '../screens/LandoltC/LandoltC';
 import LandoltCTest from '../screens/LandoltC/LandoltCtest';
 import About from '../screens/Settings/About';
-import Help from '../screens/Settings/Help';
 import Language from '../screens/Settings/Language';
 import Profile from '../screens/Settings/Profile';
 import TabNavigator from './TabNavigator';
-import DotTracking from '../screens/EyeTiredness/DotTracking';
-import FatigueDetailPage from '../screens/Historys/FatigueDetail';
 
 const Stack = createNativeStackNavigator();
 const CameraStack = createNativeStackNavigator();
@@ -57,7 +56,6 @@ const StackNavigator = () => {
       <Stack.Screen name="LandoltCDetail" component={LandoltCDetail} />
       <Stack.Screen name="FatigueDetail" component={FatigueDetailPage} />
       <Stack.Screen name="About" component={About} />
-      <Stack.Screen name="Help" component={Help} />
       <Stack.Screen name="Language" component={Language} />
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="Login" component={Login} />

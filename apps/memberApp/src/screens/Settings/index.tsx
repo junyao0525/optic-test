@@ -131,12 +131,6 @@ const SettingScreen = () => {
               Colors.orange,
             )}
             {renderSettingItem(
-              t('settings.help'),
-              'help-circle-outline',
-              () => navigation.navigate('Help'),
-              Colors.green,
-            )}
-            {renderSettingItem(
               t('settings.about'),
               'information-circle-outline',
               () => navigation.navigate('About'),
