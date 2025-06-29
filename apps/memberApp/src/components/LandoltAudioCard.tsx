@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Animated,
@@ -15,11 +15,11 @@ import AudioRecorderPlayer, {
   OutputFormatAndroidType,
 } from 'react-native-audio-recorder-player';
 import RNFetchBlob from 'rn-fetch-blob';
-import {useDetectAudioAPI} from '../api/python';
-import {useLanguage} from '../hooks/useLanguage';
-import {useWindowDimension} from '../hooks/useWindowDimension';
-import {Colors} from '../themes';
-import {Direction} from '../utils/logMar';
+import { useDetectAudioAPI } from '../api/python';
+import { useLanguage } from '../hooks/useLanguage';
+import { useWindowDimension } from '../hooks/useWindowDimension';
+import { Colors } from '../themes';
+import { Direction } from '../utils/logMar';
 import Header from './Header';
 
 type LandoltCardProps = {
@@ -159,7 +159,6 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
   const startRecording = async () => {
     try {
-      setIsProcessingAudio(false);
       setShowLimitMessage(false);
       setCanRetry(false);
       const path = getAudioFilePath();
@@ -181,7 +180,7 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
       // Set maximum recording duration
       maxDurationTimeout.current = setTimeout(() => {
         console.log('Max duration reached, stopping recording');
-        handleMaxDurationReached();
+        stopRecording();
       }, maxDuration * 1000);
 
       audioRecorderPlayer.current.addRecordBackListener(e => {
@@ -196,7 +195,7 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
 
         if (currentPosition >= maxDuration) {
           console.log('Duration limit reached in listener');
-          handleMaxDurationReached();
+          stopRecording();
         }
       });
     } catch (error) {
@@ -319,50 +318,12 @@ const LandoltAudioCard: React.FC<LandoltCardProps> = ({
       );
       // Delete the audio file on error
       await deleteAudioFile(filePath);
-      setIsProcessingAudio(false);
       // Reset recording state on error
       setRecordingState({
         isRecording: false,
         currentDurationSec: 0,
         recordTime: '00:00:00',
       });
-    }
-  };
-
-  const handleMaxDurationReached = async () => {
-    console.log('Handling max duration reached');
-    if (recordingState.isRecording) {
-      try {
-        // Clear the timeout
-        if (maxDurationTimeout.current) {
-          clearTimeout(maxDurationTimeout.current);
-          maxDurationTimeout.current = null;
-        }
-
-        // Stop the recorder
-        await audioRecorderPlayer.current.stopRecorder();
-        audioRecorderPlayer.current.removeRecordBackListener();
-
-        setShowLimitMessage(true);
-        setCanRetry(true);
-
-        // Delete the audio file
-        await deleteAudioFile(filePath);
-
-        // Reset recording state
-        setRecordingState({
-          isRecording: false,
-          currentDurationSec: 0,
-          recordTime: '00:00:00',
-        });
-
-        // Hide message after 3 seconds
-        setTimeout(() => {
-          setShowLimitMessage(false);
-        }, 3000);
-      } catch (error) {
-        console.error('Error in handleMaxDurationReached:', error);
-      }
     }
   };
 
