@@ -33,6 +33,9 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
+android/app/my-release-key.keystore
+android/gradle.properties
+
 
 # node.js
 #
@@ -74,3 +77,4 @@ yarn-error.log
 !.yarn/versions
 
 .env
+.env.production

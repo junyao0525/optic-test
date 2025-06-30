@@ -8,3 +8,15 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+# Keep React Native
+-keep class com.facebook.react.** { *; }
+
+# Keep networking libs
+-keep class okhttp3.** { *; }
+-keep class retrofit2.** { *; }
+-keep class com.google.gson.** { *; }
+
+# Keep custom models if needed
+-keep class your.package.models.** { *; }
+
