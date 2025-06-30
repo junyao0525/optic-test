@@ -1,10 +1,14 @@
-import { useCallback, useState } from 'react';
-import { EyeResults, FeedbackState, LandoltTestResult, TestState, TestStep } from '../../types/app/landolt';
-import { LandoltController } from '../api/LandoltC/controller';
-import { Direction, logMARToSnellen, logMarValues } from '../utils/logMar';
-import { useDebounce } from './useDebounce';
-
-
+import {useCallback, useState} from 'react';
+import {
+  EyeResults,
+  FeedbackState,
+  LandoltTestResult,
+  TestState,
+  TestStep,
+} from '../../types/app/landolt';
+import {LandoltController} from '../api/LandoltC/controller';
+import {Direction, logMARToSnellen, logMarValues} from '../utils/logMar';
+import {useDebounce} from './useDebounce';
 
 export const useLandoltTest = () => {
   const [step, setStep] = useState<TestStep>('type');
@@ -26,7 +30,9 @@ export const useLandoltTest = () => {
     return directions[Math.floor(Math.random() * directions.length)];
   }, []);
 
-  const [direction, setDirection] = useState<Direction>(() => getRandomDirection());
+  const [direction, setDirection] = useState<Direction>(() =>
+    getRandomDirection(),
+  );
 
   const [leftEyeResults, setLeftEyeResults] = useState<EyeResults>({
     score: 0,
@@ -42,47 +48,59 @@ export const useLandoltTest = () => {
     snellen: '20/200',
   });
 
+  const [leftEyePassedLevels, setLeftEyePassedLevels] = useState<Set<number>>(
+    new Set(),
+  );
+  const [rightEyePassedLevels, setRightEyePassedLevels] = useState<Set<number>>(
+    new Set(),
+  );
+
   const resetTestState = useCallback(() => {
     setTestState({
       level: 1,
       attempts: 0,
       isPreviousLevel: false,
     });
+    setLeftEyePassedLevels(new Set());
+    setRightEyePassedLevels(new Set());
   }, []);
 
-  const handleIncorrectAnswer = useCallback((eye: 'left' | 'right') => {
-    setTestState(prev => {
-      // If we're at the previous level and failed, move to next eye
-      if (prev.isPreviousLevel) {
-        if (eye === 'left') {
-          setStep('right');
-        } else {
-          setStep('done');
+  const handleIncorrectAnswer = useCallback(
+    (eye: 'left' | 'right') => {
+      setTestState(prev => {
+        // If we're at the previous level and failed, move to next eye
+        if (prev.isPreviousLevel) {
+          if (eye === 'left') {
+            setStep('right');
+          } else {
+            setStep('done');
+          }
+          return {
+            level: 1,
+            attempts: 0,
+            isPreviousLevel: false,
+          };
         }
-        return {
-          level: 1,
-          attempts: 0,
-          isPreviousLevel: false,
-        };
-      }
 
-      // If we've had 2 attempts at current level, go back one level
-      if (prev.attempts >= 2) {
-        return {
-          level: Math.max(1, prev.level - 1),
-          attempts: 1,
-          isPreviousLevel: true,
-        };
-      }
+        // If we've had 2 attempts at current level, go back one level
+        if (prev.attempts >= 2) {
+          return {
+            level: Math.max(1, prev.level - 1),
+            attempts: 1,
+            isPreviousLevel: true,
+          };
+        }
 
-      // Otherwise, increment attempts at current level
-      return {
-        ...prev,
-        attempts: prev.attempts + 1,
-      };
-    });
-    setDirection(getRandomDirection());
-  }, [getRandomDirection]);
+        // Otherwise, increment attempts at current level
+        return {
+          ...prev,
+          attempts: prev.attempts + 1,
+        };
+      });
+      setDirection(getRandomDirection());
+    },
+    [getRandomDirection],
+  );
 
   const debouncedProcessInput = useDebounce(500);
 
@@ -98,7 +116,9 @@ export const useLandoltTest = () => {
       const isLastLevel = testState.level >= Object.keys(logMarValues).length;
 
       console.log(
-        `${testType === 'audio' ? 'Audio' : 'Swipe'}: ${detectedDirection} | Expected: ${direction} | Correct: ${isCorrect}`,
+        `${
+          testType === 'audio' ? 'Audio' : 'Swipe'
+        }: ${detectedDirection} | Expected: ${direction} | Correct: ${isCorrect}`,
       );
 
       // Show feedback
@@ -110,18 +130,29 @@ export const useLandoltTest = () => {
 
       // Hide feedback after different durations based on correctness
       setTimeout(() => {
-        setFeedback(prev => ({ ...prev, show: false }));
+        setFeedback(prev => ({...prev, show: false}));
       }, 2000);
 
       debouncedProcessInput(() => {
         const currentStep = step;
-        const isLeftEye = currentStep === 'leftTest' || currentStep === 'leftSpeakTest';
+        const isLeftEye =
+          currentStep === 'leftTest' || currentStep === 'leftSpeakTest';
         const setResults = isLeftEye ? setLeftEyeResults : setRightEyeResults;
+        const setPassedLevels = isLeftEye
+          ? setLeftEyePassedLevels
+          : setRightEyePassedLevels;
+        const passedLevels = isLeftEye
+          ? leftEyePassedLevels
+          : rightEyePassedLevels;
 
         if (isCorrect) {
+          // Add current level to the set of passed levels
+          setPassedLevels(prev => new Set(prev).add(testState.level));
           setResults(prev => ({
             ...prev,
-            score: prev.score + 1,
+            score: passedLevels.has(testState.level)
+              ? prev.score
+              : prev.score + 1,
             finalLevel: testState.level,
             logMAR: logMarValues[testState.level],
             snellen: logMARToSnellen(logMarValues[testState.level]),
@@ -141,7 +172,9 @@ export const useLandoltTest = () => {
           }
           setDirection(getRandomDirection());
         } else {
-          console.log(`❌ Incorrect ${testType} (${isLeftEye ? 'left' : 'right'} eye)`);
+          console.log(
+            `❌ Incorrect ${testType} (${isLeftEye ? 'left' : 'right'} eye)`,
+          );
           handleIncorrectAnswer(isLeftEye ? 'left' : 'right');
         }
 
@@ -158,26 +191,41 @@ export const useLandoltTest = () => {
         }, 100);
       });
     },
-    [step, direction, testState, getRandomDirection, handleIncorrectAnswer, resetTestState, debouncedProcessInput, isProcessing, testType],
+    [
+      step,
+      direction,
+      testState,
+      getRandomDirection,
+      handleIncorrectAnswer,
+      resetTestState,
+      debouncedProcessInput,
+      isProcessing,
+      testType,
+    ],
   );
 
-  const handleTestTypeSelection = useCallback((type: string) => {
-    console.log(`Selected test type: ${type}`);
-    if (type === 'swipe') {
-      setTestType('swipe');
-      setStep('left');
-    } else if (type === 'audio') {
-      setTestType('audio');
-      setStep('left');
-    }
-    resetTestState();
-  }, [resetTestState]);
+  const handleTestTypeSelection = useCallback(
+    (type: string) => {
+      console.log(`Selected test type: ${type}`);
+      if (type === 'swipe') {
+        setTestType('swipe');
+        setStep('left');
+      } else if (type === 'audio') {
+        setTestType('audio');
+        setStep('left');
+      }
+      resetTestState();
+    },
+    [resetTestState],
+  );
 
   const getTestInfo = useCallback(() => {
     const totalLevels = Object.keys(logMarValues).length;
     const currentLogMAR = logMarValues[testState.level];
     const currentSnellen = logMARToSnellen(currentLogMAR);
-    const remainingAttempts = testState.isPreviousLevel ? 1 : 3 - testState.attempts;
+    const remainingAttempts = testState.isPreviousLevel
+      ? 1
+      : 3 - testState.attempts;
 
     return {
       currentLevel: testState.level,
@@ -189,49 +237,46 @@ export const useLandoltTest = () => {
     };
   }, [testState]);
 
-
   //  Supabase function
 
+  const saveTestResults = useCallback(
+    async (
+      userId: number,
+      leftEyeResults: {
+        score: number;
+        logMAR: number;
+        snellen: string;
+      },
+      rightEyeResults: {
+        score: number;
+        logMAR: number;
+        snellen: string;
+      },
+    ) => {
+      console.log(testType);
+      const testResult: LandoltTestResult = {
+        user_id: userId,
+        L_score: leftEyeResults.score,
+        L_logMar: leftEyeResults.logMAR,
+        L_snellen: leftEyeResults.snellen,
+        R_score: rightEyeResults.score,
+        R_logMar: rightEyeResults.logMAR,
+        R_snellen: rightEyeResults.snellen,
+        test_type: testType,
+      };
 
-  const saveTestResults = useCallback(async (
-    userId: number,
-    leftEyeResults: {
-      score: number;
-      logMAR: number;
-      snellen: string;
+      return await LandoltController.insertTestResult(testResult);
     },
-    rightEyeResults: {
-      score: number;
-      logMAR: number;
-      snellen: string;
-    }
-  ) => {
-    console.log(testType)
-    const testResult: LandoltTestResult = {
-      user_id: userId,
-      L_score: leftEyeResults.score,
-      L_logMar: leftEyeResults.logMAR,
-      L_snellen: leftEyeResults.snellen,
-      R_score: rightEyeResults.score,
-      R_logMar: rightEyeResults.logMAR,
-      R_snellen: rightEyeResults.snellen,
-      test_type: testType
-    };
-
-    return await LandoltController.insertTestResult(testResult);
-  }, []);
-
+    [],
+  );
 
   const getUserTestResults = useCallback(async (userId: number) => {
     return await LandoltController.getUserTestResults(userId);
   }, []);
 
-
   const getTestResultById = useCallback(async (resultId: number) => {
     return await LandoltController.getTestResultById(resultId);
   }, []);
-
-
 
   return {
     step,
@@ -250,4 +295,4 @@ export const useLandoltTest = () => {
     getUserTestResults,
     getTestResultById,
   };
-}; 
+};
